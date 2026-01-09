@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <title>ローグライクRPG</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="game">
+<div class="status">
+  <div class="header-row">
+    <div>Lv：<span id="playerLevel"></span></div>
+    <div>階層：<span id="floor"></span></div>
+  </div>
+
+  <div class="header-row">
+    <div>HP：<span id="playerHp"></span></div>
+    <div><span id="enemyInfo">---</span></div>
+  </div>
+</div>
+
+  <div class="log" id="log"></div>
+
+  <!-- 探索 -->
+<div id="exploreButtons">
+  <div class="row">
+    <button onclick="move(1)">すすむ</button>
+    <button onclick="openInventory()">アイテム</button>
+  </div>
+  <div class="row">
+    <button onclick="move(-1)">もどる</button>
+    <button onclick="openStatus()">ステータス</button>
+  </div>
+</div>
+
+  <!-- 戦闘 -->
+  <div id="battleButtons" style="display:none;">
+    <button onclick="attack()">こうげき</button>
+    <button onclick="escape()">にげる</button>
+  </div>
+</div>
+
+  <!-- アイテム画面 -->
+<div id="inventory" style="display:none;">
+  <h3>アイテム</h3>
+  <div id="itemList"></div>
+  <button onclick="closeInventory()">戻る</button>
+</div>
+
+<!-- ステータス画面 -->
+<div id="statusScreen" style="display:none;">
+  <h3>ステータス</h3>
+  <div id="statusContent"></div>
+  <button onclick="closeStatus()">戻る</button>
+</div>
+
+<!-- =====================
+     JavaScript 読み込み
+===================== -->
+
+<!-- データ -->
+<script src="js/data/items.js"></script>
+<script src="js/data/enemies.js"></script>
+
+<!-- コア -->
+<script src="js/core/dom.js"></script>
+<script src="js/core/state.js"></script>
+<script src="js/core/player.js"></script>
+
+<!-- システム -->
+<script src="js/systems/explore.js"></script>
+<script src="js/systems/battle.js"></script>
+<script src="js/systems/inventory.js"></script>
+
+<!-- UI -->
+<script src="js/ui/ui.js"></script>
+<script src="js/ui/status.js"></script>
+
+<!-- エントリーポイント -->
+<script src="js/game.js"></script>
+</body>
+</html>

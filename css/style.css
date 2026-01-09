@@ -1,0 +1,87 @@
+body {
+  background: #222;
+  color: #fff;
+  font-family: sans-serif;
+}
+
+.game {
+  width: 360px;
+  margin: 20px auto;
+  background: #333;
+  padding: 10px;
+  border: 2px solid #666;
+}
+
+.status {
+  margin-bottom: 10px;
+}
+
+.log {
+  height: 120px;
+  background: #111;
+  padding: 5px;
+  overflow-y: auto;
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+button {
+  width: 48%;
+  margin: 1%;
+  padding: 10px;
+}
+.row {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+#statusScreen {
+  background: #333;
+  color: #fff;
+  padding: 10px;
+  width: 360px;
+  margin: 10px auto;
+  border: 2px solid #666;
+}
+.status {
+  background: #222;
+  padding: 6px;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.header-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;          /* 要素間の余白 */
+  margin: 4px 0;
+}
+.header-row div {
+  width: 48%;
+}
+
+.status-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;          /* 要素間の余白 */
+  margin: 4px 0;
+}
+
+.status-row div {
+  width: 48%;
+}
+.state-btn {
+  width: 22px !important;
+  height: 22px !important;
+  padding: 0 !important;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 14px;
+  line-height: 1;
+}
+
+
