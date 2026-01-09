@@ -24,6 +24,7 @@ function move(dir) {
   // 拠点（0階層）
   if (floor === 0 && prev !== 0) {
     goToBase();
+    autoSave();
     return;
   }
 
@@ -31,13 +32,16 @@ function move(dir) {
   refresh();
 
   // 0階層ではイベントなし
-  if (floor === 0) return;
-
+  if (floor === 0) {
+    autoSave();
+    return;
+  }
   // ===== ここからイベント抽選 =====
 
   // 10階層までは必ず戦闘（= floor <= 10）
   if (floor <= 10) {
     startBattle();
+    autoSave();
     return;
   }
 
@@ -47,12 +51,14 @@ function move(dir) {
   if (roll < 0.70) {
     // 70% 戦闘
     startBattle();
+    autoSave();
     return;
   }
 
   if (roll < 0.90) {
     // 20% 何も起こらない
     log("…何も起こらなかった。");
+    autoSave();
     return;
   }
 
@@ -60,6 +66,7 @@ function move(dir) {
   log("✨ 泉を発見した。");
   player.hp = calcMaxHp();
   log("💧 HPが回復した。");
+  autoSave();
   refresh();
 }
 
