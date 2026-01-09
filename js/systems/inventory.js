@@ -28,9 +28,6 @@ function closeInventory() {
 
 /* =====================
    インベントリ描画（装備中は[E]を表示）
-===================== */
-/* =====================
-   インベントリ描画（装備中は[E]を表示）
    - 攻撃は表示しない
    - 固有(baseBonus) と ランダム(optionBonus) を分けて表示
 ===================== */
@@ -78,27 +75,16 @@ function renderInventory() {
       </div>
 
       <div style="margin-top:4px;">
-        <div style="font-size:12px; opacity:0.9;">固有</div>
-        <div>${baseParts.length ? baseParts.join(" / ") : "補正なし"}</div>
+        <div style="font-size:12px; opacity:0.9;">固有能力</div>
+        <div>${baseParts.length ? baseParts.join(" / ") : "なし"}</div>
       </div>
 
       <div style="margin-top:6px;">
-        <div style="font-size:12px; opacity:0.9;">ランダムオプション</div>
-        <div>
-          ${
-            hasSeparated
-              ? (optParts.length ? optParts.join(" / ") : "なし")
-              : "（未対応の旧アイテム）"
-          }
+        <div style="font-size:12px; opacity:0.9;">オプション</div>
+            <div>${hasSeparated ? (optParts.length ? optParts.join(" / ") : "なし") : "なし"}</div>
         </div>
-      </div>
-
       <div style="margin-top:6px;">
-        ${
-          isEquipped
-            ? `<span style="color:#7fff7f;font-weight:bold;">装備中</span>`
-            : `<button onclick="equip(${index})">装備</button>`
-        }
+        ${isEquipped ? "" : `<button onclick="equip(${index})">装備</button>`}
       </div>
       <hr>
     `;

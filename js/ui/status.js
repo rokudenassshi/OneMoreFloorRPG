@@ -21,6 +21,7 @@ function renderStatus() {
   const weaponName = player.weapon ? player.weapon.name : "なし";
 
   statusContentEl.innerHTML = `
+    <div>記録：${player.maxReachedFloor}階</div>
     <div>Lv：${player.level}</div>
     <div>未割り振りポイント：${player.unassignedPoints}</div>
     <div>EXP：${player.exp} / ${calcNextExp()}</div>

@@ -5,6 +5,8 @@ const player = {
   baseHp: 50,
   hp: 50,
 
+  maxReachedFloor: 0,
+  
   status: {
     power: 5,
     vitality: 5,
