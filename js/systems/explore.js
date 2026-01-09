@@ -22,17 +22,9 @@ function move(dir) {
   player.maxReachedFloor = Math.max(player.maxReachedFloor, floor);
 
   // 拠点（0階層）
-  if (floor === 0 && prev !== 0) {
-    goToBase();
-    autoSave();
-    return;
-  }
-
-  log(`▶ 階層 ${floor}`);
-  refresh();
-
-  // 0階層ではイベントなし
+  // if (floor === 0 && prev !== 0) {
   if (floor === 0) {
+    goToBase();
     autoSave();
     return;
   }

@@ -1,6 +1,7 @@
 let gameState = "EXPLORE";
 let floor = 0;
 let enemy = null;
+const autosaveKey = "roguelike_autosave";
 
 function setFloor(value) {
   floor = Math.max(0, value);
