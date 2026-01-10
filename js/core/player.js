@@ -62,7 +62,7 @@ function gainExp(exp) {
 
 function levelUp() {
   player.level++;
-  player.unassignedPoints += 3; 
+  player.unassignedPoints += 1; 
   player.hp = calcMaxHp();
   log(`🎉 レベルアップ！ Lv.${player.level}`);
   refresh();
