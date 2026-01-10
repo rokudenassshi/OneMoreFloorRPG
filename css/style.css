@@ -23,8 +23,7 @@ body {
 }
 
 .log {
-  min-height: 140px;
-  max-height: 220px;
+  height: 220px;
   background: #111;
   padding: 8px;
   overflow-y: auto;
@@ -35,14 +34,17 @@ body {
 
 button {
   flex: 1;
-  min-height: 48px;
-  padding: 10px 12px;
+  min-height:80px;
+  padding: 12px 14px;
   font-size: 16px;
   border-radius: 10px;
   border: 1px solid #555;
   background: #444;
   color: #fff;
   touch-action: manipulation;
+}
+.escape-btn {
+  margin-left: 8px;
 }
 .row {
   display: flex;
@@ -114,7 +116,6 @@ button {
   }
 
   .log {
-    min-height: 160px;
-    max-height: 240px;
+    height: 240px;
   }
 }
