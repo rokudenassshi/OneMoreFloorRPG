@@ -43,9 +43,6 @@ button {
   color: #fff;
   touch-action: manipulation;
 }
-.escape-btn {
-  margin-left: 8px;
-}
 .row {
   display: flex;
   gap: 10px;
