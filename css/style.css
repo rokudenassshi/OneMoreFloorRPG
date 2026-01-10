@@ -49,6 +49,10 @@ button {
   margin-bottom: 10px;
 }
 
+#battleButtons button {
+  margin-left: 20px;
+}
+
 #statusScreen {
   background: #333;
   color: #fff;
