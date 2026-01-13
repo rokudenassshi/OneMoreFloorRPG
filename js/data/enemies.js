@@ -297,10 +297,21 @@ const TIER_COUNTS = {
 
 function buildTierPool(floor) {
   const pool = [];
-  Object.keys(TIER_COUNTS).map(Number).sort((a, b) => a - b).forEach(tier => {
+    const tiers = Object.keys(TIER_COUNTS).map(Number).sort((a, b) => a - b);
+  let currentTier = 1;
+  tiers.forEach(tier => {
     if (floor >= tierToMinFloor(tier)) {
-      for (let i = 0; i < TIER_COUNTS[tier]; i++) pool.push(tier);
+      currentTier = tier;
     }
+  });
+  
+  const allowedTiers = new Set([currentTier]);
+  if (currentTier > 1) {
+    allowedTiers.add(currentTier - 1);
+  }
+  tiers.forEach(tier => {
+    if (!allowedTiers.has(tier)) return;
+    for (let i = 0; i < TIER_COUNTS[tier]; i++) pool.push(tier);
   });
   return pool.length > 0 ? pool : [1];
 }
