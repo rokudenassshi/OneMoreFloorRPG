@@ -26,6 +26,16 @@ function move(dir) {
     autoSave();
     return;
   }
+
+  // 50階層ごとの節目：必ずHP全回復
+  if (floor % 50 === 0) {
+    log("🔥静かに炎が燈っている。ここでは休めそうだ。");
+    player.hp = calcMaxHp();
+    log("HPが最大まで回復した。");
+    autoSave();
+    refresh();
+    return;
+  }
   // ===== ここからイベント抽選 =====
 
   // 5階層までは必ず戦闘
@@ -38,14 +48,14 @@ function move(dir) {
   // 11階層以降：70%戦闘 / 20%何もなし / 10%泉
   const roll = Math.random(); // 0.0〜0.999...
 
-  if (roll < 0.70) {
+  if (roll < 0.7) {
     // 70% 戦闘
     startBattle();
     autoSave();
     return;
   }
 
-  if (roll < 0.90) {
+  if (roll < 0.9) {
     // 20% 何も起こらない
     log("…何も起こらなかった。");
     refresh();
@@ -60,5 +70,3 @@ function move(dir) {
   autoSave();
   refresh();
 }
-
-
