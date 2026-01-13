@@ -111,10 +111,6 @@ button {
   margin-bottom: 10px;
 }
 
-#battleButtons button + button{
-  margin-left: 20px;
-}
-
 #inventory,
 #statusScreen {
   background: #333;
@@ -150,6 +146,7 @@ button {
   margin-bottom: 10px;
   font-size: 14px;
   border-radius: 8px;
+  min-height: 60px;
 }
 
 .header-row {
@@ -159,7 +156,16 @@ button {
   margin: 4px 0;
 }
 .header-row div {
-  width: 48%;
+  flex: 1;
+  min-width: 0;
+}
+
+#enemyName,
+#enemyHp {
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .status-row {

@@ -230,13 +230,13 @@ function adjustHpForMaxChange(prevMaxHp, nextMaxHp) {
 ===================== */
 function useItem(index) {
   const item = inventory[index];
-  if (!item || item.kind !== "consumable") return;
+  if (!item || item.kind !== "consumable") return false;
 
   if (item.effect === "heal") {
     const maxHp = calcMaxHp();
     if (player.hp >= maxHp) {
       log("💤 HPは満タンだ");
-      return;
+      return false;
     }
 
     const healAmount = Math.max(1, Math.floor(maxHp * item.healRatio));
@@ -247,6 +247,21 @@ function useItem(index) {
   inventory.splice(index, 1);
   renderInventory();
   refresh();
+  return true;
+}
+
+function useHerbInBattle() {
+  if (gameState !== "BATTLE") return;
+
+  const herbIndex = inventory.findIndex(
+    (item) => item && item.id === HERB_ITEM_TEMPLATE.id
+  );
+  if (herbIndex === -1) {
+    log("💤 やくそうがない");
+    return;
+  }
+  const used = useItem(herbIndex);
+  if (used) return;
 }
 
 /* =====================
