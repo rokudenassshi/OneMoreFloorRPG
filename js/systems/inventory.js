@@ -363,8 +363,18 @@ function applyBaseStatCount(baseItem, desiredCount) {
 ===================== */
 function createLootItem(baseItem, isRareEnemy) {
   // ★3はレア敵のみ、それ以外は★1〜★2
-  const rarity = isRareEnemy ? 3 : Math.floor(Math.random() * 2) + 1;
-
+  // ★3はレア敵 or 通常敵0.1%、それ以外は★1〜★2
+  let rarity;
+  let optionMultiplier = 1;
+  if (isRareEnemy) {
+    rarity = 3;
+    optionMultiplier = 2;
+  } else if (Math.random() < 0.001) {
+    rarity = 3;
+    optionMultiplier = 1.5;
+  } else {
+    rarity = Math.floor(Math.random() * 2) + 1;
+  }
   // 固有（items.jsで確定済み）をコピー
   const base = baseItem.baseBonus || { power: 0, vitality: 0, agility: 0 };
   const baseBonus = {
@@ -378,8 +388,7 @@ function createLootItem(baseItem, isRareEnemy) {
 
   // ★による追加補正：★1=1種、★2=2種、★3=3種
   // 付与値は 1..floor/2（floorが0なら付与なし）
-  const cap = Math.max(0, Math.floor(floor / 2));
-  const optionMultiplier = isRareEnemy ? 2 : 1;
+  const cap = Math.max(0, floor);
   const stats = ["power", "vitality", "agility"].sort(
     () => Math.random() - 0.5
   );
