@@ -20,7 +20,11 @@
 
       <div class="header-row">
         <div>HP：<span id="playerHp"></span></div>
-        <div><span id="enemyInfo">---</span></div>
+        <div><span id="enemyName"></span></div>
+      </div>
+      <div class="header-row">
+        <div>&nbsp;</div>
+        <div><span id="enemyHp"></span></div>
       </div>
     </div>
 
@@ -40,10 +44,14 @@
 
     <!-- 戦闘 -->
     <div id="battleButtons" style="display:none;">
-      <button onclick="attack()">こうげき</button>
-      <button onclick="openInventory()">アイテム</button>
-      <button class="escape-btn" onclick="escape()">にげる</button>
-    </div>
+       <div class="row">
+        <button onclick="attack()">たたかう</button>
+      <button onclick="useHerbInBattle()">やくそう</button>
+      </div>
+      <div class="row">
+        <button class="escape-btn" onclick="escape()">にげる</button>
+        <button onclick="openStatus()">ステータス</button>
+      </div>
   </div>
     
   <!-- アイテム画面 -->
@@ -78,17 +86,17 @@
   <script src="js/data/enemies.js?v=1.0.0"></script>
 
   <!-- コア -->
-  <script src="js/core/dom.js?v=1.0.0"></script>
+  <script src="js/core/dom.js?v=1.0.1"></script>
   <script src="js/core/state.js?v=1.0.0"></script>
   <script src="js/core/player.js?v=1.0.0"></script>
 
   <!-- システム -->
   <script src="js/systems/explore.js?v=1.0.1"></script>
   <script src="js/systems/battle.js?v=1.0.1"></script>
-  <script src="js/systems/inventory.js?v=1.0.1"></script>
+  <script src="js/systems/inventory.js?v=1.0.2"></script>
 
   <!-- UI -->
-  <script src="js/ui/ui.js?v=1.0.0"></script>
+  <script src="js/ui/ui.js?v=1.0.1"></script>
   <script src="js/ui/status.js?v=1.0.0"></script>
 
   <!-- エントリーポイント -->

@@ -13,9 +13,11 @@ function updateUI() {
     (gameState === "INVENTORY" && inventoryReturnState === "BATTLE");
 
   if (enemy && isBattleView) {
-    enemyInfoEl.textContent = `${enemy.name} HP：${enemy.hp}/${enemy.maxHp}`;
+    enemyNameEl.textContent = enemy.name;
+    enemyHpEl.textContent = `HP：${enemy.hp}/${enemy.maxHp}`;
   } else {
-    enemyInfoEl.textContent = "---";
+    enemyNameEl.textContent = "";
+    enemyHpEl.textContent = "";
   }
 }
 
