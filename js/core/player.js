@@ -30,6 +30,7 @@ function resetPlayer() {
   player.status.vitality = 5;
   player.status.agility = 5;
   loseUnequippedItems();
+  grantHerbs(5);
 }
 
 function calcMaxHp() {

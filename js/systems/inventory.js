@@ -13,6 +13,15 @@ const HERB_ITEM_TEMPLATE = {
   description: "最大HPの20%回復",
 };
 
+function grantHerbs(count, shouldLog = true) {
+  for (let i = 0; i < count; i++) {
+    const herb = { ...HERB_ITEM_TEMPLATE };
+    inventory.push(herb);
+  }
+  if (shouldLog && count > 0) {
+    log(`🎁 やくそう ×${count} を手に入れた`);
+  }
+}
 /* =====================
    インベントリ画面
 ===================== */
