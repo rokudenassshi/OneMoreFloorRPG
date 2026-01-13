@@ -179,6 +179,39 @@ function renderInventory() {
     itemListEl.appendChild(div);
   });
 }
+// アイテムのトータル加山地を計算
+function getItemTotalBonus(item) {
+  const normalizeBonus = (bonus) => ({
+    power: Number(bonus?.power) || 0,
+    vitality: Number(bonus?.vitality) || 0,
+    agility: Number(bonus?.agility) || 0,
+  });
+
+  if (!item) {
+    return { power: 0, vitality: 0, agility: 0 };
+  }
+
+  if (item.bonus) {
+    return normalizeBonus(item.bonus);
+  }
+
+  const baseBonus = normalizeBonus(item.baseBonus);
+  const optionBonus = normalizeBonus(item.optionBonus);
+
+  return {
+    power: baseBonus.power + optionBonus.power,
+    vitality: baseBonus.vitality + optionBonus.vitality,
+    agility: baseBonus.agility + optionBonus.agility,
+  };
+}
+
+function isBonusStrictlyLower(source, target) {
+  return (
+    source.power < target.power &&
+    source.vitality < target.vitality &&
+    source.agility < target.agility
+  );
+}
 
 /* =====================
    装備を捨てる
@@ -202,6 +235,39 @@ function discardEquipment(index) {
   refresh();
 }
 
+/* =====================
+   装備中より弱い装備をまとめて捨てる
+===================== */
+function discardWeakerEquipment() {
+  if (!player.weapon) {
+    log("🧺 装備中の武器がない");
+    return;
+  }
+
+  const equippedBonus = getEquipmentBonus();
+  let discardedCount = 0;
+
+  for (let i = inventory.length - 1; i >= 0; i -= 1) {
+    const item = inventory[i];
+    if (!item || item.kind === "consumable") continue;
+    if (item === player.weapon) continue;
+
+    const itemBonus = getItemTotalBonus(item);
+    if (isBonusStrictlyLower(itemBonus, equippedBonus)) {
+      inventory.splice(i, 1);
+      discardedCount += 1;
+    }
+  }
+
+  if (discardedCount === 0) {
+    log("🧹 捨てる装備がない");
+    return;
+  }
+
+  log(`🧹 装備より弱い装備を${discardedCount}個捨てた`);
+  renderInventory();
+  refresh();
+}
 /* =====================
    装備
    ★重要：player.statusを直接増減しない！
