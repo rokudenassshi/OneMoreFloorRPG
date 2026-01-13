@@ -111,10 +111,6 @@ button {
   margin-bottom: 10px;
 }
 
-#battleButtons button + button{
-  margin-left: 20px;
-}
-
 #inventory,
 #statusScreen {
   background: #333;
