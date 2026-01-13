@@ -464,6 +464,7 @@
       titleMul: title.mul,
 
       // ここが固定ステータス
+      maxHp: hp,
       hp,
       atk,
       exp,

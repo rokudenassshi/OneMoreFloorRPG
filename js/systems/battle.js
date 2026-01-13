@@ -37,12 +37,15 @@ function attack() {
   const hits = calcAttackCount();
 
   let total = 0;
+  const bonusAtk = calcPowerBonusDamage(enemy.maxHp ?? enemy.hp);
   for (let i = 0; i < hits; i++) {
     const damage = rollDamage(atk);
     enemy.hp -= damage;
     total += damage;
   }
 
+  enemy.hp -= bonusAtk;
+  total += bonusAtk;
   log(`▶ 攻撃！ ${hits}回ヒット（${total}ダメージ）`);
   refresh();
   afterPlayerAction();
