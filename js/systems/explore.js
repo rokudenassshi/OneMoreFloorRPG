@@ -17,12 +17,10 @@ function goToBase() {
 function move(dir) {
   if (gameState !== "EXPLORE") return;
 
-  const prev = floor;
   floor = Math.max(0, floor + dir);
   player.maxReachedFloor = Math.max(player.maxReachedFloor, floor);
 
   // 拠点（0階層）
-  // if (floor === 0 && prev !== 0) {
   if (floor === 0) {
     goToBase();
     autoSave();

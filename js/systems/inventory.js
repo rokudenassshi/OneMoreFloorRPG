@@ -107,12 +107,13 @@ function renderInventory() {
         <div style="font-size:12px; opacity:0.9;">オプション</div>
             <div>${hasSeparated ? (optParts.length ? optParts.join(" / ") : "なし") : "なし"}</div>
         </div>
-      <div style="margin-top:6px;">
+      <div style="margin-top:6px; display:flex; gap:10px; flex-wrap:wrap;">
         ${isEquipped
           ? ""
           : (gameState === "BATTLE"
             ? `<button disabled>戦闘中は装備不可</button>`
             : `<button onclick="equip(${index})">装備</button>`)}
+            <button onclick="discardEquipment(${index})">捨てる</button>
       </div>
       <hr>
     `;
@@ -121,6 +122,25 @@ function renderInventory() {
   });
 }
 
+/* =====================
+   装備を捨てる
+===================== */
+function discardEquipment(index) {
+  const item = inventory[index];
+  if (!item || item.kind === "consumable") return;
+
+  const wasEquipped = player.weapon === item;
+  inventory.splice(index, 1);
+
+  if (wasEquipped) {
+    player.weapon = null;
+    player.hp = Math.min(player.hp, calcMaxHp());
+  }
+
+  log(`🗑 ${item.name}${"★".repeat(item.rarity || 0)} を捨てた`);
+  renderInventory();
+  refresh();
+}
 
 /* =====================
    装備
