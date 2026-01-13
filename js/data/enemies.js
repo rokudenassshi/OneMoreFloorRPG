@@ -13,7 +13,9 @@ function mulberry32(seed) {
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
 }
-
+const rngE = mulberry32(20260109);
+// 外部から参照されても落ちないように共有（GCS配信時の差分対策）
+window.rngE = rngE;
 function hashSeed(str) {
   let h = 2166136261;
   for (let i = 0; i < str.length; i++) {
@@ -22,9 +24,11 @@ function hashSeed(str) {
   }
   return h >>> 0;
 }
-
-function rInt(rng, min, max) {
-  return Math.floor(rng() * (max - min + 1)) + min;
+function rInt(rngOrMin, minOrMax, maybeMax) {
+  if (typeof rngOrMin === "function") {
+    return Math.floor(rngOrMin() * (maybeMax - minOrMax + 1)) + minOrMax;
+  }
+  return Math.floor(rngE() * (minOrMax - rngOrMin + 1)) + rngOrMin;
 }
 function pick(rng, arr) {
   return arr[rInt(rng, 0, arr.length - 1)];
