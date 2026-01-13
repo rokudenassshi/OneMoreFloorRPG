@@ -4,7 +4,7 @@
 // 敵ステータスは「敵生成時に確定」する＝敵ごとに固定
 // drops：敵ごとのドロップ候補（item_1..item_100を想定）
 (() => {
-/* ========= 乱数（seed固定で毎回同じ100体が生成される） ========= */
+/* ========= 乱数（戦闘ごとに生成） ========= */
 function mulberry32(seed) {
   return function () {
     let t = (seed += 0x6D2B79F5);
@@ -13,15 +13,22 @@ function mulberry32(seed) {
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
 }
-const rngE = mulberry32(20260109);
 
-function rInt(min, max) {
-  return Math.floor(rngE() * (max - min + 1)) + min;
-}
-function pick(arr) {
-  return arr[rInt(0, arr.length - 1)];
+function hashSeed(str) {
+  let h = 2166136261;
+  for (let i = 0; i < str.length; i++) {
+    h ^= str.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return h >>> 0;
 }
 
+function rInt(rng, min, max) {
+  return Math.floor(rng() * (max - min + 1)) + min;
+}
+function pick(rng, arr) {
+  return arr[rInt(rng, 0, arr.length - 1)];
+}
 /* ========= tierごとの種族（多め） ========= */
 const BASE_BY_TIER = {
   1: [
@@ -140,9 +147,9 @@ const TITLE_BY_TIER = {
   ],
 };
 
-function pickTitle(tier) {
+function pickTitle(rng, tier) {
   const list = TITLE_BY_TIER[tier] || TITLE_BY_TIER[1];
-  return list[rInt(0, list.length - 1)];
+  return list[rInt(rng, 0, list.length - 1)];
 }
 
 /* ========= 出現階層（任せる条件なので、自然に伸びるカーブに設定） ========= */
@@ -150,15 +157,15 @@ function tierToMinFloor(tier) {
   // 例： 1, 5, 10, 20, 35, 55, 80, 110, 145, 185
   const table = {
     1: 1,
-    2: 5,
-    3: 10,
-    4: 20,
-    5: 35,
-    6: 55,
-    7: 80,
-    8: 110,
-    9: 145,
-    10: 185,
+    2: 10,
+    3: 50,
+    4: 70,
+    5: 100,
+    6: 200,
+    7: 500,
+    8: 800,
+    9: 1000,
+    10: 1500,
   };
   return table[tier] ?? 1;
 }
@@ -182,28 +189,28 @@ function tierMul(tier) {
 }
 
 /* ========= 敵ごとのドロップ候補（tier帯中心に） ========= */
-function buildDrops(tier) {
+function buildDrops(rng, tier) {
   // items.js 側の item_1..item_100 を想定
   const start = (tier - 1) * 10 + 1; // 1,11,...,91
   const end = tier * 10;            // 10,20,...,100
 
-  const count = rInt(6, 10); // 候補多め
+  const count = rInt(rng, 6, 10); // 候補多め
   const drops = [];
   for (let i = 0; i < count; i++) {
-    const id = `item_${rInt(start, end)}`;
+    const id = `item_${rInt(rng, start, end)}`;
     if (!drops.includes(id)) drops.push(id);
   }
 
   // たまに「1つ上のtier」も混ぜる（夢）
-  if (tier < 10 && rngE() < 0.25) {
-    const id = `item_${rInt(end + 1, Math.min(100, end + 10))}`;
+    if (tier < 10 && rng() < 0.25) {
+    const id = `item_${rInt(rng, end + 1, Math.min(100, end + 10))}`;
     if (!drops.includes(id)) drops.push(id);
   }
 
   return drops;
 }
 
-/* ========= 100体をtierに割り当て（各tierで登場数を増やす） ========= */
+/* ========= tierに割り当て（各tierで登場数を増やす） ========= */
 const TIER_COUNTS = {
   1: 14,
   2: 12,
@@ -224,20 +231,25 @@ const TIER_COUNTS = {
   TIER_COUNTS[1] += (100 - sum);
 })();
 
-// tier順に配列化（例： [1,1,1,...,2,2,...,10] ）
-const tierList = [];
-Object.keys(TIER_COUNTS).map(Number).sort((a, b) => a - b).forEach(t => {
-  for (let i = 0; i < TIER_COUNTS[t]; i++) tierList.push(t);
-});
+function buildTierPool(floor) {
+  const pool = [];
+  Object.keys(TIER_COUNTS).map(Number).sort((a, b) => a - b).forEach(tier => {
+    if (floor >= tierToMinFloor(tier)) {
+      for (let i = 0; i < TIER_COUNTS[tier]; i++) pool.push(tier);
+    }
+  });
+  return pool.length > 0 ? pool : [1];
+}
 
-/* ========= 敵生成（ここでhp/atk/expが固定化される） ========= */
-const ENEMIES = Array.from({ length: 100 }, (_, i) => {
-  const idx = i + 1;
-  const tier = tierList[i];
+/* ========= 敵生成（戦闘ごとにhp/atk/expが固定化される） ========= */
+function createEnemyForFloor(floor) {
+  const seed = hashSeed(`ENEMY|F${floor}|${Date.now()}|${Math.random()}`);
+  const rng = mulberry32(seed);
+  const tier = pick(rng, buildTierPool(Math.max(1, floor)));
   const minFloor = tierToMinFloor(tier);
 
-  const baseName = pick(BASE_BY_TIER[tier]);
-  const title = pickTitle(tier); // {t, mul}
+  const baseName = pick(rng, BASE_BY_TIER[tier]);
+  const title = pickTitle(rng, tier); // {t, mul}
 
   // 表示名にtierを含める（不要なら外してOK）
   const name = `[T${tier}] ${title.t}${baseName}`;
@@ -246,16 +258,16 @@ const ENEMIES = Array.from({ length: 100 }, (_, i) => {
   const mul = tierMul(tier) * title.mul;
 
   // 基礎値（tierで少し上げつつ、mulで一気に差が出る）
-  const hpBase = rInt(40, 60) + tier * 2;
-  const atkBase = rInt(10, 20) + Math.floor(tier / 2);
-  const expBase = rInt(7, 14) + tier * 2;
+  const hpBase = rInt(rng, 40, 60) + tier * 2;
+  const atkBase = rInt(rng, 10, 20) + Math.floor(tier / 2);
+  const expBase = rInt(rng, 7, 14) + tier * 2;
 
   const hp = Math.floor(hpBase * mul);
   const atk = Math.floor(atkBase * mul);
   const exp = Math.floor(expBase * mul);
 
   return {
-    id: `enemy_${idx}`,
+    id: `enemy_${seed}`,
     name,
 
     tier,
@@ -270,8 +282,10 @@ const ENEMIES = Array.from({ length: 100 }, (_, i) => {
     atk,
     exp,
 
-    drops: buildDrops(tier),
+    drops: buildDrops(rng, tier),
   };
-});
-  window.ENEMIES = ENEMIES;
+}
+  window.EnemyGen = {
+    createEnemyForFloor,
+  };
 })();
