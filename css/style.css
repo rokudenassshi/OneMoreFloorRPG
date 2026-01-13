@@ -138,4 +138,11 @@ button {
   .log {
     height: 240px;
   }
+  
+  #inventory button,
+  #statusScreen button {
+    min-height: 44px;
+    padding: 6px 10px;
+    font-size: 14px;
+  }
 }
