@@ -92,7 +92,7 @@ function enemyAttack() {
   damagePlayer(damage);
 }
 
-function rollDamage(base, variance = 0.1) {
+function rollDamage(base, variance = 0.3) {
   const min = Math.floor(base * (1 - variance));
   const max = Math.ceil(base * (1 + variance));
   return Math.max(1, Math.floor(Math.random() * (max - min + 1)) + min);

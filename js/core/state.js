@@ -20,7 +20,8 @@ function clearEnemy() {
 }
 
 function autoSave() {
-  const weaponIndex = player && player.weapon ? inventory.indexOf(player.weapon) : -1;
+  const weaponIndex =
+    player && player.weapon ? inventory.indexOf(player.weapon) : -1;
   const data = {
     version: 1,
     savedAt: Date.now(),
@@ -46,7 +47,7 @@ function autoSave() {
       weaponIndex,
     },
     battleCount,
-    inventory: inventory.map(item => ({ ...item })),
+    inventory: inventory.map((item) => ({ ...item })),
   };
 
   localStorage.setItem(autosaveKey, JSON.stringify(data));
@@ -77,31 +78,41 @@ function loadAutoSave() {
   player.level = Math.max(1, Number(savedPlayer.level) || 1);
   player.exp = Math.max(0, Number(savedPlayer.exp) || 0);
   player.baseHp = Math.max(1, Number(savedPlayer.baseHp) || player.baseHp);
-  player.maxReachedFloor = Math.max(0, Number(savedPlayer.maxReachedFloor) || 0);
+  player.maxReachedFloor = Math.max(
+    0,
+    Number(savedPlayer.maxReachedFloor) || 0
+  );
   player.status.power = Number(savedStatus.power) || 0;
   player.status.vitality = Number(savedStatus.vitality) || 0;
   player.status.agility = Number(savedStatus.agility) || 0;
-  player.baseStatus.power = Number(savedBaseStatus.power) || player.status.power;
-  player.baseStatus.vitality = Number(savedBaseStatus.vitality) || player.status.vitality;
-  player.baseStatus.agility = Number(savedBaseStatus.agility) || player.status.agility;
-  player.unassignedPoints = Math.max(0, Number(savedPlayer.unassignedPoints) || 0);
+  player.baseStatus.power =
+    Number(savedBaseStatus.power) || player.status.power;
+  player.baseStatus.vitality =
+    Number(savedBaseStatus.vitality) || player.status.vitality;
+  player.baseStatus.agility =
+    Number(savedBaseStatus.agility) || player.status.agility;
+  player.unassignedPoints = Math.max(
+    0,
+    Number(savedPlayer.unassignedPoints) || 0
+  );
 
   inventory.length = 0;
   if (Array.isArray(data.inventory)) {
-    data.inventory.forEach(item => {
+    data.inventory.forEach((item) => {
       if (item) inventory.push({ ...item });
     });
   }
 
   const weaponIndex = Number(savedPlayer.weaponIndex);
-  player.weapon = Number.isInteger(weaponIndex) && inventory[weaponIndex]
-    ? inventory[weaponIndex]
-    : null;
+  player.weapon =
+    Number.isInteger(weaponIndex) && inventory[weaponIndex]
+      ? inventory[weaponIndex]
+      : null;
 
-  player.hp = Math.min(
-    Math.max(0, Number(savedPlayer.hp) || calcMaxHp()),
-    calcMaxHp()
-  );
+  const loadedHp = Number(savedPlayer.hp);
+  const maxHp = calcMaxHp();
+  const hpToApply = Number.isFinite(loadedHp) ? loadedHp : player.hp;
+  player.hp = Math.min(Math.max(0, hpToApply), maxHp);
 
   return true;
 }
