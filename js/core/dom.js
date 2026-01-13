@@ -11,4 +11,5 @@ const inventoryEl = document.getElementById("inventory");
 const itemListEl = document.getElementById("itemList");
 const statusScreenEl = document.getElementById("statusScreen");
 const statusContentEl = document.getElementById("statusContent");
+const statusVersionEl = document.getElementById("statusVersion");
 const playerLevelEl = document.getElementById("playerLevel");

@@ -21,18 +21,18 @@ const player = {
   weapon: null,
 };
 
-function resetPlayer() {
-  player.level = 1;
-  player.exp = 0;
-  player.unassignedPoints = 0;
-  battleCount = 0;
+// function resetPlayer() {
+//   player.level = 1;
+//   player.exp = 0;
+//   player.unassignedPoints = 0;
+//   battleCount = 0;
 
-  player.status.power = 5;
-  player.status.vitality = 5;
-  player.status.agility = 5;
-  loseUnequippedItems();
-  grantHerbs(5);
-}
+//   player.status.power = 5;
+//   player.status.vitality = 5;
+//   player.status.agility = 5;
+//   loseUnequippedItems();
+//   grantHerbs(5);
+// }
 
 function calcMaxHp() {
   const bonus = getEquipmentBonus();
@@ -67,8 +67,45 @@ function calcAttackCount() {
   return Math.floor(Math.random() * maxHits) + 1;
 }
 
+// ちから：敵最大HP割合の追加ダメ（上限3%）
+function calcPowerBonusDamage(enemyMaxHp) {
+  const power = Number(player.status.power) || 0;
+  const rate = Math.min(0.03, power * 0.0006); // power1あたり0.06%
+  const bonus = Math.floor(enemyMaxHp * rate);
+  return Math.max(1, bonus); // 体感のため最低1保証
+}
+
+// たいりょく：被ダメ割合軽減（上限25%）
+function applyVitalityReduction(rawDamage) {
+  const vit = Number(player.status.vitality) || 0;
+  const reduceRate = Math.min(0.25, vit * 0.003); // vit1あたり0.3%
+  return Math.max(1, Math.floor(rawDamage * (1 - reduceRate)));
+}
+
+// すばやさ：回避（上限20%）
+function rollEvade() {
+  const agi = Number(player.status.agility) || 0;
+  const evadeRate = Math.min(0.2, agi * 0.0025); // agi1あたり0.25%
+  return Math.random() < evadeRate;
+}
+
 function calcNextExp() {
-  return Math.floor(20 * Math.pow(1.3, player.level - 1));
+  const lv = player.level;
+
+  // 序盤〜中盤：指数（緩め）
+  if (lv <= 30) {
+    return Math.floor(20 * Math.pow(1.25, lv - 1));
+  }
+
+  // 中盤以降：線形 + 少しだけ指数
+  const base = Math.floor(20 * Math.pow(1.25, 29)); // Lv30基準
+  const extra = lv - 30;
+
+  return Math.floor(
+    base +
+      extra * 120 + // 線形成長
+      Math.pow(extra, 1.4) * 40 // 緩やかな曲線
+  );
 }
 
 function gainExp(exp) {
@@ -89,8 +126,21 @@ function levelUp() {
   refresh();
 }
 function damagePlayer(amount) {
-  player.hp -= amount;
+  // 回避
+  if (rollEvade()) {
+    log("💨 攻撃をかわした！");
+    refresh();
+    return;
+  }
+
+  // たいりょく軽減（装備参照なし）
+  const reduced = applyVitalityReduction(amount);
+
+  player.hp -= reduced;
   if (player.hp < 0) player.hp = 0;
+
+  log(`ダメージ ${reduced}（軽減前 ${amount}）`);
+
   refresh();
 
   if (player.hp === 0) {

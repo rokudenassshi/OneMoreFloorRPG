@@ -111,10 +111,6 @@ button {
   margin-bottom: 10px;
 }
 
-#battleButtons button + button{
-  margin-left: 20px;
-}
-
 #inventory,
 #statusScreen {
   background: #333;
@@ -134,6 +130,13 @@ button {
   gap: 12px;
   margin-bottom: 10px;
 }
+
+.status-version {
+  font-size: 12px;
+  color: #b6b6b6;
+  margin-left: 6px;
+}
+
 .screen-header h3 {
   margin: 0;
   font-size: 18px;

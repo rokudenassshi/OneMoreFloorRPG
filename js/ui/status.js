@@ -4,6 +4,9 @@ function openStatus() {
   gameState = "STATUS";
   exploreButtons.style.display = "none";
   statusScreenEl.style.display = "block";
+  if (statusVersionEl) {
+    statusVersionEl.textContent = `v${GAME_VERSION}`;
+  }
   renderStatus();
 }
 
@@ -69,6 +72,3 @@ function subStat(stat) {
   refresh();
   renderStatus();
 }
-
-
-
