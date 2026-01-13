@@ -49,19 +49,42 @@ function renderInventory() {
     return;
   }
 
+const consumableGroups = [];
+  const consumableMap = new Map();
+
+  inventory.forEach((item, index) => {
+    if (item.kind !== "consumable") return;
+    const key = item.id || `${item.name}:${item.effect || ""}`;
+    if (!consumableMap.has(key)) {
+      const group = {
+        item,
+        indices: [index],
+      };
+      consumableMap.set(key, group);
+      consumableGroups.push(group);
+      return;
+    }
+    consumableMap.get(key).indices.push(index);
+  });
+
+  consumableGroups.forEach(group => {
+    const { item, indices } = group;
+    const div = document.createElement("div");
+    const description = item.description || "";
+    const countLabel = indices.length > 1 ? ` ×${indices.length}` : "";
+    div.innerHTML = `
+      <div>${item.name}${countLabel}</div>
+      ${description ? `<div style="margin-top:4px; font-size:12px; opacity:0.9;">${description}</div>` : ""}
+      <div style="margin-top:6px;">
+        <button onclick="useItem(${indices[0]})">使用</button>
+      </div>
+      <hr>
+    `;
+    itemListEl.appendChild(div);
+  });
+
   inventory.forEach((item, index) => {
     if (item.kind === "consumable") {
-      const div = document.createElement("div");
-      const description = item.description || "";
-      div.innerHTML = `
-        <div>${item.name}</div>
-        ${description ? `<div style="margin-top:4px; font-size:12px; opacity:0.9;">${description}</div>` : ""}
-        <div style="margin-top:6px;">
-          <button onclick="useItem(${index})">使用</button>
-        </div>
-        <hr>
-      `;
-      itemListEl.appendChild(div);
       return;
     }
     const isEquipped = player.weapon === item;
@@ -113,7 +136,7 @@ function renderInventory() {
           : (gameState === "BATTLE"
             ? `<button disabled>戦闘中は装備不可</button>`
             : `<button onclick="equip(${index})">装備</button>`)}
-            <button onclick="discardEquipment(${index})">捨てる</button>
+                    ${isEquipped ? "" : `<button onclick="discardEquipment(${index})">捨てる</button>`}
       </div>
       <hr>
     `;
