@@ -77,7 +77,7 @@
     const seed = hashSeed(`T${tier}|${type}|${titleText}|BASE`);
     const rng = mulberry32(seed);
 
-    // 固有は「ちから/たいりょく/すばやさ」だけ（攻撃はUI不要なら別管理）
+    // 固有は「ちから/たいりょく/すばやさ」だけ
     // TYPEで傾向を変える：剣系→power、杖靴短剣→agility、防具→vitality
     const baseBonus = { power: 0, vitality: 0, agility: 0 };
 

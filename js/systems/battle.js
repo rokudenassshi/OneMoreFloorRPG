@@ -2,12 +2,9 @@ function startBattle() {
   gameState = "BATTLE";
 
   // ★ floor 以上で出現する敵だけ抽選
-  const candidates = ENEMIES.filter(e => floor >= e.minFloor);
-  const base = candidates.length > 0
-    ? candidates[Math.floor(Math.random() * candidates.length)]
-    : ENEMIES[0]; // 念のため
+  const base = EnemyGen.createEnemyForFloor(floor);
 
-  // レアエネミー（以前の仕様があるなら維持）
+  // レアエネミー
   const isRare = Math.random() < 0.1;
   const rate = isRare ? 5 : 1;
 
