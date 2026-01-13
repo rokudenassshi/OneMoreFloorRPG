@@ -24,6 +24,9 @@ function hashSeed(str) {
   }
   return h >>> 0;
 }
+function normalizeRng(rng) {
+  return typeof rng === "function" ? rng : rngE;
+}
 function rInt(rngOrMin, minOrMax, maybeMax) {
   if (typeof rngOrMin === "function") {
     return Math.floor(rngOrMin() * (maybeMax - minOrMax + 1)) + minOrMax;
@@ -31,7 +34,8 @@ function rInt(rngOrMin, minOrMax, maybeMax) {
   return Math.floor(rngE() * (minOrMax - rngOrMin + 1)) + rngOrMin;
 }
 function pick(rng, arr) {
-  return arr[rInt(rng, 0, arr.length - 1)];
+  const safeRng = normalizeRng(rng);
+  return arr[rInt(safeRng, 0, arr.length - 1)];
 }
 /* ========= tierごとの種族（多め） ========= */
 const BASE_BY_TIER = {
@@ -152,8 +156,10 @@ const TITLE_BY_TIER = {
 };
 
 function pickTitle(rng, tier) {
+
+  const safeRng = normalizeRng(rng);
   const list = TITLE_BY_TIER[tier] || TITLE_BY_TIER[1];
-  return list[rInt(rng, 0, list.length - 1)];
+  return list[rInt(safeRng, 0, list.length - 1)];
 }
 
 /* ========= 出現階層（任せる条件なので、自然に伸びるカーブに設定） ========= */
@@ -194,20 +200,21 @@ function tierMul(tier) {
 
 /* ========= 敵ごとのドロップ候補（tier帯中心に） ========= */
 function buildDrops(rng, tier) {
+  const safeRng = normalizeRng(rng);
   // items.js 側の item_1..item_100 を想定
   const start = (tier - 1) * 10 + 1; // 1,11,...,91
   const end = tier * 10;            // 10,20,...,100
 
-  const count = rInt(rng, 6, 10); // 候補多め
+  const count = rInt(safeRng, 6, 10); // 候補多め
   const drops = [];
   for (let i = 0; i < count; i++) {
-    const id = `item_${rInt(rng, start, end)}`;
+    const id = `item_${rInt(safeRng, start, end)}`;
     if (!drops.includes(id)) drops.push(id);
   }
 
   // たまに「1つ上のtier」も混ぜる（夢）
-    if (tier < 10 && rng() < 0.25) {
-    const id = `item_${rInt(rng, end + 1, Math.min(100, end + 10))}`;
+    if (tier < 10 && safeRng() < 0.25) {
+    const id = `item_${rInt(safeRng, end + 1, Math.min(100, end + 10))}`;
     if (!drops.includes(id)) drops.push(id);
   }
 
@@ -248,7 +255,7 @@ function buildTierPool(floor) {
 /* ========= 敵生成（戦闘ごとにhp/atk/expが固定化される） ========= */
 function createEnemyForFloor(floor) {
   const seed = hashSeed(`ENEMY|F${floor}|${Date.now()}|${Math.random()}`);
-  const rng = mulberry32(seed);
+  const rng = normalizeRng(mulberry32(seed));
   const tier = pick(rng, buildTierPool(Math.max(1, floor)));
   const minFloor = tierToMinFloor(tier);
 

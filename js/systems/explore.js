@@ -31,7 +31,7 @@ function move(dir) {
   // ===== ここからイベント抽選 =====
 
   // 10階層までは必ず戦闘（= floor <= 10）
-  if (floor <= 10) {
+  if (floor <= 5) {
     startBattle();
     autoSave();
     return;
