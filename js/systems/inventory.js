@@ -9,8 +9,8 @@ const HERB_ITEM_TEMPLATE = {
   name: "やくそう",
   kind: "consumable",
   effect: "heal",
-  healRatio: 0.2,
-  description: "最大HPの20%回復",
+  healRatio: 0.5,
+  description: "最大HPの50%回復",
 };
 
 function grantHerbs(count, shouldLog = true) {
@@ -22,6 +22,16 @@ function grantHerbs(count, shouldLog = true) {
     log(`🎁 やくそう ×${count} を手に入れた`);
   }
 }
+
+function setHerbCount(count, shouldLog = true) {
+  const keptItems = inventory.filter(
+    (item) => item && item.id !== HERB_ITEM_TEMPLATE.id
+  );
+  inventory.length = 0;
+  inventory.push(...keptItems);
+  grantHerbs(count, shouldLog);
+}
+
 /* =====================
    インベントリ画面
 ===================== */
@@ -268,17 +278,17 @@ function useHerbInBattle() {
    ゲームオーバー時：未装備アイテムをロスト
    （装備中のアイテムだけ残す）
 ===================== */
-function loseUnequippedItems() {
-  if (!player.weapon) {
-    inventory.length = 0;
-    return;
-  }
+// function loseUnequippedItems() {
+//   if (!player.weapon) {
+//     inventory.length = 0;
+//     return;
+//   }
 
-  const equipped = player.weapon;
+//   const equipped = player.weapon;
 
-  inventory.length = 0;
-  inventory.push(equipped);
-}
+//   inventory.length = 0;
+//   inventory.push(equipped);
+// }
 
 /* =====================
    ドロップ（敵ごとの drops から抽選）

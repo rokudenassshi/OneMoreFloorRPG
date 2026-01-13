@@ -66,7 +66,7 @@
   <!-- ステータス画面 -->
   <div id="statusScreen" style="display:none;">
     <div class="screen-header">
-      <h3>ステータス</h3>
+      <h3>ステータス <span id="statusVersion" class="status-version"></span></h3>
       <button class="back-button" onclick="closeStatus()">戻る</button>
     </div>
     <div id="statusContent"></div>
@@ -80,26 +80,8 @@
   <!-- =====================
        JavaScript 読み込み
   ===================== -->
-
-    <!-- データ -->
-  <script src="js/data/items.js?v=1.0.0"></script>
-  <script src="js/data/enemies.js?v=1.0.0"></script>
-
-  <!-- コア -->
-  <script src="js/core/dom.js?v=1.0.0"></script>
-  <script src="js/core/state.js?v=1.0.0"></script>
-  <script src="js/core/player.js?v=1.0.0"></script>
-
-  <!-- システム -->
-  <script src="js/systems/explore.js?v=1.0.1"></script>
-  <script src="js/systems/battle.js?v=1.0.1"></script>
-  <script src="js/systems/inventory.js?v=1.0.1"></script>
-
-  <!-- UI -->
-  <script src="js/ui/ui.js?v=1.0.0"></script>
-  <script src="js/ui/status.js?v=1.0.0"></script>
-
   <!-- エントリーポイント -->
-  <script src="js/game.js?v=1.0.0"></script>
+  <script src="js/core/version.js"></script>
+  <script src="js/core/loader.js"></script>
 </body>
 </html>

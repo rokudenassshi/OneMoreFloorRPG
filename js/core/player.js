@@ -21,18 +21,18 @@ const player = {
   weapon: null,
 };
 
-function resetPlayer() {
-  player.level = 1;
-  player.exp = 0;
-  player.unassignedPoints = 0;
-  battleCount = 0;
+// function resetPlayer() {
+//   player.level = 1;
+//   player.exp = 0;
+//   player.unassignedPoints = 0;
+//   battleCount = 0;
 
-  player.status.power = 5;
-  player.status.vitality = 5;
-  player.status.agility = 5;
-  loseUnequippedItems();
-  grantHerbs(5);
-}
+//   player.status.power = 5;
+//   player.status.vitality = 5;
+//   player.status.agility = 5;
+//   loseUnequippedItems();
+//   grantHerbs(5);
+// }
 
 function calcMaxHp() {
   const bonus = getEquipmentBonus();
@@ -90,7 +90,22 @@ function rollEvade() {
 }
 
 function calcNextExp() {
-  return Math.floor(20 * Math.pow(1.3, player.level - 1));
+  const lv = player.level;
+
+  // 序盤〜中盤：指数（緩め）
+  if (lv <= 30) {
+    return Math.floor(20 * Math.pow(1.25, lv - 1));
+  }
+
+  // 中盤以降：線形 + 少しだけ指数
+  const base = Math.floor(20 * Math.pow(1.25, 29)); // Lv30基準
+  const extra = lv - 30;
+
+  return Math.floor(
+    base +
+      extra * 120 + // 線形成長
+      Math.pow(extra, 1.4) * 40 // 緩やかな曲線
+  );
 }
 
 function gainExp(exp) {
@@ -124,7 +139,7 @@ function damagePlayer(amount) {
   player.hp -= reduced;
   if (player.hp < 0) player.hp = 0;
 
-  log(`🛡️ ダメージ ${reduced}（軽減前 ${amount}）`);
+  log(`ダメージ ${reduced}（軽減前 ${amount}）`);
 
   refresh();
 
