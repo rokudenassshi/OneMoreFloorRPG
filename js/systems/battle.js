@@ -30,8 +30,6 @@ function startBattle() {
   updateUI();
 }
 
-
-
 function attack() {
   if (gameState !== "BATTLE") return;
 
@@ -40,8 +38,9 @@ function attack() {
 
   let total = 0;
   for (let i = 0; i < hits; i++) {
-    enemy.hp -= atk;
-    total += atk;
+    const damage = rollDamage(atk);
+    enemy.hp -= damage;
+    total += damage;
   }
 
   log(`▶ 攻撃！ ${hits}回ヒット（${total}ダメージ）`);
@@ -88,10 +87,16 @@ function afterPlayerAction() {
 
 function enemyAttack() {
   if (gameState !== "BATTLE") return;
-  log(`◀ ${enemy.name} の攻撃！ ${enemy.atk}ダメージ`);
-  damagePlayer(enemy.atk);
+  const damage = rollDamage(enemy.atk);
+  log(`◀ ${enemy.name} の攻撃！ ${damage}ダメージ`);
+  damagePlayer(damage);
 }
 
+function rollDamage(base, variance = 0.1) {
+  const min = Math.floor(base * (1 - variance));
+  const max = Math.ceil(base * (1 + variance));
+  return Math.max(1, Math.floor(Math.random() * (max - min + 1)) + min);
+}
 
 function endBattle() {
   const hasBattle = !!enemy;
@@ -116,4 +121,3 @@ function gameOver() {
   resetPlayer();
   goToBase();
 }
-
