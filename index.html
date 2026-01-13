@@ -46,16 +46,20 @@
 
   <!-- アイテム画面 -->
 <div id="inventory" style="display:none;">
+<div class="screen-header">
   <h3>アイテム</h3>
+    <button class="back-button" onclick="closeInventory()">戻る</button>
+  </div>
   <div id="itemList"></div>
-  <button onclick="closeInventory()">戻る</button>
 </div>
 
 <!-- ステータス画面 -->
 <div id="statusScreen" style="display:none;">
-  <h3>ステータス</h3>
+  <div class="screen-header">
+    <h3>ステータス</h3>
+    <button class="back-button" onclick="closeStatus()">戻る</button>
+  </div>
   <div id="statusContent"></div>
-  <button onclick="closeStatus()">戻る</button>
 </div>
 
 <!-- =====================

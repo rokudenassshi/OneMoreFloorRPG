@@ -263,7 +263,8 @@ function createEnemyForFloor(floor) {
   const title = pickTitle(rng, tier); // {t, mul}
 
   // 表示名にtierを含める（不要なら外してOK）
-  const name = `[T${tier}] ${title.t}${baseName}`;
+  // const name = `[T${tier}] ${title.t}${baseName}`;
+  const name = ` ${title.t}${baseName}`;
 
   // tier倍率 × 二つ名倍率（高tier二つ名ほど強くなる）
   const mul = tierMul(tier) * title.mul;

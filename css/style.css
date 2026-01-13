@@ -49,10 +49,11 @@ button {
   margin-bottom: 10px;
 }
 
-#battleButtons button {
+#battleButtons button + button{
   margin-left: 20px;
 }
 
+#inventory,
 #statusScreen {
   background: #333;
   color: #fff;
@@ -63,6 +64,23 @@ button {
   border: 2px solid #666;
   border-radius: 12px;
   box-sizing: border-box;
+}
+.screen-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.screen-header h3 {
+  margin: 0;
+  font-size: 18px;
+}
+.back-button {
+  flex: 0 0 auto;
+  min-height: 44px;
+  padding: 6px 12px;
+  font-size: 14px;
 }
 .status {
   background: #222;
@@ -93,15 +111,15 @@ button {
   width: 48%;
 }
 .state-btn {
-  width: 32px !important;
-  height: 32px !important;
+  width: 24px !important;
+  height: 24px !important;
   padding: 0 !important;
 
   display: flex;
   align-items: center;
   justify-content: center;
 
-  font-size: 16px;
+  font-size: 12px;
   line-height: 1;
 }
 
@@ -111,6 +129,7 @@ button {
   }
 
   .game,
+  #inventory,
   #statusScreen {
     margin: 12px auto;
     padding: 12px;
