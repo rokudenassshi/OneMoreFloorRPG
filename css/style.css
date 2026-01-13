@@ -111,6 +111,10 @@ button {
   margin-bottom: 10px;
 }
 
+#battleButtons button + button{
+  margin-left: 20px;
+}
+
 #inventory,
 #statusScreen {
   background: #333;
@@ -156,6 +160,7 @@ button {
   margin: 4px 0;
 }
 .header-row div {
+
   flex: 1;
   min-width: 0;
 }
