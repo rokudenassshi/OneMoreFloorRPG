@@ -47,7 +47,10 @@ function calcAttack() {
 function calcAttackCount() {
   const bonus = getEquipmentBonus();
   const totalAgility = Number(player.status.agility) + bonus.agility;
-  const maxHits = Math.max(1, Math.floor(totalAgility / 10) + 1);
+  // 10以下:1回, 20以下:2回, 30以下:3回...
+  const maxHits = Math.max(1, Math.ceil(totalAgility / 10));
+
+  // 1〜maxHits のランダム
   return Math.floor(Math.random() * maxHits) + 1;
 }
 

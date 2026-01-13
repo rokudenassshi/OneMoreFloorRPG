@@ -130,11 +130,13 @@ function discardEquipment(index) {
   if (!item || item.kind === "consumable") return;
 
   const wasEquipped = player.weapon === item;
+  const prevMaxHp = wasEquipped ? calcMaxHp() : null;
   inventory.splice(index, 1);
 
   if (wasEquipped) {
     player.weapon = null;
-    player.hp = Math.min(player.hp, calcMaxHp());
+    const nextMaxHp = calcMaxHp();
+    adjustHpForMaxChange(prevMaxHp, nextMaxHp);
   }
 
   log(`🗑 ${item.name}${"★".repeat(item.rarity || 0)} を捨てた`);
@@ -151,14 +153,28 @@ function equip(index) {
   const item = inventory[index];
   if (!item) return;
 
+  const prevMaxHp = calcMaxHp();
   player.weapon = item;
 
   // 最大HPが変わる可能性があるので安全に丸める
-  player.hp = Math.min(player.hp, calcMaxHp());
+  const nextMaxHp = calcMaxHp();
+  adjustHpForMaxChange(prevMaxHp, nextMaxHp);
 
   log(`🗡 ${item.name}${"★".repeat(item.rarity || 0)} を装備した`);
   closeInventory();
   refresh();
+}
+
+function adjustHpForMaxChange(prevMaxHp, nextMaxHp) {
+  if (player.hp <= 0) return;
+  if (!prevMaxHp || prevMaxHp <= 0) {
+    player.hp = Math.min(player.hp, nextMaxHp);
+    return;
+  }
+
+  const ratio = player.hp / prevMaxHp;
+  const scaledHp = Math.round(nextMaxHp * ratio);
+  player.hp = Math.min(nextMaxHp, Math.max(1, scaledHp));
 }
 
 /* =====================
