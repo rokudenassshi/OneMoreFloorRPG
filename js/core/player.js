@@ -25,6 +25,7 @@ function resetPlayer() {
   player.level = 1;
   player.exp = 0;
   player.unassignedPoints = 0;
+  battleCount = 0;
 
   player.status.power = 5;
   player.status.vitality = 5;

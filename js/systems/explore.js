@@ -28,7 +28,7 @@ function move(dir) {
   }
   // ===== ここからイベント抽選 =====
 
-  // 10階層までは必ず戦闘（= floor <= 10）
+  // 5階層までは必ず戦闘
   if (floor <= 5) {
     startBattle();
     autoSave();
@@ -48,6 +48,7 @@ function move(dir) {
   if (roll < 0.90) {
     // 20% 何も起こらない
     log("…何も起こらなかった。");
+    refresh();
     autoSave();
     return;
   }

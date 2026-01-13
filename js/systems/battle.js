@@ -94,8 +94,16 @@ function enemyAttack() {
 
 
 function endBattle() {
+  const hasBattle = !!enemy;
   gameState = "EXPLORE";
   enemy = null;
+
+  if (hasBattle) {
+    battleCount += 1;
+    if (battleCount % 10 === 0) {
+      grantHerbs(1);
+    }
+  }
 
   battleButtons.style.display = "none";
   exploreButtons.style.display = "block";

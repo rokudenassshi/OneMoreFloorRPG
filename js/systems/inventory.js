@@ -262,12 +262,6 @@ function dropItem() {
 
   // ドロップ率（好みで）
   const roll = Math.random();
-  if (roll < 0.1) {
-    const herb = { ...HERB_ITEM_TEMPLATE };
-    inventory.push(herb);
-    log(`🎁 ${herb.name} を手に入れた`);
-    return;
-  }
   if (!enemy.isRare && roll >= 0.5) return;
   
   // items.js のジェネレータで「その場生成」
