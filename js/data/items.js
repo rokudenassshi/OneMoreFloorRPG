@@ -182,7 +182,8 @@ function pickTitle(tier) {
       id: `gen_${tier}_${typeDef.type}_${title.t}`, // 一意でなくてもOK（必要なら素材も入れる）
       tier,
       type: typeDef.type,
-      name: `[T${tier}] ${title.t}${material}${typeDef.jp}`,
+      // name: `[T${tier}] ${title.t}${material}${typeDef.jp}`,
+      name: `${title.t}${material}${typeDef.jp}`,
       baseBonus,
     };
   }

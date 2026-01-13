@@ -33,16 +33,21 @@ function resetPlayer() {
 }
 
 function calcMaxHp() {
-  return player.baseHp + player.status.vitality * 10;
+  const bonus = getEquipmentBonus();
+  const totalVitality = player.status.vitality + bonus.vitality;
+  return player.baseHp + totalVitality * 10;
 }
 
 function calcAttack() {
   const weaponAtk = player.weapon ? player.weapon.atk : 0;
-  return player.status.power * 2 + weaponAtk;
+  const bonus = getEquipmentBonus();
+  return (player.status.power + bonus.power) * 2 + weaponAtk;
 }
 
 function calcAttackCount() {
-  const maxHits = Math.max(1, Math.floor(player.status.agility / 10) + 1);
+  const bonus = getEquipmentBonus();
+  const totalAgility = Number(player.status.agility) + bonus.agility;
+  const maxHits = Math.max(1, Math.floor(totalAgility / 10) + 1);
   return Math.floor(Math.random() * maxHits) + 1;
 }
 
@@ -89,6 +94,25 @@ function getEquipmentBonus() {
   if (!player.weapon) {
     return { power: 0, vitality: 0, agility: 0 };
   }
-  return player.weapon.bonus;
+
+  const normalizeBonus = (bonus) => ({
+    power: Number(bonus?.power) || 0,
+    vitality: Number(bonus?.vitality) || 0,
+    agility: Number(bonus?.agility) || 0,
+  });
+
+  if (player.weapon.bonus) {
+    return normalizeBonus(player.weapon.bonus);
+  }
+
+  const baseBonus = normalizeBonus(player.weapon.baseBonus);
+  const optionBonus = normalizeBonus(player.weapon.optionBonus);
+
+  return {
+    power: baseBonus.power + optionBonus.power,
+    vitality: baseBonus.vitality + optionBonus.vitality,
+    agility: baseBonus.agility + optionBonus.agility,
+  };
 }
+
 

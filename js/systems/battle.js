@@ -10,7 +10,7 @@ function startBattle() {
 
   enemy = {
     id: base.id,
-    name: isRare ? `★レア ${base.name}` : base.name,
+    name: isRare ? `＊レア ${base.name}` : base.name,
     isRare,
 
     // 上位ほど強い：baseがtierで強い + floor補正を少し
@@ -52,6 +52,15 @@ function attack() {
 function escape() {
   if (gameState !== "BATTLE") return;
 
+  // レアモンスターとの戦闘は必ず逃走に成功する
+  if (enemy && enemy.isRare) {
+    log("💨 逃走成功！");
+    floor = Math.max(0, floor - 1);
+    endBattle();
+    refresh();
+    return;
+  }
+
   const rate = Math.min(30 + Math.floor(player.status.agility / 2), 90);
 
   if (Math.random() * 100 < rate) {
@@ -68,7 +77,7 @@ function escape() {
 function afterPlayerAction() {
   if (gameState !== "BATTLE") return;
   if (enemy.hp <= 0) {
-    log(`★ ${enemy.name} を倒した！`);
+    log(` ${enemy.name} を倒した！`);
     gainExp(enemy.exp);
     dropItem();
     endBattle();
