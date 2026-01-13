@@ -8,83 +8,28 @@
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+  <main class="top-content">
+    <a class="start-link" href="game.html">ゲームを開始する</a>
+    <h1>OneMoreFloorRPG</h1>
+    <section>
+      <h2>このゲームについて</h2>
+      <p>
+        ローグライクRPGです。敵と戦いながら階層を進み、
+        装備と成長を重ねてより深くを目指します。
+      </p>
+    </section>
+    <section>
+      <h2>遊び方</h2>
+      <ul>
+        <li>「すすむ」で探索・戦闘が発生します</li>
+        <li>戦闘で勝つと経験値やアイテムを獲得します</li>
+        <li>やられると拠点に戻ります</li>
+      </ul>
+    </section>
+  </main>
 
-<div class="game">
-<div class="status">
-  <div class="header-row">
-    <div>Lv：<span id="playerLevel"></span></div>
-    <div>階層：<span id="floor"></span></div>
-  </div>
-
-  <div class="header-row">
-    <div>HP：<span id="playerHp"></span></div>
-    <div><span id="enemyInfo">---</span></div>
-  </div>
-</div>
-
-  <div class="log" id="log"></div>
-
-  <!-- 探索 -->
-<div id="exploreButtons">
-  <div class="row">
-    <button onclick="move(1)">すすむ</button>
-    <button onclick="openInventory()">アイテム</button>
-  </div>
-  <div class="row">
-    <button onclick="move(-1)">もどる</button>
-    <button onclick="openStatus()">ステータス</button>
-  </div>
-</div>
-
-  <!-- 戦闘 -->
-  <div id="battleButtons" style="display:none;">
-    <button onclick="attack()">こうげき</button>
-    <button onclick="openInventory()">アイテム</button>
-    <button class="escape-btn" onclick="escape()">にげる</button>
-  </div>
-</div>
-
-  <!-- アイテム画面 -->
-<div id="inventory" style="display:none;">
-<div class="screen-header">
-  <h3>アイテム</h3>
-    <button class="back-button" onclick="closeInventory()">戻る</button>
-  </div>
-  <div id="itemList"></div>
-</div>
-
-<!-- ステータス画面 -->
-<div id="statusScreen" style="display:none;">
-  <div class="screen-header">
-    <h3>ステータス</h3>
-    <button class="back-button" onclick="closeStatus()">戻る</button>
-  </div>
-  <div id="statusContent"></div>
-</div>
-
-<!-- =====================
-     JavaScript 読み込み
-===================== -->
-
-<!-- データ -->
-<script src="js/data/items.js"></script>
-<script src="js/data/enemies.js"></script>
-
-<!-- コア -->
-<script src="js/core/dom.js"></script>
-<script src="js/core/state.js"></script>
-<script src="js/core/player.js"></script>
-
-<!-- システム -->
-<script src="js/systems/explore.js"></script>
-<script src="js/systems/battle.js"></script>
-<script src="js/systems/inventory.js"></script>
-
-<!-- UI -->
-<script src="js/ui/ui.js"></script>
-<script src="js/ui/status.js"></script>
-
-<!-- エントリーポイント -->
-<script src="js/game.js"></script>
-</body>
+  <footer class="site-footer">
+    <a href="privacy.html">プライバシーポリシー</a>
+  </footer>
+</body>https://one-more-floor-rpg.web.app/
 </html>
