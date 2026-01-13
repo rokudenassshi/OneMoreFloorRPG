@@ -236,7 +236,7 @@ function dropItem() {
     log(`🎁 ${herb.name} を手に入れた`);
     return;
   }
-  if (roll >= 0.5) return;
+  if (!enemy.isRare && roll >= 0.5) return;
   
   // items.js のジェネレータで「その場生成」
   const base = window.ItemGen.createBaseItemForDrop(tier);
@@ -274,13 +274,14 @@ function createLootItem(baseItem, isRareEnemy) {
   // ★による追加補正：★1=1種、★2=2種、★3=3種
   // 付与値は 1..floor（floorが0なら付与なし）
   const cap = Math.max(0, floor);
+  const optionMultiplier = isRareEnemy ? 5 : 1;
   const stats = ["power", "vitality", "agility"].sort(() => Math.random() - 0.5);
   const addCount = Math.min(rarity, stats.length);
 
   for (let i = 0; i < addCount; i++) {
     if (cap <= 0) break;
     const key = stats[i];
-    const add = Math.floor(Math.random() * cap) + 1; // 1..floor
+    const add = (Math.floor(Math.random() * cap) + 1) * optionMultiplier;
     optionBonus[key] += add;
   }
 
