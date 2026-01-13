@@ -238,13 +238,50 @@ function discardEquipment(index) {
 /* =====================
    装備中より弱い装備をまとめて捨てる
 ===================== */
+
+function getItemTotalBonus(item) {
+  const normalizeBonus = (bonus) => ({
+    power: Number(bonus?.power) || 0,
+    vitality: Number(bonus?.vitality) || 0,
+    agility: Number(bonus?.agility) || 0,
+  });
+
+  if (!item) {
+    return { power: 0, vitality: 0, agility: 0 };
+  }
+
+  if (item.bonus) {
+    return normalizeBonus(item.bonus);
+  }
+
+  const baseBonus = normalizeBonus(item.baseBonus);
+  const optionBonus = normalizeBonus(item.optionBonus);
+
+  return {
+    power: baseBonus.power + optionBonus.power,
+    vitality: baseBonus.vitality + optionBonus.vitality,
+    agility: baseBonus.agility + optionBonus.agility,
+  };
+}
+
+function isBonusStrictlyLower(source, target) {
+  return (
+    source.power < target.power &&
+    source.vitality < target.vitality &&
+    source.agility < target.agility
+  );
+}
+
+/* =====================
+   装備中より弱い装備をまとめて捨てる
+===================== */
 function discardWeakerEquipment() {
   if (!player.weapon) {
     log("🧺 装備中の武器がない");
     return;
   }
 
-  const equippedBonus = getEquipmentBonus();
+  const equippedBonus = getItemTotalBonus(player.weapon);
   let discardedCount = 0;
 
   for (let i = inventory.length - 1; i >= 0; i -= 1) {
@@ -260,14 +297,16 @@ function discardWeakerEquipment() {
   }
 
   if (discardedCount === 0) {
-    log("🧹 捨てる装備がない");
+    log("🧺 捨てる装備がない");
     return;
   }
 
-  log(`🧹 装備より弱い装備を${discardedCount}個捨てた`);
+  log(`🧺 装備より弱い装備を${discardedCount}個捨てた`);
   renderInventory();
   refresh();
 }
+
+window.discardWeakerEquipment = discardWeakerEquipment;
 /* =====================
    装備
    ★重要：player.statusを直接増減しない！
@@ -464,7 +503,7 @@ function createLootItem(baseItem, isRareEnemy) {
 
   // ★による追加補正：★1=1種、★2=2種、★3=3種
   // 付与値は 1..floor/2（floorが0なら付与なし）
-  const cap = Math.max(0, floor);
+  const cap = Math.max(0, Math.floor(floor / 2));
   const stats = ["power", "vitality", "agility"].sort(
     () => Math.random() - 0.5
   );
