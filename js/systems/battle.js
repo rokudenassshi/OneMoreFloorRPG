@@ -113,6 +113,7 @@ function endBattle() {
   battleButtons.style.display = "none";
   exploreButtons.style.display = "block";
   refresh();
+  autoSave({ saveHp: true });
 }
 
 function gameOver() {

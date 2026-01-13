@@ -2,6 +2,8 @@ let gameState = "EXPLORE";
 let floor = 0;
 let enemy = null;
 let battleCount = 0;
+let reloadPenalty = false;
+let reloadPenaltyFloorLoss = 0;
 const autosaveKey = "roguelike_autosave";
 
 function setFloor(value) {
@@ -66,6 +68,9 @@ function loadAutoSave() {
 
   if (!data || data.version !== 1) return false;
 
+  reloadPenalty = false;
+  reloadPenaltyFloorLoss = 0;
+  const wasInBattle = data.gameState === "BATTLE";
   const savedPlayer = data.player || {};
   const savedStatus = savedPlayer.status || {};
   const savedBaseStatus = savedPlayer.baseStatus || {};
@@ -114,5 +119,10 @@ function loadAutoSave() {
   const hpToApply = Number.isFinite(loadedHp) ? loadedHp : player.hp;
   player.hp = Math.min(Math.max(0, hpToApply), maxHp);
 
+  if (wasInBattle) {
+    reloadPenaltyFloorLoss = 50;
+    floor = Math.max(0, floor - reloadPenaltyFloorLoss);
+    reloadPenalty = true;
+  }
   return true;
 }
