@@ -6,19 +6,19 @@ const player = {
   hp: 50,
 
   maxReachedFloor: 0,
-  
+
   status: {
     power: 5,
     vitality: 5,
-    agility: 5
+    agility: 5,
   },
   baseStatus: {
     power: 5,
     vitality: 5,
-    agility: 5
+    agility: 5,
   },
   unassignedPoints: 0,
-  weapon: null
+  weapon: null,
 };
 
 function resetPlayer() {
@@ -49,10 +49,21 @@ function calcAttack() {
 function calcAttackCount() {
   const bonus = getEquipmentBonus();
   const totalAgility = Number(player.status.agility) + bonus.agility;
-  // 
-  const maxHits = Math.max(1, Math.ceil(totalAgility / 50));
 
-  // 1〜maxHits のランダム
+  // 1hitは常に保証、2hit以降の要求値を「段階的に増加」させる
+  const base = 50; // 最初の増分（2hitに必要な追加量）
+  const stepInc = 20; // 段階が1上がるごとに増分を+20
+
+  let maxHits = 1;
+  let required = 0;
+  let delta = base;
+
+  while (totalAgility >= required + delta) {
+    required += delta;
+    maxHits += 1;
+    delta += stepInc; // 次の段階はさらに重くする
+  }
+
   return Math.floor(Math.random() * maxHits) + 1;
 }
 
@@ -72,7 +83,7 @@ function gainExp(exp) {
 
 function levelUp() {
   player.level++;
-  player.unassignedPoints += 1; 
+  player.unassignedPoints += 1;
   player.hp = calcMaxHp();
   log(`🎉 レベルアップ！ Lv.${player.level}`);
   refresh();
@@ -91,7 +102,7 @@ function getBaseStatus() {
   return {
     power: player.status.power,
     vitality: player.status.vitality,
-    agility: player.status.agility
+    agility: player.status.agility,
   };
 }
 
@@ -119,5 +130,3 @@ function getEquipmentBonus() {
     agility: baseBonus.agility + optionBonus.agility,
   };
 }
-
-

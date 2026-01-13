@@ -8,9 +8,12 @@ function updateUI() {
   playerHpEl.textContent = `${player.hp}/${calcMaxHp()}`;
   playerLevelEl.textContent = player.level;
 
-  if (enemy && gameState === "BATTLE") {
-    enemyInfoEl.textContent =
-      `${enemy.name} HP：${enemy.hp}/${enemy.maxHp}`;
+  const isBattleView =
+    gameState === "BATTLE" ||
+    (gameState === "INVENTORY" && inventoryReturnState === "BATTLE");
+
+  if (enemy && isBattleView) {
+    enemyInfoEl.textContent = `${enemy.name} HP：${enemy.hp}/${enemy.maxHp}`;
   } else {
     enemyInfoEl.textContent = "---";
   }

@@ -58,7 +58,7 @@ function renderInventory() {
     return;
   }
 
-const consumableGroups = [];
+  const consumableGroups = [];
   const consumableMap = new Map();
 
   inventory.forEach((item, index) => {
@@ -76,14 +76,18 @@ const consumableGroups = [];
     consumableMap.get(key).indices.push(index);
   });
 
-  consumableGroups.forEach(group => {
+  consumableGroups.forEach((group) => {
     const { item, indices } = group;
     const div = document.createElement("div");
     const description = item.description || "";
     const countLabel = indices.length > 1 ? ` ×${indices.length}` : "";
     div.innerHTML = `
       <div>${item.name}${countLabel}</div>
-      ${description ? `<div style="margin-top:4px; font-size:12px; opacity:0.9;">${description}</div>` : ""}
+      ${
+        description
+          ? `<div style="margin-top:4px; font-size:12px; opacity:0.9;">${description}</div>`
+          : ""
+      }
       <div style="margin-top:6px;">
         <button onclick="useItem(${indices[0]})">使用</button>
       </div>
@@ -137,15 +141,27 @@ const consumableGroups = [];
 
       <div style="margin-top:6px;">
         <div style="font-size:12px; opacity:0.9;">オプション</div>
-            <div>${hasSeparated ? (optParts.length ? optParts.join(" / ") : "なし") : "なし"}</div>
+            <div>${
+              hasSeparated
+                ? optParts.length
+                  ? optParts.join(" / ")
+                  : "なし"
+                : "なし"
+            }</div>
         </div>
       <div style="margin-top:6px; display:flex; gap:10px; flex-wrap:wrap;">
-        ${isEquipped
-          ? ""
-          : (gameState === "BATTLE"
+        ${
+          isEquipped
+            ? ""
+            : gameState === "BATTLE"
             ? `<button disabled>戦闘中は装備不可</button>`
-            : `<button onclick="equip(${index})">装備</button>`)}
-                    ${isEquipped ? "" : `<button onclick="discardEquipment(${index})">捨てる</button>`}
+            : `<button onclick="equip(${index})">装備</button>`
+        }
+                    ${
+                      isEquipped
+                        ? ""
+                        : `<button onclick="discardEquipment(${index})">捨てる</button>`
+                    }
       </div>
       <hr>
     `;
@@ -233,7 +249,6 @@ function useItem(index) {
   refresh();
 }
 
-
 /* =====================
    ゲームオーバー時：未装備アイテムをロスト
    （装備中のアイテムだけ残す）
@@ -258,14 +273,30 @@ function dropItem() {
 
   // 敵tierに合わせてアイテムtierを決める（±1くらい揺らす）
   const t = enemy.tier || 1;
-  const tier = Math.max(1, Math.min(10, t + (Math.random() < 0.2 ? 1 : 0) - (Math.random() < 0.1 ? 1 : 0)));
+  const tier = Math.max(
+    1,
+    Math.min(
+      10,
+      t + (Math.random() < 0.2 ? 1 : 0) - (Math.random() < 0.1 ? 1 : 0)
+    )
+  );
 
   // ドロップ率（好みで）
   const roll = Math.random();
   if (!enemy.isRare && roll >= 0.5) return;
-  
+
   // items.js のジェネレータで「その場生成」
-  const base = window.ItemGen.createBaseItemForDrop(tier);
+  const desiredBaseStatCount = pickDesiredBaseStatCount();
+  let base = window.ItemGen.createBaseItemForDrop(tier);
+  let rerollCount = 0;
+  while (
+    countNonZeroBaseStats(base.baseBonus) < desiredBaseStatCount &&
+    rerollCount < 6
+  ) {
+    base = window.ItemGen.createBaseItemForDrop(tier);
+    rerollCount += 1;
+  }
+  base = applyBaseStatCount(base, desiredBaseStatCount);
 
   // ★は今まで通り：createLootItemで optionBonus 付与
   const item = createLootItem(base, !!enemy.isRare);
@@ -274,6 +305,39 @@ function dropItem() {
   log(`🎁 ${item.name}${"★".repeat(item.rarity)} を手に入れた`);
 }
 
+function pickDesiredBaseStatCount() {
+  const roll = Math.random();
+  if (roll < 0.5) return 1;
+  if (roll < 0.8) return 2;
+  return 3;
+}
+
+function countNonZeroBaseStats(baseBonus) {
+  if (!baseBonus) return 0;
+  return ["power", "vitality", "agility"].reduce(
+    (count, key) => count + (baseBonus[key] ? 1 : 0),
+    0
+  );
+}
+
+function applyBaseStatCount(baseItem, desiredCount) {
+  const baseBonus = {
+    ...(baseItem.baseBonus || { power: 0, vitality: 0, agility: 0 }),
+  };
+  const keys = ["power", "vitality", "agility"];
+  const nonZero = keys.filter((key) => baseBonus[key] > 0);
+
+  if (nonZero.length <= desiredCount) {
+    return { ...baseItem, baseBonus };
+  }
+
+  const shuffled = nonZero.sort(() => Math.random() - 0.5);
+  for (let i = desiredCount; i < shuffled.length; i += 1) {
+    baseBonus[shuffled[i]] = 0;
+  }
+
+  return { ...baseItem, baseBonus };
+}
 
 /* =====================
    ドロップ品の実体を作る
@@ -284,7 +348,7 @@ function dropItem() {
 ===================== */
 function createLootItem(baseItem, isRareEnemy) {
   // ★3はレア敵のみ、それ以外は★1〜★2
-  const rarity = isRareEnemy ? 3 : (Math.floor(Math.random() * 2) + 1);
+  const rarity = isRareEnemy ? 3 : Math.floor(Math.random() * 2) + 1;
 
   // 固有（items.jsで確定済み）をコピー
   const base = baseItem.baseBonus || { power: 0, vitality: 0, agility: 0 };
@@ -298,10 +362,12 @@ function createLootItem(baseItem, isRareEnemy) {
   const optionBonus = { power: 0, vitality: 0, agility: 0 };
 
   // ★による追加補正：★1=1種、★2=2種、★3=3種
-  // 付与値は 1..floor（floorが0なら付与なし）
-  const cap = Math.max(0, floor);
+  // 付与値は 1..floor/2（floorが0なら付与なし）
+  const cap = Math.max(0, Math.floor(floor / 2));
   const optionMultiplier = isRareEnemy ? 5 : 1;
-  const stats = ["power", "vitality", "agility"].sort(() => Math.random() - 0.5);
+  const stats = ["power", "vitality", "agility"].sort(
+    () => Math.random() - 0.5
+  );
   const addCount = Math.min(rarity, stats.length);
 
   for (let i = 0; i < addCount; i++) {
@@ -331,9 +397,8 @@ function createLootItem(baseItem, isRareEnemy) {
     rarity,
 
     // 固有/ランダム/合計を分けて保持
-    baseBonus,     // 固有
-    optionBonus,   // ランダムオプション
-    bonus,         // 合計（計算用）
+    baseBonus, // 固有
+    optionBonus, // ランダムオプション
+    bonus, // 合計（計算用）
   };
 }
-
