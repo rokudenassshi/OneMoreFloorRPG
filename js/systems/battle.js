@@ -5,7 +5,7 @@ function startBattle() {
   const base = EnemyGen.createEnemyForFloor(floor);
 
   // レアエネミー
-  const isRare = Math.random() < 0.01;
+  const isRare = Math.random() < 1.01;
   const rate = isRare ? 5 : 1;
 
   enemy = {
