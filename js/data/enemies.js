@@ -328,7 +328,7 @@
   function tierToMinFloor(tier) {
     const table = {
       1: 1,
-      2: 10,
+      2: 50,
       3: 200,
       4: 500,
       5: 800,

@@ -1,5 +1,8 @@
 {
   "projects": {
-    "default": "one-more-floor-rpg"
-  }
+    "default": "one-more-floor-rpg",
+    "test": "one-more-floor-rpg-test"
+  },
+  "targets": {},
+  "etags": {}
 }

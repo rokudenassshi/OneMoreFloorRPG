@@ -1,5 +1,6 @@
 function startBattle() {
   gameState = "BATTLE";
+  clearLog();
 
   // ★ floor 以上で出現する敵だけ抽選
   const base = EnemyGen.createEnemyForFloor(floor);

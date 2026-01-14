@@ -403,7 +403,7 @@ function dropItem() {
   if (!enemy.isRare && roll >= 0.5) return;
 
   // items.js のジェネレータで「その場生成」
-  const desiredBaseStatCount = pickDesiredBaseStatCount();
+  const desiredBaseStatCount = 3;
   let base = window.ItemGen.createBaseItemForDrop(tier, floor);
   let rerollCount = 0;
   while (
@@ -432,13 +432,6 @@ function dropItem() {
   log(`🎁 ${item.name}${"★".repeat(item.rarity)} を手に入れた`);
 }
 
-function pickDesiredBaseStatCount() {
-  const roll = Math.random();
-  if (roll < 0.5) return 1;
-  if (roll < 0.8) return 2;
-  return 3;
-}
-
 function countNonZeroBaseStats(baseBonus) {
   if (!baseBonus) return 0;
   return ["power", "vitality", "agility"].reduce(
@@ -454,8 +447,10 @@ function applyBaseStatCount(baseItem, desiredCount) {
   const keys = ["power", "vitality", "agility"];
   const nonZero = keys.filter((key) => baseBonus[key] > 0);
 
-  if (nonZero.length <= desiredCount) {
-    return { ...baseItem, baseBonus };
+  if (desiredCount === keys.length) {
+    keys.forEach((key) => {
+      if (baseBonus[key] <= 0) baseBonus[key] = 1;
+    });
   }
 
   const shuffled = nonZero.sort(() => Math.random() - 0.5);

@@ -3,6 +3,10 @@ function log(text) {
   logEl.scrollTop = logEl.scrollHeight;
 }
 
+function clearLog() {
+  logEl.innerHTML = "";
+}
+
 function updateUI() {
   floorEl.textContent = floor;
   playerHpEl.textContent = `${player.hp}/${calcMaxHp()}`;
