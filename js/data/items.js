@@ -290,8 +290,8 @@
   function buildFixedBaseBonus(tier, floor, type, titleText) {
     const seed = hashSeed(`T${tier}|F${floor}|${type}|${titleText}|BASE`);
     const rng = mulberry32(seed);
-    const floorMul = Math.max(1, Math.floor(floor || 1));
-    const roll = () => rInt(rng, 1, 3) * floorMul;
+    const floorMul = Math.max(1, Math.floor((floor || 1) * 0.5));
+    const roll = () => rInt(rng, 1, 2) * floorMul;
 
     // 固有は「ちから/たいりょく/すばやさ」だけ
     // TYPEで傾向を変える：剣系→power、杖靴短剣→agility、防具→vitality

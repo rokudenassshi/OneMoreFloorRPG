@@ -486,7 +486,7 @@ function createLootItem(baseItem, isRareEnemy) {
 
   // ★による追加補正：★1=1種、★2=2種、★3=3種
   // 付与値は 1..floor/2（floorが0なら付与なし）
-  const cap = Math.max(0, Math.floor(floor / 2));
+  const cap = Math.max(0, Math.floor(floor / 10));
   const stats = ["power", "vitality", "agility"].sort(
     () => Math.random() - 0.5
   );
