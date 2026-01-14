@@ -13,6 +13,10 @@ const HERB_ITEM_TEMPLATE = {
   description: "最大HPの50%回復",
 };
 
+const discardThresholdsKey = "roguelike_discard_thresholds";
+const discardThresholdDefaults = { power: 0, vitality: 0, agility: 0 };
+let discardThresholds = { ...discardThresholdDefaults };
+
 function grantHerbs(count, shouldLog = true) {
   for (let i = 0; i < count; i++) {
     const herb = { ...HERB_ITEM_TEMPLATE };
@@ -41,6 +45,7 @@ function openInventory() {
   inventoryReturnState = gameState;
   gameState = "INVENTORY";
   inventoryEl.style.display = "block";
+  discardWeakScreenEl.style.display = "none";
   exploreButtons.style.display = "none";
   battleButtons.style.display = "none";
 
@@ -50,10 +55,26 @@ function openInventory() {
 function closeInventory() {
   gameState = inventoryReturnState;
   inventoryEl.style.display = "none";
+  discardWeakScreenEl.style.display = "none";
   exploreButtons.style.display = gameState === "EXPLORE" ? "block" : "none";
   battleButtons.style.display = gameState === "BATTLE" ? "block" : "none";
 
   refresh();
+}
+
+function openDiscardWeakScreen() {
+  if (gameState !== "INVENTORY") return;
+  loadDiscardThresholds();
+  syncDiscardThresholdInputs();
+  inventoryEl.style.display = "none";
+  discardWeakScreenEl.style.display = "block";
+}
+
+function closeDiscardWeakScreen() {
+  storeDiscardThresholdInputs();
+  discardWeakScreenEl.style.display = "none";
+  inventoryEl.style.display = "block";
+  renderInventory();
 }
 
 /* =====================
@@ -180,7 +201,7 @@ function renderInventory() {
     itemListEl.appendChild(div);
   });
 }
-// アイテムのトータル加山地を計算
+// アイテムのトータル加算値を計算
 function getItemTotalBonus(item) {
   const normalizeBonus = (bonus) => ({
     power: Number(bonus?.power) || 0,
@@ -206,14 +227,52 @@ function getItemTotalBonus(item) {
   };
 }
 
-function isBonusStrictlyLower(source, target) {
-  return (
-    source.power < target.power &&
-    source.vitality < target.vitality &&
-    source.agility < target.agility
-  );
+function normalizeDiscardThreshold(value) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) return 0;
+  return Math.max(0, Math.floor(parsed));
 }
 
+function loadDiscardThresholds() {
+  const raw = localStorage.getItem(discardThresholdsKey);
+  if (!raw) {
+    discardThresholds = { ...discardThresholdDefaults };
+    return discardThresholds;
+  }
+
+  try {
+    const data = JSON.parse(raw);
+    discardThresholds = {
+      power: normalizeDiscardThreshold(data?.power),
+      vitality: normalizeDiscardThreshold(data?.vitality),
+      agility: normalizeDiscardThreshold(data?.agility),
+    };
+  } catch (error) {
+    discardThresholds = { ...discardThresholdDefaults };
+  }
+
+  return discardThresholds;
+}
+
+function saveDiscardThresholds() {
+  localStorage.setItem(discardThresholdsKey, JSON.stringify(discardThresholds));
+}
+function syncDiscardThresholdInputs() {
+  discardPowerInputEl.value = discardThresholds.power;
+  discardVitalityInputEl.value = discardThresholds.vitality;
+  discardAgilityInputEl.value = discardThresholds.agility;
+}
+
+function storeDiscardThresholdInputs() {
+  discardThresholds = {
+    power: normalizeDiscardThreshold(discardPowerInputEl.value),
+    vitality: normalizeDiscardThreshold(discardVitalityInputEl.value),
+    agility: normalizeDiscardThreshold(discardAgilityInputEl.value),
+  };
+  syncDiscardThresholdInputs();
+  saveDiscardThresholds();
+  return discardThresholds;
+}
 /* =====================
    装備を捨てる
 ===================== */
@@ -237,52 +296,10 @@ function discardEquipment(index) {
 }
 
 /* =====================
-   装備中より弱い装備をまとめて捨てる
-===================== */
-
-function getItemTotalBonus(item) {
-  const normalizeBonus = (bonus) => ({
-    power: Number(bonus?.power) || 0,
-    vitality: Number(bonus?.vitality) || 0,
-    agility: Number(bonus?.agility) || 0,
-  });
-
-  if (!item) {
-    return { power: 0, vitality: 0, agility: 0 };
-  }
-
-  if (item.bonus) {
-    return normalizeBonus(item.bonus);
-  }
-
-  const baseBonus = normalizeBonus(item.baseBonus);
-  const optionBonus = normalizeBonus(item.optionBonus);
-
-  return {
-    power: baseBonus.power + optionBonus.power,
-    vitality: baseBonus.vitality + optionBonus.vitality,
-    agility: baseBonus.agility + optionBonus.agility,
-  };
-}
-
-function isBonusStrictlyLower(source, target) {
-  return (
-    source.power < target.power &&
-    source.vitality < target.vitality &&
-    source.agility < target.agility
-  );
-}
-
-/* =====================
-   装備中より弱い装備をまとめて捨てる
+   設定値以下の装備をまとめて捨てる
 ===================== */
 function discardWeakerEquipment() {
-  if (!player.weapon) {
-    log("装備中の武器がない");
-    return;
-  }
-
-  const equippedBonus = getItemTotalBonus(player.weapon);
+  const thresholds = storeDiscardThresholdInputs();
   let discardedCount = 0;
 
   for (let i = inventory.length - 1; i >= 0; i -= 1) {
@@ -291,7 +308,11 @@ function discardWeakerEquipment() {
     if (item === player.weapon) continue;
 
     const itemBonus = getItemTotalBonus(item);
-    if (isBonusStrictlyLower(itemBonus, equippedBonus)) {
+    if (
+      itemBonus.power <= thresholds.power &&
+      itemBonus.vitality <= thresholds.vitality &&
+      itemBonus.agility <= thresholds.agility
+    ) {
       inventory.splice(i, 1);
       discardedCount += 1;
     }
@@ -308,6 +329,8 @@ function discardWeakerEquipment() {
 }
 
 window.discardWeakerEquipment = discardWeakerEquipment;
+window.openDiscardWeakScreen = openDiscardWeakScreen;
+window.closeDiscardWeakScreen = closeDiscardWeakScreen;
 /* =====================
    装備
    ★重要：player.statusを直接増減しない！

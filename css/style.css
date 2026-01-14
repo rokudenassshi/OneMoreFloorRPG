@@ -111,8 +111,8 @@ button {
   margin-bottom: 10px;
 }
 
-#inventory,
-#statusScreen {
+#statusScreen,
+#discardWeakScreen {
   background: #333;
   color: #fff;
   padding: 14px;
@@ -157,6 +157,40 @@ button {
   flex: 0 0 auto;
   min-height: 44px;
   padding: 6px 12px;
+  font-size: 14px;
+}
+.discard-weak-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.discard-weak-note {
+  margin: 0;
+  font-size: 13px;
+  opacity: 0.85;
+}
+
+.discard-weak-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.discard-weak-row label {
+  flex: 0 0 auto;
+  font-size: 14px;
+}
+
+.discard-weak-row input {
+  flex: 1;
+  min-width: 0;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid #555;
+  background: #222;
+  color: #fff;
   font-size: 14px;
 }
 
@@ -219,7 +253,8 @@ button {
 
   .game,
   #inventory,
-  #statusScreen {
+  #statusScreen,
+  #discardWeakScreen {
     margin: 12px auto;
     padding: 12px;
   }
@@ -229,7 +264,8 @@ button {
   }
   
   #inventory button,
-  #statusScreen button {
+  #statusScreen button,
+  #discardWeakScreen button {
     min-height: 44px;
     padding: 6px 10px;
     font-size: 14px;
