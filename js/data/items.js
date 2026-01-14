@@ -287,12 +287,14 @@
   }
 
   // 同じ (tier, type, title) なら固有値が完全一致する生成
-  function buildFixedBaseBonus(tier, floor, type, titleText) {
-    const seed = hashSeed(`T${tier}|F${floor}|${type}|${titleText}|BASE`);
+  function buildFixedBaseBonus(tier, floor, type, title) {
+    const seed = hashSeed(`T${tier}|F${floor}|${type}|${title.t}|BASE`);
     const rng = mulberry32(seed);
-    const floorMul = Math.max(1, Math.floor((floor || 1) * 0.5));
-    const roll = () => rInt(rng, 1, 2) * floorMul;
-
+    const floorMul = Math.max(0, Math.floor((floor || 0) * 0.5));
+    const roll = () => {
+      const variance = 0.5 + rng() * 1.8;
+      return Math.floor(rng() * floorMul * title.mul * variance);
+    };
     // 固有は「ちから/たいりょく/すばやさ」だけ
     // TYPEで傾向を変える：剣系→power、杖靴短剣→agility、防具→vitality
     const baseBonus = { power: 0, vitality: 0, agility: 0 };
@@ -336,8 +338,7 @@
     const title = getTierTitle(rngVis, tier);
     const material = getTierMaterial(rngVis, tier);
 
-    const baseBonus = buildFixedBaseBonus(tier, floor, typeDef.type, title.t);
-
+    const baseBonus = buildFixedBaseBonus(tier, floor, typeDef.type, title);
     return {
       id: `gen_${tier}_${typeDef.type}_${title.t}`, // 一意でなくてもOK（必要なら素材も入れる）
       tier,
