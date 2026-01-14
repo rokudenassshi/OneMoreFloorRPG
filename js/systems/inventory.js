@@ -459,7 +459,7 @@ function applyBaseStatCount(baseItem, desiredCount) {
 ===================== */
 function createLootItem(baseItem, isRareEnemy) {
   // レア敵ドロップのみ★1、それ以外は★なし
-  const rarity = isRareEnemy ? 1 : 0;
+  const rarity = pickOptionCount(isRareEnemy);
   const baseMultiplier = isRareEnemy ? 1.2 : 1;
   // 固有（items.jsで確定済み）をコピー
   const base = baseItem.baseBonus || { power: 0, vitality: 0, agility: 0 };
@@ -478,12 +478,12 @@ function createLootItem(baseItem, isRareEnemy) {
   const stats = ["power", "vitality", "agility"].sort(
     () => Math.random() - 0.5
   );
-  const addCount = isRareEnemy ? 0 : Math.min(rarity, stats.length);
-
+  const addCount = Math.min(rarity, stats.length);
   for (let i = 0; i < addCount; i++) {
     if (cap <= 0) break;
     const key = stats[i];
     const add = Math.floor(Math.random() * cap) + 1;
+    optionBonus[key] += add;
   }
 
   // 合計（計算用）
@@ -510,4 +510,14 @@ function createLootItem(baseItem, isRareEnemy) {
     optionBonus, // ランダムオプション
     bonus, // 合計（計算用）
   };
+
+  function pickOptionCount(isRareEnemy) {
+    const roll = Math.random();
+    if (isRareEnemy) {
+      return roll < 0.6 ? 2 : 3;
+    }
+    if (roll < 0.4) return 1;
+    if (roll < 0.8) return 2;
+    return 3;
+  }
 }
