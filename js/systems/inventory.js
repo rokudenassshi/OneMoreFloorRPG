@@ -135,28 +135,12 @@ function renderInventory() {
     const isEquipped = player.weapon === item;
     const stars = "★".repeat(item.rarity || 0);
 
-    // 固有（無ければ0）
-    const base = item.baseBonus || { power: 0, vitality: 0, agility: 0 };
-    // ランダムオプション（無ければ0）
-    const opt = item.optionBonus || { power: 0, vitality: 0, agility: 0 };
-
-    // 互換：もしbase/optが無い古いデータなら、bonusを固有扱いにして表示
-    const hasSeparated = !!item.baseBonus || !!item.optionBonus;
-    const fallbackBonus = item.bonus || { power: 0, vitality: 0, agility: 0 };
-
-    const baseParts = [];
-    const optParts = [];
-
-    const baseSrc = hasSeparated ? base : fallbackBonus;
-    if (baseSrc.power) baseParts.push(`ちから+${baseSrc.power}`);
-    if (baseSrc.vitality) baseParts.push(`たいりょく+${baseSrc.vitality}`);
-    if (baseSrc.agility) baseParts.push(`すばやさ+${baseSrc.agility}`);
-
-    if (hasSeparated) {
-      if (opt.power) optParts.push(`ちから+${opt.power}`);
-      if (opt.vitality) optParts.push(`たいりょく+${opt.vitality}`);
-      if (opt.agility) optParts.push(`すばやさ+${opt.agility}`);
-    }
+    const totalBonus = getItemTotalBonus(item);
+    const totalParts = [];
+    if (totalBonus.power) totalParts.push(`ちから+${totalBonus.power}`);
+    if (totalBonus.vitality)
+      totalParts.push(`たいりょく+${totalBonus.vitality}`);
+    if (totalBonus.agility) totalParts.push(`すばやさ+${totalBonus.agility}`);
 
     const div = document.createElement("div");
 
@@ -167,20 +151,9 @@ function renderInventory() {
       </div>
 
       <div style="margin-top:4px;">
-        <div style="font-size:12px; opacity:0.9;">固有能力</div>
-        <div>${baseParts.length ? baseParts.join(" / ") : "なし"}</div>
+        <div style="font-size:12px; opacity:0.9;">能力値</div>
+        <div>${totalParts.length ? totalParts.join(" / ") : "なし"}</div>
       </div>
-
-      <div style="margin-top:6px;">
-        <div style="font-size:12px; opacity:0.9;">オプション</div>
-            <div>${
-              hasSeparated
-                ? optParts.length
-                  ? optParts.join(" / ")
-                  : "なし"
-                : "なし"
-            }</div>
-        </div>
       <div style="margin-top:6px; display:flex; gap:10px; flex-wrap:wrap;">
         ${
           isEquipped
