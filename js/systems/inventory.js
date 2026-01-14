@@ -456,23 +456,13 @@ function applyBaseStatCount(baseItem, desiredCount) {
    ドロップ品の実体を作る
    - baseItem（TYPE基礎＋二つ名倍率で確定済み）をコピー
    - ★補正を追加で付与
-   - ★3はレア敵のみ
+   - レア敵ドロップのみ★1
    - ★補正の上限は現在階層（floor）
 ===================== */
 function createLootItem(baseItem, isRareEnemy) {
-  // ★3はレア敵のみ、それ以外は★1〜★2
-  // ★3はレア敵 or 通常敵0.1%、それ以外は★1〜★2
-  let rarity;
-  let optionMultiplier = 1;
-  if (isRareEnemy) {
-    rarity = 3;
-    optionMultiplier = 2;
-  } else if (Math.random() < 0.001) {
-    rarity = 3;
-    optionMultiplier = 1.5;
-  } else {
-    rarity = Math.floor(Math.random() * 2) + 1;
-  }
+  // レア敵ドロップのみ★1、それ以外は★なし
+  const rarity = isRareEnemy ? 1 : 0;
+  const optionMultiplier = 1;
   // 固有（items.jsで確定済み）をコピー
   const base = baseItem.baseBonus || { power: 0, vitality: 0, agility: 0 };
   const baseBonus = {
