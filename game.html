@@ -6,9 +6,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>OneMoreFloorRPG</title>
   <link rel="stylesheet" href="css/style.css">
-  <script async
-    src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1047750481134162"
-    crossorigin="anonymous"></script>
 </head>
 <body>
   <div class="game">
@@ -59,19 +56,19 @@
     <div class="screen-header">
       <h3>アイテム</h3>
               <div class="screen-header-actions">
-                <button class="discard-button" onclick="openDiscardWeakScreen()">弱い装備を捨てる</button><button class="back-button" onclick="closeInventory()">戻る</button>
+                <button class="discard-button" onclick="openDiscardWeakScreen()">アイテムフィルター</button><button class="back-button" onclick="closeInventory()">戻る</button>
       </div></div>
     <div id="itemList"></div>
   </div>
 
- <!-- 弱い装備のまとめ捨て画面 -->
+ <!-- アイテムフィルター設定画面 -->
   <div id="discardWeakScreen" style="display:none;">
     <div class="screen-header">
-      <h3>弱い装備を捨てる</h3>
+      <h3>アイテムフィルター設定</h3>
       <button class="back-button" onclick="closeDiscardWeakScreen()">戻る</button>
     </div>
     <div class="discard-weak-form">
-      <p class="discard-weak-note">入力した数値以下の装備をまとめて捨てます</p>
+      <p class="discard-weak-note">入力した数値以下の装備は拾いません</p>
       <div class="discard-weak-row">
         <label for="discardPowerInput">ちから</label>
         <input id="discardPowerInput" type="number" min="0" step="1">
@@ -85,11 +82,11 @@
         <input id="discardAgilityInput" type="number" min="0" step="1">
       </div>
       <div class="row">
-        <button class="discard-button" onclick="discardWeakerEquipment()">まとめて捨てる</button>
+                <button class="discard-button" onclick="discardWeakerEquipment()">設定を保存</button>
       </div>
     </div>
   </div>
-  
+
   <!-- ステータス画面 -->
   <div id="statusScreen" style="display:none;">
     <div class="screen-header">
@@ -108,7 +105,7 @@
        JavaScript 読み込み
   ===================== -->
   <!-- エントリーポイント -->
-  <script src="js/core/version.js?v=1.1.2"></script>
-  <script src="js/core/loader.js?v=1.1.2"></script>
+  <script src="js/core/version.js?v=1.1.4"></script>
+  <script src="js/core/loader.js?v=1.1.4"></script>
 </body>
 </html>

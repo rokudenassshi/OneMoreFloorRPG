@@ -296,36 +296,12 @@ function discardEquipment(index) {
 }
 
 /* =====================
-   設定値以下の装備をまとめて捨てる
+   アイテムフィルターの設定を保存
 ===================== */
 function discardWeakerEquipment() {
   const thresholds = storeDiscardThresholdInputs();
-  let discardedCount = 0;
-
-  for (let i = inventory.length - 1; i >= 0; i -= 1) {
-    const item = inventory[i];
-    if (!item || item.kind === "consumable") continue;
-    if (item === player.weapon) continue;
-
-    const itemBonus = getItemTotalBonus(item);
-    if (
-      itemBonus.power <= thresholds.power &&
-      itemBonus.vitality <= thresholds.vitality &&
-      itemBonus.agility <= thresholds.agility
-    ) {
-      inventory.splice(i, 1);
-      discardedCount += 1;
-    }
-  }
-
-  if (discardedCount === 0) {
-    log("捨てる装備がない");
-    return;
-  }
-
-  log(`🧹 弱い装備を${discardedCount}個捨てた`);
-  renderInventory();
-  refresh();
+  log(`📌 アイテムフィルターの設定を保存`);
+  closeDiscardWeakScreen();
 }
 
 window.discardWeakerEquipment = discardWeakerEquipment;
@@ -454,7 +430,17 @@ function dropItem() {
 
   // ★は今まで通り：createLootItemで optionBonus 付与
   const item = createLootItem(base, !!enemy.isRare);
+  const thresholds = loadDiscardThresholds();
+  const itemBonus = getItemTotalBonus(item);
 
+  if (
+    itemBonus.power <= thresholds.power &&
+    itemBonus.vitality <= thresholds.vitality &&
+    itemBonus.agility <= thresholds.agility
+  ) {
+    log(`⏭ ${item.name}${"★".repeat(item.rarity)} は拾わなかった`);
+    return;
+  }
   inventory.push(item);
   log(`🎁 ${item.name}${"★".repeat(item.rarity)} を手に入れた`);
 }

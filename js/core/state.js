@@ -82,23 +82,11 @@ function loadAutoSave() {
     0,
     Number(savedPlayer.maxReachedFloor) || 0
   );
-  // player.status.power = Number(savedStatus.power) || 0;
-
-  const loadedPower = Number(savedStatus.power);
-  const normalizedPower = loadedPower === 5000 ? 5 : loadedPower;
-  player.status.power = Number.isFinite(normalizedPower) ? normalizedPower : 0;
-
+  player.status.power = Number(savedStatus.power) || 0;
   player.status.vitality = Number(savedStatus.vitality) || 0;
   player.status.agility = Number(savedStatus.agility) || 0;
-  // player.baseStatus.power =
-  //   Number(savedBaseStatus.power) || player.status.power;
-
-  const loadedBasePower = Number(savedBaseStatus.power);
-  const normalizedBasePower = loadedBasePower === 5000 ? 5 : loadedBasePower;
-  player.baseStatus.power = Number.isFinite(normalizedBasePower)
-    ? normalizedBasePower
-    : player.status.power;
-
+  player.baseStatus.power =
+    Number(savedBaseStatus.power) || player.status.power;
   player.baseStatus.vitality =
     Number(savedBaseStatus.vitality) || player.status.vitality;
   player.baseStatus.agility =
