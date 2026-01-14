@@ -133,7 +133,7 @@ function renderInventory() {
       return;
     }
     const isEquipped = player.weapon === item;
-    const stars = "★".repeat(item.rarity || 0);
+    // const stars = "★".repeat(item.rarity || 0);
     const specialOptions = Array.isArray(item.specialOptions)
       ? item.specialOptions
       : [];
@@ -153,7 +153,7 @@ function renderInventory() {
     div.innerHTML = `
       <div>
         ${isEquipped ? "🟢[E] " : ""}
-        ${item.name}${stars}
+        ${item.name}
       </div>
 
       <div style="margin-top:4px;">
@@ -277,7 +277,7 @@ function discardEquipment(index) {
     adjustHpForMaxChange(prevMaxHp, nextMaxHp);
   }
 
-  log(`🗑 ${item.name}${"★".repeat(item.rarity || 0)} を捨てた`);
+  log(`🗑 ${item.name}を捨てた`);
   renderInventory();
   refresh();
 }
@@ -310,7 +310,7 @@ function equip(index) {
   const nextMaxHp = calcMaxHp();
   adjustHpForMaxChange(prevMaxHp, nextMaxHp);
 
-  log(`🗡 ${item.name}${"★".repeat(item.rarity || 0)} を装備した`);
+  log(`🗡 ${item.name}を装備した`);
   closeInventory();
   refresh();
 }
@@ -402,21 +402,15 @@ function dropItem() {
   const roll = Math.random();
   if (!enemy.isRare && roll >= 0.5) return;
 
-  // items.js のジェネレータで「その場生成」
   const desiredBaseStatCount = 3;
-  let base = window.ItemGen.createBaseItemForDrop(tier, floor);
-  let rerollCount = 0;
-  while (
-    countNonZeroBaseStats(base.baseBonus) < desiredBaseStatCount &&
-    rerollCount < 6
-  ) {
-    base = window.ItemGen.createBaseItemForDrop(tier, floor);
-    rerollCount += 1;
-  }
-  base = applyBaseStatCount(base, desiredBaseStatCount);
+  const item = window.ItemGen.createLootItemForDrop(
+    tier,
+    floor,
+    !!enemy.isRare,
+    enemy.titleMul,
+    desiredBaseStatCount
+  );
 
-  // ★は今まで通り：createLootItemで optionBonus 付与
-  const item = createLootItem(base, !!enemy.isRare, enemy.titleMul);
   const thresholds = loadDiscardThresholds();
   const itemBonus = getItemTotalBonus(item);
 
@@ -425,11 +419,11 @@ function dropItem() {
     itemBonus.vitality <= thresholds.vitality &&
     itemBonus.agility <= thresholds.agility
   ) {
-    log(`⏭ ${item.name}${"★".repeat(item.rarity)} は拾わなかった`);
+    log(`⏭ ${item.name} は拾わなかった`);
     return;
   }
   inventory.push(item);
-  log(`🎁 ${item.name}${"★".repeat(item.rarity)} を手に入れた`);
+  log(`🎁 ${item.name}を手に入れた`);
 }
 
 function countNonZeroBaseStats(baseBonus) {
@@ -438,136 +432,4 @@ function countNonZeroBaseStats(baseBonus) {
     (count, key) => count + (baseBonus[key] ? 1 : 0),
     0
   );
-}
-
-function applyBaseStatCount(baseItem, desiredCount) {
-  const baseBonus = {
-    ...(baseItem.baseBonus || { power: 0, vitality: 0, agility: 0 }),
-  };
-  const keys = ["power", "vitality", "agility"];
-  const nonZero = keys.filter((key) => baseBonus[key] > 0);
-
-  if (desiredCount === keys.length) {
-    keys.forEach((key) => {
-      if (baseBonus[key] <= 0) baseBonus[key] = 1;
-    });
-  }
-
-  const shuffled = nonZero.sort(() => Math.random() - 0.5);
-  for (let i = desiredCount; i < shuffled.length; i += 1) {
-    baseBonus[shuffled[i]] = 0;
-  }
-
-  return { ...baseItem, baseBonus };
-}
-
-/* =====================
-   ドロップ品の実体を作る
-   - baseItem（TYPE基礎＋二つ名倍率で確定済み）をコピー
-   - レア敵ドロップのみ★1
-===================== */
-function getTitleDropMultiplier(titleMul) {
-  const safeMul = Number(titleMul);
-  if (!Number.isFinite(safeMul) || safeMul <= 1) {
-    return 1;
-  }
-  const scaled = 1 + (safeMul - 1) * 0.1;
-  return Math.min(scaled, 1.8);
-}
-
-function createLootItem(baseItem, isRareEnemy, titleMul) {
-  // レア敵ドロップのみ★1、それ以外は★なし
-  const rarity = pickOptionCount(isRareEnemy);
-  const titleMultiplier = getTitleDropMultiplier(titleMul);
-  const baseMultiplier = (isRareEnemy ? 1.2 : 1) * titleMultiplier;
-  // 固有（items.jsで確定済み）をコピー
-  const base = baseItem.baseBonus || { power: 0, vitality: 0, agility: 0 };
-  const baseBonus = {
-    power: Math.floor((base.power || 0) * baseMultiplier),
-    vitality: Math.floor((base.vitality || 0) * baseMultiplier),
-    agility: Math.floor((base.agility || 0) * baseMultiplier),
-  };
-
-  // ランダムオプション（★で増えた分だけ）
-  const optionBonus = { power: 0, vitality: 0, agility: 0 };
-
-  // ★による追加補正：★1=1種、★2=2種、★3=3種
-  // 付与値は 1..floor/2（floorが0なら付与なし）
-  const cap = Math.max(0, Math.floor(floor / 10));
-  const stats = ["power", "vitality", "agility"].sort(
-    () => Math.random() - 0.5
-  );
-  const addCount = Math.min(3, stats.length);
-  for (let i = 0; i < addCount; i++) {
-    if (cap <= 0) break;
-    const key = stats[i];
-    const add = Math.floor(Math.random() * cap) + 1;
-    optionBonus[key] += add;
-  }
-
-  // 合計（計算用）
-  const bonus = {
-    power: baseBonus.power + optionBonus.power,
-    vitality: baseBonus.vitality + optionBonus.vitality,
-    agility: baseBonus.agility + optionBonus.agility,
-  };
-  const specialOptions = isRareEnemy ? pickSpecialOptions(1) : [];
-
-  return {
-    id: baseItem.id,
-    name: baseItem.name,
-    type: baseItem.type,
-    tier: baseItem.tier,
-    minFloor: baseItem.minFloor,
-
-    atk: baseItem.atk || 0, // UIでは表示しないだけ。計算用に残してOK
-
-    // ★レア度
-    rarity,
-
-    // 固有/ランダム/合計を分けて保持
-    baseBonus, // 固有
-    optionBonus, // ランダムオプション
-    bonus, // 合計（計算用）
-    // 特殊オプション（レア敵ドロップのみ）
-    specialOptions,
-  };
-
-  function pickOptionCount(isRareEnemy) {
-    const roll = Math.random();
-    if (isRareEnemy) {
-      return roll < 0.6 ? 2 : 3;
-    }
-    if (roll < 0.4) return 1;
-    if (roll < 0.8) return 2;
-    return 3;
-  }
-}
-const SPECIAL_OPTION_POOL = window.SpecialOptionPool || [];
-
-function pickSpecialOptions(count) {
-  if (count <= 0) return [];
-  const pool = SPECIAL_OPTION_POOL.slice().sort(() => Math.random() - 0.5);
-  const result = [];
-  const pickCount = Math.min(count, pool.length);
-  for (let i = 0; i < pickCount; i += 1) {
-    const option = pool[i];
-    const value = rollSpecialOptionValue(option);
-    result.push({
-      id: option.id,
-      name: option.name,
-      value,
-      description: option.describe(value),
-    });
-  }
-  return result;
-}
-
-function rollSpecialOptionValue(option) {
-  if (Number.isFinite(option.fixed)) {
-    return option.fixed;
-  }
-  const min = Number(option.min) || 0;
-  const max = Number(option.max) || min;
-  return Math.floor(Math.random() * (max - min + 1)) + min;
 }

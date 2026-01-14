@@ -291,12 +291,13 @@
     const seed = hashSeed(`T${tier}|F${floor}|${type}|${title.t}|BASE`);
     const rng = mulberry32(seed);
     const floorMul = Math.max(0, Math.floor(floor || 0));
+    const cap = Math.max(1, floorMul);
     const roll = () => {
       const variance = 0.5 + rng() * 1.0;
       return Math.max(1, Math.floor(rng() * floorMul * title.mul * variance));
     };
     const rollWithMultiplier = (multiplier) =>
-      Math.floor(roll() * Math.max(0, multiplier));
+      Math.min(cap, Math.floor(roll() * Math.max(0, multiplier)));
     // 固有は「ちから/たいりょく/すばやさ」だけ
     // TYPEで傾向を変える：剣系→power、杖靴短剣→agility、防具→vitality
     const baseBonus = { power: 1, vitality: 1, agility: 1 };
@@ -350,10 +351,135 @@
       baseBonus,
     };
   }
+  function countNonZeroBaseStats(baseBonus) {
+    if (!baseBonus) return 0;
+    return ["power", "vitality", "agility"].reduce(
+      (count, key) => count + (baseBonus[key] ? 1 : 0),
+      0
+    );
+  }
+
+  function applyBaseStatCount(baseItem, desiredCount) {
+    const baseBonus = {
+      ...(baseItem.baseBonus || { power: 0, vitality: 0, agility: 0 }),
+    };
+    const keys = ["power", "vitality", "agility"];
+    const nonZero = keys.filter((key) => baseBonus[key] > 0);
+
+    if (desiredCount === keys.length) {
+      keys.forEach((key) => {
+        if (baseBonus[key] <= 0) baseBonus[key] = 1;
+      });
+    }
+
+    const shuffled = nonZero.sort(() => Math.random() - 0.5);
+    for (let i = desiredCount; i < shuffled.length; i += 1) {
+      baseBonus[shuffled[i]] = 0;
+    }
+
+    return { ...baseItem, baseBonus };
+  }
+
+  function getTitleDropMultiplier(titleMul) {
+    const safeMul = Number(titleMul);
+    if (!Number.isFinite(safeMul) || safeMul <= 1) {
+      return 1;
+    }
+    const scaled = 1 + (safeMul - 1) * 0.1;
+    return Math.min(scaled, 1.8);
+  }
+
+  function pickSpecialOptions(count) {
+    if (count <= 0) return [];
+    const pool = (window.SpecialOptionPool || []).slice();
+    const shuffled = pool.sort(() => Math.random() - 0.5);
+    const result = [];
+    const pickCount = Math.min(count, shuffled.length);
+    for (let i = 0; i < pickCount; i += 1) {
+      const option = shuffled[i];
+      const value = rollSpecialOptionValue(option);
+      result.push({
+        id: option.id,
+        name: option.name,
+        value,
+        description: option.describe(value),
+      });
+    }
+    return result;
+  }
+
+  function rollSpecialOptionValue(option) {
+    if (Number.isFinite(option.fixed)) {
+      return option.fixed;
+    }
+    const min = Number(option.min) || 0;
+    const max = Number(option.max) || min;
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
+  function createLootItem(baseItem, { floor, isRareEnemy, titleMul }) {
+    const rarity = 3;
+    const titleMultiplier = getTitleDropMultiplier(titleMul);
+    const baseMultiplier = (isRareEnemy ? 1.2 : 1) * titleMultiplier;
+    const base = baseItem.baseBonus || { power: 0, vitality: 0, agility: 0 };
+    const baseBonus = {
+      power: Math.floor((base.power || 0) * baseMultiplier),
+      vitality: Math.floor((base.vitality || 0) * baseMultiplier),
+      agility: Math.floor((base.agility || 0) * baseMultiplier),
+    };
+
+    const optionBonus = { power: 0, vitality: 0, agility: 0 };
+    const cap = Math.max(0, Math.floor((floor || 0) / 10));
+    const stats = ["power", "vitality", "agility"].sort(
+      () => Math.random() - 0.5
+    );
+
+    const bonus = {
+      power: baseBonus.power + optionBonus.power,
+      vitality: baseBonus.vitality + optionBonus.vitality,
+      agility: baseBonus.agility + optionBonus.agility,
+    };
+    const specialOptions = isRareEnemy ? pickSpecialOptions(1) : [];
+
+    return {
+      id: baseItem.id,
+      name: baseItem.name,
+      type: baseItem.type,
+      tier: baseItem.tier,
+      minFloor: baseItem.minFloor,
+      atk: baseItem.atk || 0,
+      rarity,
+      baseBonus,
+      optionBonus,
+      bonus,
+      specialOptions,
+    };
+  }
+
+  function createLootItemForDrop(
+    tier,
+    floor,
+    isRareEnemy,
+    titleMul,
+    desiredBaseStatCount = 3
+  ) {
+    let base = createBaseItemForDrop(tier, floor);
+    let rerollCount = 0;
+    while (
+      countNonZeroBaseStats(base.baseBonus) < desiredBaseStatCount &&
+      rerollCount < 6
+    ) {
+      base = createBaseItemForDrop(tier, floor);
+      rerollCount += 1;
+    }
+    base = applyBaseStatCount(base, desiredBaseStatCount);
+    return createLootItem(base, { floor, isRareEnemy, titleMul });
+  }
 
   window.ItemGen = {
     TITLE_BY_TIER,
     ITEM_TYPES,
     createBaseItemForDrop,
+    createLootItemForDrop,
   };
 })();
