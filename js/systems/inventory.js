@@ -455,20 +455,18 @@ function applyBaseStatCount(baseItem, desiredCount) {
 /* =====================
    ドロップ品の実体を作る
    - baseItem（TYPE基礎＋二つ名倍率で確定済み）をコピー
-   - ★補正を追加で付与
    - レア敵ドロップのみ★1
-   - ★補正の上限は現在階層（floor）
 ===================== */
 function createLootItem(baseItem, isRareEnemy) {
   // レア敵ドロップのみ★1、それ以外は★なし
   const rarity = isRareEnemy ? 1 : 0;
-  const optionMultiplier = 1;
+  const baseMultiplier = isRareEnemy ? 1.2 : 1;
   // 固有（items.jsで確定済み）をコピー
   const base = baseItem.baseBonus || { power: 0, vitality: 0, agility: 0 };
   const baseBonus = {
-    power: base.power || 0,
-    vitality: base.vitality || 0,
-    agility: base.agility || 0,
+    power: Math.floor((base.power || 0) * baseMultiplier),
+    vitality: Math.floor((base.vitality || 0) * baseMultiplier),
+    agility: Math.floor((base.agility || 0) * baseMultiplier),
   };
 
   // ランダムオプション（★で増えた分だけ）
@@ -480,13 +478,12 @@ function createLootItem(baseItem, isRareEnemy) {
   const stats = ["power", "vitality", "agility"].sort(
     () => Math.random() - 0.5
   );
-  const addCount = Math.min(rarity, stats.length);
+  const addCount = isRareEnemy ? 0 : Math.min(rarity, stats.length);
 
   for (let i = 0; i < addCount; i++) {
     if (cap <= 0) break;
     const key = stats[i];
-    const add = (Math.floor(Math.random() * cap) + 1) * optionMultiplier;
-    optionBonus[key] += add;
+    const add = Math.floor(Math.random() * cap) + 1;
   }
 
   // 合計（計算用）
