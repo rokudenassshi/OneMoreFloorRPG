@@ -24,12 +24,13 @@ function grantHerbs(count, shouldLog = true) {
 }
 
 function setHerbCount(count, shouldLog = true) {
-  const keptItems = inventory.filter(
-    (item) => item && item.id !== HERB_ITEM_TEMPLATE.id
-  );
-  inventory.length = 0;
-  inventory.push(...keptItems);
-  grantHerbs(count, shouldLog);
+  const herbCount = inventory.filter(
+    (item) => item && item.id === HERB_ITEM_TEMPLATE.id
+  ).length;
+  const needed = count - herbCount;
+  if (needed > 0) {
+    grantHerbs(needed, shouldLog);
+  }
 }
 
 /* =====================
@@ -277,7 +278,7 @@ function isBonusStrictlyLower(source, target) {
 ===================== */
 function discardWeakerEquipment() {
   if (!player.weapon) {
-    log("🧺 装備中の武器がない");
+    log("装備中の武器がない");
     return;
   }
 
@@ -297,11 +298,11 @@ function discardWeakerEquipment() {
   }
 
   if (discardedCount === 0) {
-    log("🧺 捨てる装備がない");
+    log("捨てる装備がない");
     return;
   }
 
-  log(`🧺 装備より弱い装備を${discardedCount}個捨てた`);
+  log(`🧹 弱い装備を${discardedCount}個捨てた`);
   renderInventory();
   refresh();
 }
