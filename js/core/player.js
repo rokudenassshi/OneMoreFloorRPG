@@ -49,7 +49,8 @@ function calcAttack() {
 function calcAttackCount() {
   const bonus = getEquipmentBonus();
   const totalAgility = Number(player.status.agility) + bonus.agility;
-
+  const specialEffects = getEquipmentSpecialEffects();
+  const minHitBonus = Math.max(0, Math.floor(specialEffects.minHits || 0));
   // 1hitは常に保証、2hit以降の要求値を「段階的に増加」させる
   const base = 50; // 最初の増分（2hitに必要な追加量）
   const stepInc = 20; // 段階が1上がるごとに増分を+20
@@ -63,8 +64,8 @@ function calcAttackCount() {
     maxHits += 1;
     delta += stepInc; // 次の段階はさらに重くする
   }
-
-  return Math.floor(Math.random() * maxHits) + 1;
+  const minHits = Math.min(maxHits, 1 + minHitBonus);
+  return Math.floor(Math.random() * (maxHits - minHits + 1)) + minHits;
 }
 
 // ちから：敵最大HP割合の追加ダメ（上限3%）
@@ -85,7 +86,10 @@ function applyVitalityReduction(rawDamage) {
 // すばやさ：回避（上限20%）
 function rollEvade() {
   const agi = Number(player.status.agility) || 0;
-  const evadeRate = Math.min(0.2, agi * 0.0025); // agi1あたり0.25%
+  const baseRate = Math.min(0.2, agi * 0.0025); // agi1あたり0.25%
+  const specialEffects = getEquipmentSpecialEffects();
+  const extraRate = (specialEffects.evadeBoost || 0) / 100;
+  const evadeRate = Math.min(0.5, baseRate + extraRate);
   return Math.random() < evadeRate;
 }
 
@@ -109,8 +113,14 @@ function calcNextExp() {
 }
 
 function gainExp(exp) {
-  player.exp += exp;
-  log(`✨ 経験値 ${exp} 獲得`);
+  const specialEffects = getEquipmentSpecialEffects();
+  const boostRate = (specialEffects.expBoost || 0) / 100;
+  const boostedExp = Math.floor(exp * (1 + boostRate));
+  player.exp += boostedExp;
+  log(`✨ 経験値 ${boostedExp} 獲得`);
+  if (boostRate > 0) {
+    log(`📈 経験値ブースト +${specialEffects.expBoost}%`);
+  }
 
   while (player.exp >= calcNextExp()) {
     player.exp -= calcNextExp();
@@ -130,7 +140,7 @@ function damagePlayer(amount) {
   if (rollEvade()) {
     log("💨 攻撃をかわした！");
     refresh();
-    return;
+    return { evaded: true, damage: 0 };
   }
 
   // たいりょく軽減（装備参照なし）
@@ -145,8 +155,8 @@ function damagePlayer(amount) {
 
   if (player.hp === 0) {
     gameOver();
-    return;
   }
+  return { evaded: false, damage: reduced };
 }
 function getBaseStatus() {
   return {
@@ -179,4 +189,57 @@ function getEquipmentBonus() {
     vitality: baseBonus.vitality + optionBonus.vitality,
     agility: baseBonus.agility + optionBonus.agility,
   };
+}
+function getEquipmentSpecialOptions() {
+  if (!player.weapon || !Array.isArray(player.weapon.specialOptions)) {
+    return [];
+  }
+  return player.weapon.specialOptions;
+}
+
+function getEquipmentSpecialEffects() {
+  const effects = {
+    lifeSteal: 0,
+    reflect: 0,
+    comboBoost: 0,
+    victoryRecover: 0,
+    evadeBoost: 0,
+    expBoost: 0,
+    rareEncounterBoost: 0,
+    minHits: 0,
+  };
+
+  getEquipmentSpecialOptions().forEach((option) => {
+    const value = Number(option?.value) || 0;
+    switch (option?.id) {
+      case "life_steal":
+        effects.lifeSteal += value;
+        break;
+      case "damage_reflect":
+        effects.reflect += value;
+        break;
+      case "combo_boost":
+        effects.comboBoost += value;
+        break;
+      case "victory_recover":
+        effects.victoryRecover += value;
+        break;
+      case "evade_boost":
+        effects.evadeBoost += value;
+        break;
+      case "exp_boost":
+        effects.expBoost += value;
+        break;
+      case "rare_encounter":
+        effects.rareEncounterBoost += value;
+        break;
+      case "min_hits":
+        effects.minHits += value;
+        break;
+      default:
+        break;
+    }
+  });
+
+  return effects;
 }
