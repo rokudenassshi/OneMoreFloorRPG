@@ -59,12 +59,37 @@
     <div class="screen-header">
       <h3>アイテム</h3>
               <div class="screen-header-actions">
-        <button class="discard-button" onclick="discardWeakerEquipment()">弱い装備を捨てる</button>
-        <button class="back-button" onclick="closeInventory()">戻る</button>
+                <button class="discard-button" onclick="openDiscardWeakScreen()">弱い装備を捨てる</button><button class="back-button" onclick="closeInventory()">戻る</button>
       </div></div>
     <div id="itemList"></div>
   </div>
 
+ <!-- 弱い装備のまとめ捨て画面 -->
+  <div id="discardWeakScreen" style="display:none;">
+    <div class="screen-header">
+      <h3>弱い装備を捨てる</h3>
+      <button class="back-button" onclick="closeDiscardWeakScreen()">戻る</button>
+    </div>
+    <div class="discard-weak-form">
+      <p class="discard-weak-note">入力した数値以下の装備をまとめて捨てます</p>
+      <div class="discard-weak-row">
+        <label for="discardPowerInput">ちから</label>
+        <input id="discardPowerInput" type="number" min="0" step="1">
+      </div>
+      <div class="discard-weak-row">
+        <label for="discardVitalityInput">たいりょく</label>
+        <input id="discardVitalityInput" type="number" min="0" step="1">
+      </div>
+      <div class="discard-weak-row">
+        <label for="discardAgilityInput">すばやさ</label>
+        <input id="discardAgilityInput" type="number" min="0" step="1">
+      </div>
+      <div class="row">
+        <button class="discard-button" onclick="discardWeakerEquipment()">まとめて捨てる</button>
+      </div>
+    </div>
+  </div>
+  
   <!-- ステータス画面 -->
   <div id="statusScreen" style="display:none;">
     <div class="screen-header">
