@@ -402,7 +402,7 @@ function dropItem() {
   base = applyBaseStatCount(base, desiredBaseStatCount);
 
   // ★は今まで通り：createLootItemで optionBonus 付与
-  const item = createLootItem(base, !!enemy.isRare);
+  const item = createLootItem(base, !!enemy.isRare, enemy.titleMul);
   const thresholds = loadDiscardThresholds();
   const itemBonus = getItemTotalBonus(item);
 
@@ -457,10 +457,20 @@ function applyBaseStatCount(baseItem, desiredCount) {
    - baseItem（TYPE基礎＋二つ名倍率で確定済み）をコピー
    - レア敵ドロップのみ★1
 ===================== */
-function createLootItem(baseItem, isRareEnemy) {
+function getTitleDropMultiplier(titleMul) {
+  const safeMul = Number(titleMul);
+  if (!Number.isFinite(safeMul) || safeMul <= 1) {
+    return 1;
+  }
+  const scaled = 1 + (safeMul - 1) * 0.1;
+  return Math.min(scaled, 1.8);
+}
+
+function createLootItem(baseItem, isRareEnemy, titleMul) {
   // レア敵ドロップのみ★1、それ以外は★なし
   const rarity = pickOptionCount(isRareEnemy);
-  const baseMultiplier = isRareEnemy ? 1.2 : 1;
+  const titleMultiplier = getTitleDropMultiplier(titleMul);
+  const baseMultiplier = (isRareEnemy ? 1.2 : 1) * titleMultiplier;
   // 固有（items.jsで確定済み）をコピー
   const base = baseItem.baseBonus || { power: 0, vitality: 0, agility: 0 };
   const baseBonus = {

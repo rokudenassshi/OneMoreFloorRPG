@@ -12,7 +12,8 @@ function startBattle() {
     id: base.id,
     name: isRare ? `＊レア ${base.name}` : base.name,
     isRare,
-
+    tier: base.tier,
+    titleMul: base.titleMul,
     // 上位ほど強い：baseがtierで強い + floor補正を少し
     maxHp: Math.floor((base.hp + floor * 2) * rate),
     hp: Math.floor((base.hp + floor * 2) * rate),
