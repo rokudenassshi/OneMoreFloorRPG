@@ -502,7 +502,7 @@ function createLootItem(baseItem, isRareEnemy, titleMul) {
   const stats = ["power", "vitality", "agility"].sort(
     () => Math.random() - 0.5
   );
-  const addCount = Math.min(rarity, stats.length);
+  const addCount = Math.min(3, stats.length);
   for (let i = 0; i < addCount; i++) {
     if (cap <= 0) break;
     const key = stats[i];
@@ -516,7 +516,6 @@ function createLootItem(baseItem, isRareEnemy, titleMul) {
     vitality: baseBonus.vitality + optionBonus.vitality,
     agility: baseBonus.agility + optionBonus.agility,
   };
-
   const specialOptions = isRareEnemy ? pickSpecialOptions(1) : [];
 
   return {

@@ -290,11 +290,13 @@
   function buildFixedBaseBonus(tier, floor, type, title) {
     const seed = hashSeed(`T${tier}|F${floor}|${type}|${title.t}|BASE`);
     const rng = mulberry32(seed);
-    const floorMul = Math.max(0, Math.floor((floor || 0) * 0.5));
+    const floorMul = Math.max(1, Math.floor((floor || 0) * 0.5));
     const roll = () => {
-      const variance = 0.5 + rng() * 1.8;
-      return Math.floor(rng() * floorMul * title.mul * variance);
+      const variance = 0.4 + rng() * 1.2;
+      return Math.max(1, Math.floor(rng() * floorMul * title.mul * variance));
     };
+    const rollWithMultiplier = (multiplier) =>
+      Math.floor(roll() * Math.max(0, multiplier));
     // 固有は「ちから/たいりょく/すばやさ」だけ
     // TYPEで傾向を変える：剣系→power、杖靴短剣→agility、防具→vitality
     const baseBonus = { power: 0, vitality: 0, agility: 0 };
@@ -310,19 +312,19 @@
         "halberd",
       ].includes(type)
     ) {
-      baseBonus.power = roll();
-      baseBonus.vitality = roll();
-      baseBonus.agility = roll();
+      baseBonus.power = rollWithMultiplier(1.35);
+      baseBonus.vitality = rollWithMultiplier(0.85);
+      baseBonus.agility = rollWithMultiplier(0.6);
     } else if (
       ["staff", "boots", "dagger", "bow", "whip", "chakram"].includes(type)
     ) {
-      baseBonus.agility = roll();
-      baseBonus.power = roll();
-      baseBonus.vitality = roll();
+      baseBonus.agility = rollWithMultiplier(1.35);
+      baseBonus.power = rollWithMultiplier(0.85);
+      baseBonus.vitality = rollWithMultiplier(0.6);
     } else {
-      baseBonus.vitality = roll();
-      baseBonus.power = roll();
-      baseBonus.agility = roll();
+      baseBonus.vitality = rollWithMultiplier(1.35);
+      baseBonus.power = rollWithMultiplier(0.85);
+      baseBonus.agility = rollWithMultiplier(0.6);
     }
 
     return baseBonus;

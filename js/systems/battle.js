@@ -6,10 +6,10 @@ function startBattle() {
 
   // レアエネミー
   const specialEffects = getEquipmentSpecialEffects();
-  const baseRareRate = 1.05;
+  const baseRareRate = 0.05;
   const bonusRareRate = (specialEffects.rareEncounterBoost || 0) / 100;
   const isRare = Math.random() < Math.min(0.5, baseRareRate + bonusRareRate);
-  const rate = isRare ? 5 : 1;
+  const rate = isRare ? 3 : 1;
 
   enemy = {
     id: base.id,
@@ -46,8 +46,8 @@ function attack() {
   const bonusAtk = calcPowerBonusDamage(enemy.maxHp ?? enemy.hp);
   const enemyHpBefore = enemy.hp;
 
-  const hitDecayRate = 0.9;
-  const lateHitDecayRate = 0.95;
+  const hitDecayRate = 0.6;
+  const lateHitDecayRate = 0.8;
   const hitDamages = [];
   const hitComboBonusDamages = [];
   for (let i = 0; i < hits; i++) {
@@ -165,7 +165,7 @@ function rollDamageWithRoll(base, variance, roll) {
   return Math.max(1, Math.floor(roll * (max - min + 1)) + min);
 }
 
-function rollDamage(base, variance = 0.5) {
+function rollDamage(base, variance = 0.3) {
   return rollDamageWithRoll(base, variance, Math.random());
 }
 
