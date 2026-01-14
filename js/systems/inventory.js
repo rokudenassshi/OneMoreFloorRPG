@@ -134,6 +134,12 @@ function renderInventory() {
     }
     const isEquipped = player.weapon === item;
     const stars = "★".repeat(item.rarity || 0);
+    const specialOptions = Array.isArray(item.specialOptions)
+      ? item.specialOptions
+      : [];
+    const specialLines = specialOptions
+      .map((option) => option.description || option.name)
+      .filter(Boolean);
 
     const totalBonus = getItemTotalBonus(item);
     const totalParts = [];
@@ -154,6 +160,14 @@ function renderInventory() {
         <div style="font-size:12px; opacity:0.9;">能力値</div>
         <div>${totalParts.length ? totalParts.join(" / ") : "なし"}</div>
       </div>
+            ${
+              specialLines.length
+                ? `<div style="margin-top:6px;">
+        <div style="font-size:12px; opacity:0.9;">特殊オプション</div>
+        <div>${specialLines.join(" / ")}</div>
+      </div>`
+                : ""
+            }
       <div style="margin-top:6px; display:flex; gap:10px; flex-wrap:wrap;">
         ${
           isEquipped
@@ -503,6 +517,8 @@ function createLootItem(baseItem, isRareEnemy, titleMul) {
     agility: baseBonus.agility + optionBonus.agility,
   };
 
+  const specialOptions = isRareEnemy ? pickSpecialOptions(1) : [];
+
   return {
     id: baseItem.id,
     name: baseItem.name,
@@ -519,6 +535,8 @@ function createLootItem(baseItem, isRareEnemy, titleMul) {
     baseBonus, // 固有
     optionBonus, // ランダムオプション
     bonus, // 合計（計算用）
+    // 特殊オプション（レア敵ドロップのみ）
+    specialOptions,
   };
 
   function pickOptionCount(isRareEnemy) {
@@ -530,4 +548,87 @@ function createLootItem(baseItem, isRareEnemy, titleMul) {
     if (roll < 0.8) return 2;
     return 3;
   }
+}
+const SPECIAL_OPTION_POOL = [
+  {
+    id: "life_steal",
+    name: "吸血",
+    min: 3,
+    max: 8,
+    describe: (value) => `攻撃時に与えたダメージの${value}%をHP回復`,
+  },
+  {
+    id: "damage_reflect",
+    name: "ダメージ反射",
+    min: 5,
+    max: 20,
+    describe: (value) => `被ダメージの${value}%を相手に反射`,
+  },
+  {
+    id: "combo_boost",
+    name: "連撃強化",
+    min: 4,
+    max: 12,
+    describe: (value) => `連続攻撃でダメージが${value}%ずつ増加`,
+  },
+  {
+    id: "victory_recover",
+    name: "勝利時リカバー",
+    min: 5,
+    max: 15,
+    describe: (value) => `戦闘勝利時に最大HPの${value}%を回復`,
+  },
+  {
+    id: "evade_boost",
+    name: "回避率上昇",
+    min: 3,
+    max: 10,
+    describe: (value) => `すばやさ由来の回避率に+${value}%補正`,
+  },
+  {
+    id: "exp_boost",
+    name: "経験値ブースト",
+    fixed: 20,
+    describe: (value) => `獲得経験値${value}%アップ`,
+  },
+  {
+    id: "rare_encounter",
+    name: "レアエネミー遭遇率UP",
+    fixed: 5,
+    describe: (value) => `レアエネミー遭遇率+${value}%`,
+  },
+  {
+    id: "min_hits",
+    name: "連続攻撃の安定化",
+    min: 1,
+    max: 2,
+    describe: (value) => `最低ヒット数を+${value}`,
+  },
+];
+
+function pickSpecialOptions(count) {
+  if (count <= 0) return [];
+  const pool = SPECIAL_OPTION_POOL.slice().sort(() => Math.random() - 0.5);
+  const result = [];
+  const pickCount = Math.min(count, pool.length);
+  for (let i = 0; i < pickCount; i += 1) {
+    const option = pool[i];
+    const value = rollSpecialOptionValue(option);
+    result.push({
+      id: option.id,
+      name: option.name,
+      value,
+      description: option.describe(value),
+    });
+  }
+  return result;
+}
+
+function rollSpecialOptionValue(option) {
+  if (Number.isFinite(option.fixed)) {
+    return option.fixed;
+  }
+  const min = Number(option.min) || 0;
+  const max = Number(option.max) || min;
+  return Math.floor(Math.random() * (max - min + 1)) + min;
 }

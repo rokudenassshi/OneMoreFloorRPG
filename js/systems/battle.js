@@ -5,7 +5,10 @@ function startBattle() {
   const base = EnemyGen.createEnemyForFloor(floor);
 
   // レアエネミー
-  const isRare = Math.random() < 1.01;
+  const specialEffects = getEquipmentSpecialEffects();
+  const baseRareRate = 1.05;
+  const bonusRareRate = (specialEffects.rareEncounterBoost || 0) / 100;
+  const isRare = Math.random() < Math.min(0.5, baseRareRate + bonusRareRate);
   const rate = isRare ? 5 : 1;
 
   enemy = {
@@ -36,9 +39,12 @@ function attack() {
 
   const atk = calcAttack();
   const hits = calcAttackCount();
+  const specialEffects = getEquipmentSpecialEffects();
+  const comboBoostRate = (specialEffects.comboBoost || 0) / 100;
 
   let total = 0;
   const bonusAtk = calcPowerBonusDamage(enemy.maxHp ?? enemy.hp);
+  const enemyHpBefore = enemy.hp;
 
   const hitDecayRate = 0.9;
   const lateHitDecayRate = 0.95;
@@ -51,7 +57,8 @@ function attack() {
       Math.floor(
         atk *
           Math.pow(hitDecayRate, earlyHits) *
-          Math.pow(lateHitDecayRate, lateHits)
+          Math.pow(lateHitDecayRate, lateHits) *
+          (1 + comboBoostRate * i)
       )
     );
     const damage = rollDamage(hitAtk);
@@ -72,6 +79,17 @@ function attack() {
   }
   if (bonusAtk > 0) {
     log(`追加ダメージ ${bonusAtk}`);
+  }
+
+  const lifeStealRate = (specialEffects.lifeSteal || 0) / 100;
+  if (lifeStealRate > 0) {
+    const actualDamage = Math.min(total, enemyHpBefore);
+    const recoverAmount = Math.floor(actualDamage * lifeStealRate);
+    if (recoverAmount > 0) {
+      const maxHp = calcMaxHp();
+      player.hp = Math.min(maxHp, player.hp + recoverAmount);
+      log(`🩸 吸血でHPを${recoverAmount}回復`);
+    }
   }
   refresh();
   afterPlayerAction();
@@ -105,10 +123,7 @@ function escape() {
 function afterPlayerAction() {
   if (gameState !== "BATTLE") return;
   if (enemy.hp <= 0) {
-    log(` ${enemy.name} を倒した！`);
-    gainExp(enemy.exp);
-    dropItem();
-    endBattle();
+    handleEnemyDefeat();
   } else {
     enemyAttack();
   }
@@ -118,7 +133,22 @@ function enemyAttack() {
   if (gameState !== "BATTLE") return;
   const damage = rollDamage(enemy.atk);
   log(`◀ ${enemy.name} の攻撃！ ${damage}ダメージ`);
-  damagePlayer(damage);
+
+  const result = damagePlayer(damage);
+  if (result?.evaded) return;
+
+  const specialEffects = getEquipmentSpecialEffects();
+  const reflectRate = (specialEffects.reflect || 0) / 100;
+  if (reflectRate > 0 && enemy) {
+    const reflectDamage = Math.floor((result?.damage || 0) * reflectRate);
+    if (reflectDamage > 0) {
+      enemy.hp -= reflectDamage;
+      log(`🛡️ ${enemy.name} に${reflectDamage}ダメージ反射`);
+      if (enemy.hp <= 0) {
+        handleEnemyDefeat();
+      }
+    }
+  }
 }
 
 function rollDamage(base, variance = 0.3) {
@@ -143,6 +173,26 @@ function endBattle() {
   exploreButtons.style.display = "block";
   refresh();
   autoSave({ saveHp: true });
+}
+function handleEnemyDefeat() {
+  log(` ${enemy.name} を倒した！`);
+  gainExp(enemy.exp);
+  dropItem();
+  applyVictoryRecovery();
+  endBattle();
+}
+
+function applyVictoryRecovery() {
+  const specialEffects = getEquipmentSpecialEffects();
+  const recoverRate = (specialEffects.victoryRecover || 0) / 100;
+  if (recoverRate <= 0) return;
+
+  const maxHp = calcMaxHp();
+  const recoverAmount = Math.floor(maxHp * recoverRate);
+  if (recoverAmount <= 0) return;
+
+  player.hp = Math.min(maxHp, player.hp + recoverAmount);
+  log(`✨ 勝利時リカバーでHPを${recoverAmount}回復`);
 }
 
 function gameOver() {
