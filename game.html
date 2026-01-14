@@ -46,7 +46,7 @@
     <div id="battleButtons" style="display:none;">
       <div class="row">
         <button onclick="attack()">たたかう</button>
-        <button onclick="openInventory()">アイテム</button>
+        <button onclick="useHerbInBattle()">やくそう</button>
       </div>
       <div class="row">
         <button class="escape-btn" onclick="escape()">にげる</button>
@@ -58,7 +58,7 @@
   <div id="inventory" style="display:none;">
     <div class="screen-header">
       <h3>アイテム</h3>
-        <div class="screen-header-actions">
+              <div class="screen-header-actions">
         <button class="discard-button" onclick="discardWeakerEquipment()">弱い装備を捨てる</button>
         <button class="back-button" onclick="closeInventory()">戻る</button>
       </div></div>
@@ -83,7 +83,7 @@
        JavaScript 読み込み
   ===================== -->
   <!-- エントリーポイント -->
-  <script src="js/core/version.js"></script>
-  <script src="js/core/loader.js"></script>
+  <script src="js/core/version.js?v=1.1.2"></script>
+  <script src="js/core/loader.js?v=1.1.2"></script>
 </body>
 </html>

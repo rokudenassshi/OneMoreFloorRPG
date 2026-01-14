@@ -38,15 +38,40 @@ function attack() {
 
   let total = 0;
   const bonusAtk = calcPowerBonusDamage(enemy.maxHp ?? enemy.hp);
+
+  const hitDecayRate = 0.9;
+  const lateHitDecayRate = 0.95;
+  const hitDamages = [];
   for (let i = 0; i < hits; i++) {
-    const damage = rollDamage(atk);
+    const earlyHits = Math.min(i, 4);
+    const lateHits = Math.max(0, i - 4);
+    const hitAtk = Math.max(
+      1,
+      Math.floor(
+        atk *
+          Math.pow(hitDecayRate, earlyHits) *
+          Math.pow(lateHitDecayRate, lateHits)
+      )
+    );
+    const damage = rollDamage(hitAtk);
     enemy.hp -= damage;
     total += damage;
+    hitDamages.push(damage);
   }
 
   enemy.hp -= bonusAtk;
   total += bonusAtk;
-  log(`▶ 攻撃！ ${hits}回ヒット（${total}ダメージ）`);
+  if (hits > 1) {
+    log(`▶ ${hits}回の連続攻撃。`);
+    hitDamages.forEach((damage, index) => {
+      log(`${index + 1}回目 ${damage}ダメージ`);
+    });
+    if (bonusAtk > 0) {
+      log(`追加ダメージ ${bonusAtk}`);
+    }
+  } else {
+    log(`▶ 攻撃！ ${hits}回ヒット（${total}ダメージ）`);
+  }
   refresh();
   afterPlayerAction();
 }
@@ -122,10 +147,9 @@ function endBattle() {
 function gameOver() {
   log("☠ 力尽きた。下層へと叩き落とされた。");
   endBattle();
-  floor = Math.max(0, floor - 100);
-  player.exp = 0;
+  floor = Math.max(0, Math.floor(floor / 50) * 50);
   player.hp = calcMaxHp();
-  setHerbCount(5, false);
+  setHerbCount(10, false);
   refresh();
   autoSave({ saveHp: true });
 }

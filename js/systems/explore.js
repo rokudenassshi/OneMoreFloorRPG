@@ -16,7 +16,6 @@ function goToBase() {
 
 function move(dir) {
   if (gameState !== "EXPLORE") return;
-
   floor = Math.max(0, floor + dir);
   player.maxReachedFloor = Math.max(player.maxReachedFloor, floor);
 
