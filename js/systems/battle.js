@@ -49,22 +49,25 @@ function attack() {
   const hitDecayRate = 0.9;
   const lateHitDecayRate = 0.95;
   const hitDamages = [];
+  const hitComboBonusDamages = [];
   for (let i = 0; i < hits; i++) {
     const earlyHits = Math.min(i, 4);
     const lateHits = Math.max(0, i - 4);
+    const decayMultiplier =
+      Math.pow(hitDecayRate, earlyHits) * Math.pow(lateHitDecayRate, lateHits);
+    const baseHitAtk = Math.max(1, Math.floor(atk * decayMultiplier));
     const hitAtk = Math.max(
       1,
-      Math.floor(
-        atk *
-          Math.pow(hitDecayRate, earlyHits) *
-          Math.pow(lateHitDecayRate, lateHits) *
-          (1 + comboBoostRate * i)
-      )
+      Math.floor(baseHitAtk * (1 + comboBoostRate * i))
     );
-    const damage = rollDamage(hitAtk);
+    const damageRoll = Math.random();
+    const damage = rollDamageWithRoll(hitAtk, 0.3, damageRoll);
+    const baseDamage = rollDamageWithRoll(baseHitAtk, 0.3, damageRoll);
+    const comboBonusDamage = Math.max(0, damage - baseDamage);
     enemy.hp -= damage;
     total += damage;
     hitDamages.push(damage);
+    hitComboBonusDamages.push(comboBonusDamage);
   }
 
   enemy.hp -= bonusAtk;
@@ -72,7 +75,12 @@ function attack() {
   if (hits > 1) {
     log(`▶ ${hits}回の連続攻撃。`);
     hitDamages.forEach((damage, index) => {
-      log(`${index + 1}回目 ${damage}ダメージ`);
+      const comboBonus = hitComboBonusDamages[index] || 0;
+      const comboLog =
+        comboBoostRate > 0 && comboBonus > 0
+          ? `（連撃強化+${comboBonus}）`
+          : "";
+      log(`${index + 1}回目 ${damage}ダメージ${comboLog}`);
     });
   } else {
     log(`▶ 攻撃！ ${hits}回ヒット（${total}ダメージ）`);
@@ -151,10 +159,14 @@ function enemyAttack() {
   }
 }
 
-function rollDamage(base, variance = 0.3) {
+function rollDamageWithRoll(base, variance, roll) {
   const min = Math.floor(base * (1 - variance));
   const max = Math.ceil(base * (1 + variance));
-  return Math.max(1, Math.floor(Math.random() * (max - min + 1)) + min);
+  return Math.max(1, Math.floor(roll * (max - min + 1)) + min);
+}
+
+function rollDamage(base, variance = 0.5) {
+  return rollDamageWithRoll(base, variance, Math.random());
 }
 
 function endBattle() {

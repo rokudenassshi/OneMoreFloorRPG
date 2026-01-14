@@ -2,6 +2,7 @@ const SCRIPT_PATHS = [
   "js/data/items.js",
   "js/data/enemies.js",
   "js/core/dom.js",
+  "js/data/special-options.js",
   "js/core/state.js",
   "js/core/player.js",
   "js/systems/explore.js",
