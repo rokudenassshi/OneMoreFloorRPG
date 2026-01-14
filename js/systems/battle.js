@@ -66,11 +66,11 @@ function attack() {
     hitDamages.forEach((damage, index) => {
       log(`${index + 1}回目 ${damage}ダメージ`);
     });
-    if (bonusAtk > 0) {
-      log(`追加ダメージ ${bonusAtk}`);
-    }
   } else {
     log(`▶ 攻撃！ ${hits}回ヒット（${total}ダメージ）`);
+  }
+  if (bonusAtk > 0) {
+    log(`追加ダメージ ${bonusAtk}`);
   }
   refresh();
   afterPlayerAction();
