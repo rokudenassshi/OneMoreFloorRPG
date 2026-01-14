@@ -402,7 +402,7 @@ function dropItem() {
   base = applyBaseStatCount(base, desiredBaseStatCount);
 
   // ★は今まで通り：createLootItemで optionBonus 付与
-  const item = createLootItem(base, !!enemy.isRare);
+  const item = createLootItem(base, !!enemy.isRare, enemy.titleMul);
   const thresholds = loadDiscardThresholds();
   const itemBonus = getItemTotalBonus(item);
 
@@ -457,10 +457,20 @@ function applyBaseStatCount(baseItem, desiredCount) {
    - baseItem（TYPE基礎＋二つ名倍率で確定済み）をコピー
    - レア敵ドロップのみ★1
 ===================== */
-function createLootItem(baseItem, isRareEnemy) {
+function getTitleDropMultiplier(titleMul) {
+  const safeMul = Number(titleMul);
+  if (!Number.isFinite(safeMul) || safeMul <= 1) {
+    return 1;
+  }
+  const scaled = 1 + (safeMul - 1) * 0.1;
+  return Math.min(scaled, 1.8);
+}
+
+function createLootItem(baseItem, isRareEnemy, titleMul) {
   // レア敵ドロップのみ★1、それ以外は★なし
-  const rarity = isRareEnemy ? 1 : 0;
-  const baseMultiplier = isRareEnemy ? 1.2 : 1;
+  const rarity = pickOptionCount(isRareEnemy);
+  const titleMultiplier = getTitleDropMultiplier(titleMul);
+  const baseMultiplier = (isRareEnemy ? 1.2 : 1) * titleMultiplier;
   // 固有（items.jsで確定済み）をコピー
   const base = baseItem.baseBonus || { power: 0, vitality: 0, agility: 0 };
   const baseBonus = {
@@ -478,12 +488,12 @@ function createLootItem(baseItem, isRareEnemy) {
   const stats = ["power", "vitality", "agility"].sort(
     () => Math.random() - 0.5
   );
-  const addCount = isRareEnemy ? 0 : Math.min(rarity, stats.length);
-
+  const addCount = Math.min(rarity, stats.length);
   for (let i = 0; i < addCount; i++) {
     if (cap <= 0) break;
     const key = stats[i];
     const add = Math.floor(Math.random() * cap) + 1;
+    optionBonus[key] += add;
   }
 
   // 合計（計算用）
@@ -510,4 +520,14 @@ function createLootItem(baseItem, isRareEnemy) {
     optionBonus, // ランダムオプション
     bonus, // 合計（計算用）
   };
+
+  function pickOptionCount(isRareEnemy) {
+    const roll = Math.random();
+    if (isRareEnemy) {
+      return roll < 0.6 ? 2 : 3;
+    }
+    if (roll < 0.4) return 1;
+    if (roll < 0.8) return 2;
+    return 3;
+  }
 }
