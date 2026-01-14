@@ -390,13 +390,13 @@ function dropItem() {
 
   // items.js のジェネレータで「その場生成」
   const desiredBaseStatCount = pickDesiredBaseStatCount();
-  let base = window.ItemGen.createBaseItemForDrop(tier);
+  let base = window.ItemGen.createBaseItemForDrop(tier, floor);
   let rerollCount = 0;
   while (
     countNonZeroBaseStats(base.baseBonus) < desiredBaseStatCount &&
     rerollCount < 6
   ) {
-    base = window.ItemGen.createBaseItemForDrop(tier);
+    base = window.ItemGen.createBaseItemForDrop(tier, floor);
     rerollCount += 1;
   }
   base = applyBaseStatCount(base, desiredBaseStatCount);

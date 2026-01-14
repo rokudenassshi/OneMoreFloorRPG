@@ -287,18 +287,15 @@
   }
 
   // 同じ (tier, type, title) なら固有値が完全一致する生成
-  function buildFixedBaseBonus(tier, type, titleText) {
-    const seed = hashSeed(`T${tier}|${type}|${titleText}|BASE`);
+  function buildFixedBaseBonus(tier, floor, type, titleText) {
+    const seed = hashSeed(`T${tier}|F${floor}|${type}|${titleText}|BASE`);
     const rng = mulberry32(seed);
+    const floorMul = Math.max(1, Math.floor(floor || 1));
+    const roll = () => rInt(rng, 1, 3) * floorMul;
 
     // 固有は「ちから/たいりょく/すばやさ」だけ
     // TYPEで傾向を変える：剣系→power、杖靴短剣→agility、防具→vitality
     const baseBonus = { power: 0, vitality: 0, agility: 0 };
-    const primaryMin = tier === 1 ? 1 : Math.ceil(tier * 3);
-    const primaryMax = Math.max(5, tier * 8);
-    const secondaryMin = tier === 1 ? 0 : Math.floor(tier * 2);
-    const secondaryMax = Math.max(5, Math.floor(tier * 4));
-
     if (
       [
         "sword",
@@ -311,25 +308,25 @@
         "halberd",
       ].includes(type)
     ) {
-      baseBonus.power = rInt(rng, primaryMin, primaryMax);
-      baseBonus.vitality = rInt(rng, secondaryMin, secondaryMax);
-      baseBonus.agility = rInt(rng, secondaryMin, secondaryMax);
+      baseBonus.power = roll();
+      baseBonus.vitality = roll();
+      baseBonus.agility = roll();
     } else if (
       ["staff", "boots", "dagger", "bow", "whip", "chakram"].includes(type)
     ) {
-      baseBonus.agility = rInt(rng, primaryMin, primaryMax);
-      baseBonus.power = rInt(rng, secondaryMin, secondaryMax);
-      baseBonus.vitality = rInt(rng, secondaryMin, secondaryMax);
+      baseBonus.agility = roll();
+      baseBonus.power = roll();
+      baseBonus.vitality = roll();
     } else {
-      baseBonus.vitality = rInt(rng, primaryMin, primaryMax);
-      baseBonus.power = rInt(rng, secondaryMin, secondaryMax);
-      baseBonus.agility = rInt(rng, secondaryMin, secondaryMax);
+      baseBonus.vitality = roll();
+      baseBonus.power = roll();
+      baseBonus.agility = roll();
     }
 
     return baseBonus;
   }
 
-  function createBaseItemForDrop(tier) {
+  function createBaseItemForDrop(tier, floor) {
     // 見た目要素は毎回変わってOK（素材など）
     // 固有値だけ「二つ名×TYPE（＋tier）」で固定にする
     const visSeed = hashSeed(`VIS|T${tier}|${Date.now()}|${Math.random()}`);
@@ -339,16 +336,7 @@
     const title = getTierTitle(rngVis, tier);
     const material = getTierMaterial(rngVis, tier);
 
-    const baseBonusRaw = buildFixedBaseBonus(tier, typeDef.type, title.t);
-
-    // 二つ名倍率は固有値に掛ける（これも固定になる）
-    const k = 0.6; // 0.5〜0.7で調整
-    const m = 1 + (title.mul - 1) * k;
-    const baseBonus = {
-      power: Math.floor((baseBonusRaw.power || 0) * m),
-      vitality: Math.floor((baseBonusRaw.vitality || 0) * m),
-      agility: Math.floor((baseBonusRaw.agility || 0) * m),
-    };
+    const baseBonus = buildFixedBaseBonus(tier, floor, typeDef.type, title.t);
 
     return {
       id: `gen_${tier}_${typeDef.type}_${title.t}`, // 一意でなくてもOK（必要なら素材も入れる）
