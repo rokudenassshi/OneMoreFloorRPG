@@ -403,7 +403,7 @@ function dropItem() {
   if (!enemy.isRare && roll >= 0.5) return;
 
   // items.js のジェネレータで「その場生成」
-  const desiredBaseStatCount = pickDesiredBaseStatCount();
+  const desiredBaseStatCount = 3;
   let base = window.ItemGen.createBaseItemForDrop(tier, floor);
   let rerollCount = 0;
   while (
@@ -432,13 +432,6 @@ function dropItem() {
   log(`🎁 ${item.name}${"★".repeat(item.rarity)} を手に入れた`);
 }
 
-function pickDesiredBaseStatCount() {
-  const roll = Math.random();
-  if (roll < 0.5) return 1;
-  if (roll < 0.8) return 2;
-  return 3;
-}
-
 function countNonZeroBaseStats(baseBonus) {
   if (!baseBonus) return 0;
   return ["power", "vitality", "agility"].reduce(
@@ -454,8 +447,10 @@ function applyBaseStatCount(baseItem, desiredCount) {
   const keys = ["power", "vitality", "agility"];
   const nonZero = keys.filter((key) => baseBonus[key] > 0);
 
-  if (nonZero.length <= desiredCount) {
-    return { ...baseItem, baseBonus };
+  if (desiredCount === keys.length) {
+    keys.forEach((key) => {
+      if (baseBonus[key] <= 0) baseBonus[key] = 1;
+    });
   }
 
   const shuffled = nonZero.sort(() => Math.random() - 0.5);
@@ -502,7 +497,7 @@ function createLootItem(baseItem, isRareEnemy, titleMul) {
   const stats = ["power", "vitality", "agility"].sort(
     () => Math.random() - 0.5
   );
-  const addCount = Math.min(rarity, stats.length);
+  const addCount = Math.min(3, stats.length);
   for (let i = 0; i < addCount; i++) {
     if (cap <= 0) break;
     const key = stats[i];
@@ -516,7 +511,6 @@ function createLootItem(baseItem, isRareEnemy, titleMul) {
     vitality: baseBonus.vitality + optionBonus.vitality,
     agility: baseBonus.agility + optionBonus.agility,
   };
-
   const specialOptions = isRareEnemy ? pickSpecialOptions(1) : [];
 
   return {
