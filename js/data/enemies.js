@@ -444,9 +444,23 @@
     const mul = tierMul(tier) * title.mul;
 
     // 基礎値（tierで少し上げつつ、mulで一気に差が出る）
-    const hpBase = rInt(rng, 40, 60) + tier * 2;
-    const atkBase = rInt(rng, 10, 20) + Math.floor(tier / 2);
-    const expBase = rInt(rng, 7, 14) + tier * 2;
+
+    const BASE_STATS_BY_TIER = {
+      1: { hp: [40, 60], atk: [10, 20], exp: [7, 14] },
+      2: { hp: [70, 100], atk: [18, 30], exp: [14, 24] },
+      3: { hp: [90, 130], atk: [22, 36], exp: [18, 30] },
+      4: { hp: [120, 170], atk: [26, 44], exp: [22, 36] },
+      5: { hp: [160, 220], atk: [32, 54], exp: [28, 44] },
+      6: { hp: [200, 280], atk: [38, 64], exp: [34, 52] },
+      7: { hp: [240, 330], atk: [44, 74], exp: [40, 60] },
+      8: { hp: [290, 400], atk: [50, 86], exp: [46, 68] },
+      9: { hp: [350, 480], atk: [56, 98], exp: [52, 76] },
+      10: { hp: [420, 580], atk: [62, 110], exp: [58, 86] },
+    };
+    const baseStats = BASE_STATS_BY_TIER[tier] ?? BASE_STATS_BY_TIER[1];
+    const hpBase = rInt(rng, baseStats.hp[0], baseStats.hp[1]);
+    const atkBase = rInt(rng, baseStats.atk[0], baseStats.atk[1]);
+    const expBase = rInt(rng, baseStats.exp[0], baseStats.exp[1]);
 
     const statBoostByTier = {
       1: 1.18,
