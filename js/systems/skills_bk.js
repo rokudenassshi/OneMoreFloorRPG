@@ -115,6 +115,10 @@ function renderSkillScreen() {
 
         <div class="skill-description">${skill.description}</div>
 
+        <div class="skill-progress" aria-hidden="true">
+          <div class="skill-progress-bar" style="width:${progressPct}%"></div>
+        </div>
+
         <div class="skill-footer">
           <div class="skill-hint">${
             isMax ? "MAX" : canLearn ? "習得可能" : "ポイント不足"

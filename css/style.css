@@ -472,7 +472,7 @@ status-actions {
   opacity: 0.9;
 }
 
-.skill-progress {
+/* .skill-progress {
   height: 6px;
   background: #1e1e1e;
   border: 1px solid #444;
@@ -484,7 +484,7 @@ status-actions {
 .skill-progress-bar {
   height: 100%;
   background: #6c87ff;
-}
+} */
 
 /* 下段：左に状態、右に + / - */
 .skill-footer {
