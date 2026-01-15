@@ -5,7 +5,7 @@
       id: "life_steal",
       name: "吸血",
       min: 10,
-      max: 50,
+      max: 20,
       describe: (value) => `攻撃時に与えたダメージの${value}%をHP回復`,
     },
     {
@@ -18,8 +18,8 @@
     {
       id: "combo_boost",
       name: "連撃強化",
-      min: 20,
-      max: 50,
+      min: 1,
+      max: 20,
       describe: (value) => `連続攻撃でダメージが${value}%ずつ増加`,
     },
     {
