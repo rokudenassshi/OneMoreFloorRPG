@@ -40,7 +40,7 @@ function calcAttackCount() {
   const minHitBonus = Math.max(0, Math.floor(specialEffects.minHits || 0));
   // 1hitは常に保証、2hit以降の要求値を「段階的に増加」させる
   const base = 50; // 最初の増分（2hitに必要な追加量）
-  const stepInc = 20; // 段階が1上がるごとに増分を+20
+  const stepInc = 30; // 段階が1上がるごとに増分を+30
 
   let maxHits = 1;
   let required = 0;

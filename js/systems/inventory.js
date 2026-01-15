@@ -34,6 +34,7 @@ function setHerbCount(count, shouldLog = true) {
   const needed = count - herbCount;
   if (needed > 0) {
     grantHerbs(needed, shouldLog);
+    return;
   }
 }
 
