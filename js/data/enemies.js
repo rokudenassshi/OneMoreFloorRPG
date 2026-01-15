@@ -382,52 +382,20 @@
     return drops;
   }
 
-  /* ========= tierに割り当て（各tierで登場数を増やす） ========= */
-  const TIER_COUNTS = {
-    1: 14,
-    2: 12,
-    3: 12,
-    4: 10,
-    5: 10,
-    6: 10,
-    7: 9,
-    8: 8,
-    9: 8,
-    10: 7,
-  };
-
-  // 合計が100になるように安全に補正
-  (function fixCounts() {
-    const sum = Object.values(TIER_COUNTS).reduce((a, b) => a + b, 0);
-    if (sum === 100) return;
-    TIER_COUNTS[1] += 100 - sum;
-  })();
-
-  function buildTierPool(floor) {
-    const pool = [];
-    const tiers = Object.keys(TIER_COUNTS)
-      .map(Number)
-      .sort((a, b) => a - b);
-    let currentTier = 1;
-    tiers.forEach((tier) => {
-      if (floor >= tierToMinFloor(tier)) {
-        currentTier = tier;
-      }
-    });
-
-    const allowedTiers = new Set([currentTier]);
-    tiers.forEach((tier) => {
-      if (!allowedTiers.has(tier)) return;
-      for (let i = 0; i < TIER_COUNTS[tier]; i++) pool.push(tier);
-    });
-    return pool.length > 0 ? pool : [1];
+  function resolveTierForFloor(floor) {
+    const normalizedFloor = Number(floor);
+    if (!Number.isFinite(normalizedFloor)) return 1;
+    for (let tier = 10; tier >= 1; tier -= 1) {
+      if (normalizedFloor >= tierToMinFloor(tier)) return tier;
+    }
+    return 1;
   }
 
   /* ========= 敵生成 ========= */
   function createEnemyForFloor(floor) {
     const seed = hashSeed(`ENEMY|F${floor}|${Date.now()}|${Math.random()}`);
     const rng = normalizeRng(mulberry32(seed));
-    const tier = pick(rng, buildTierPool(Math.max(1, floor)));
+    const tier = resolveTierForFloor(Math.max(1, floor));
     const minFloor = tierToMinFloor(tier);
 
     const baseName = pick(rng, BASE_BY_TIER[tier]);
@@ -496,6 +464,7 @@
       drops: buildDrops(rng, tier),
     };
   }
+
   window.EnemyGen = {
     createEnemyForFloor,
   };
