@@ -47,15 +47,10 @@ function attack() {
   const bonusAtk = calcPowerBonusDamage(enemy.maxHp ?? enemy.hp);
   const enemyHpBefore = enemy.hp;
 
-  const hitDecayRate = 0.6;
-  const lateHitDecayRate = 0.8;
   const hitDamages = [];
   const hitComboBonusDamages = [];
   for (let i = 0; i < hits; i++) {
-    const earlyHits = Math.min(i, 4);
-    const lateHits = Math.max(0, i - 4);
-    const decayMultiplier =
-      Math.pow(hitDecayRate, earlyHits) * Math.pow(lateHitDecayRate, lateHits);
+    const decayMultiplier = Math.pow(0.5, i);
     const baseHitAtk = Math.max(1, Math.floor(atk * decayMultiplier));
     const hitAtk = Math.max(
       1,

@@ -313,19 +313,19 @@
         "halberd",
       ].includes(type)
     ) {
-      baseBonus.power = rollWithMultiplier(1.35);
-      baseBonus.vitality = rollWithMultiplier(0.85);
-      baseBonus.agility = rollWithMultiplier(0.6);
+      baseBonus.power = rollWithMultiplier(1.15);
+      baseBonus.vitality = rollWithMultiplier(0.75);
+      baseBonus.agility = rollWithMultiplier(0.5);
     } else if (
       ["staff", "boots", "dagger", "bow", "whip", "chakram"].includes(type)
     ) {
-      baseBonus.agility = rollWithMultiplier(1.35);
-      baseBonus.power = rollWithMultiplier(0.85);
-      baseBonus.vitality = rollWithMultiplier(0.6);
+      baseBonus.agility = rollWithMultiplier(1.15);
+      baseBonus.power = rollWithMultiplier(0.75);
+      baseBonus.vitality = rollWithMultiplier(0.5);
     } else {
-      baseBonus.vitality = rollWithMultiplier(1.35);
-      baseBonus.power = rollWithMultiplier(0.85);
-      baseBonus.agility = rollWithMultiplier(0.6);
+      baseBonus.vitality = rollWithMultiplier(1.15);
+      baseBonus.power = rollWithMultiplier(0.75);
+      baseBonus.agility = rollWithMultiplier(0.5);
     }
 
     return baseBonus;
@@ -385,8 +385,8 @@
     if (!Number.isFinite(safeMul) || safeMul <= 1) {
       return 1;
     }
-    const scaled = 1 + (safeMul - 1) * 0.1;
-    return Math.min(scaled, 1.8);
+    const scaled = 1 + (safeMul - 1) * 0.08;
+    return Math.min(scaled, 1.4);
   }
 
   function pickSpecialOptions(count) {
@@ -419,7 +419,7 @@
 
   function createLootItem(baseItem, { floor, isRareEnemy, titleMul }) {
     const titleMultiplier = getTitleDropMultiplier(titleMul);
-    const baseMultiplier = (isRareEnemy ? 1.2 : 1) * titleMultiplier;
+    const baseMultiplier = (isRareEnemy ? 1.1 : 0.95) * titleMultiplier;
     const base = baseItem.baseBonus || { power: 0, vitality: 0, agility: 0 };
     const baseBonus = {
       power: Math.floor((base.power || 0) * baseMultiplier),
