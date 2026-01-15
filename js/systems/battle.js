@@ -7,7 +7,7 @@ function startBattle() {
 
   // レアエネミー
   const specialEffects = getEquipmentSpecialEffects();
-  const baseRareRate = 0.05;
+  const baseRareRate = 0.01;
   const bonusRareRate = (specialEffects.rareEncounterBoost || 0) / 100;
   const isRare = Math.random() < Math.min(0.5, baseRareRate + bonusRareRate);
   const rate = isRare ? 3 : 1;
@@ -32,6 +32,9 @@ function startBattle() {
   battleButtons.style.display = "block";
 
   log(`⚔ ${enemy.name} があらわれた！`);
+  if (isRare) {
+    showRareEnemyPopup(base.name);
+  }
   updateUI();
 }
 

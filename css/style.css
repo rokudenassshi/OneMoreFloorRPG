@@ -4,6 +4,7 @@ body {
   font-family: sans-serif;
   margin: 0;
   padding: 0 12px 24px;
+  touch-action: manipulation;
 }
 
 .top-content {
@@ -64,6 +65,67 @@ body {
   border-radius: 8px;
 }
 
+.game {
+  position: relative;
+}
+
+.rare-popup {
+  position: absolute;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.6);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  z-index: 30;
+}
+
+.rare-popup.is-visible {
+  display: flex;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.rare-popup-content {
+  min-width: 220px;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, #ffde73, #ffb347);
+  color: #1c1c1c;
+  border-radius: 16px;
+  text-align: center;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+  border: 2px solid #ffd24d;
+  animation: rare-pop 0.25s ease-out;
+}
+
+.rare-popup-title {
+  font-weight: bold;
+  font-size: 18px;
+  margin-bottom: 6px;
+}
+
+.rare-popup-name {
+  font-size: 16px;
+  margin-bottom: 6px;
+}
+
+.rare-popup-hint {
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+@keyframes rare-pop {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
 .start-link:hover {
   background: #6c87ff;
 }

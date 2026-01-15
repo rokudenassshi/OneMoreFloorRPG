@@ -416,9 +416,6 @@
     });
 
     const allowedTiers = new Set([currentTier]);
-    if (currentTier > 1) {
-      allowedTiers.add(currentTier - 1);
-    }
     tiers.forEach((tier) => {
       if (!allowedTiers.has(tier)) return;
       for (let i = 0; i < TIER_COUNTS[tier]; i++) pool.push(tier);
@@ -447,7 +444,7 @@
 
     const BASE_STATS_BY_TIER = {
       1: { hp: [40, 60], atk: [10, 20], exp: [7, 14] },
-      2: { hp: [85, 120], atk: [22, 36], exp: [16, 28] },
+      2: { hp: [85, 120], atk: [22, 30], exp: [16, 28] },
       3: { hp: [110, 160], atk: [28, 44], exp: [20, 34] },
       4: { hp: [150, 210], atk: [34, 56], exp: [26, 42] },
       5: { hp: [200, 280], atk: [42, 70], exp: [32, 50] },

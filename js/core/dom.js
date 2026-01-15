@@ -4,6 +4,8 @@ const playerHpEl = document.getElementById("playerHp");
 const enemyNameEl = document.getElementById("enemyName");
 const enemyHpEl = document.getElementById("enemyHp");
 const logEl = document.getElementById("log");
+const rareEnemyPopupEl = document.getElementById("rareEnemyPopup");
+const rareEnemyPopupNameEl = document.getElementById("rareEnemyPopupName");
 
 const exploreButtons = document.getElementById("exploreButtons");
 const battleButtons = document.getElementById("battleButtons");
