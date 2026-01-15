@@ -64,6 +64,7 @@ function calcAttackCount() {
     maxHits += 1;
     delta += stepInc; // 次の段階はさらに重くする
   }
+  maxHits = Math.min(maxHits, 5);
   const minHits = Math.min(maxHits, 1 + minHitBonus);
   return Math.floor(Math.random() * (maxHits - minHits + 1)) + minHits;
 }
