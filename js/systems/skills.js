@@ -75,35 +75,73 @@ function renderSkillScreen() {
   if (!skillScreenContentEl) return;
 
   const pointsLabel = `未使用スキルポイント：${player.unassignedPoints}`;
+
+  // （任意）合計効果を上に出す：すでに getSkillEffects() があるので活用
+  const total = getSkillEffects();
+  const summaryHtml = `
+    <div class="skill-summary">
+      <div class="skill-summary-title">合計効果</div>
+      <div class="skill-summary-grid">
+        <div>最大HP：+${total.maxHp}</div>
+        <div>攻撃力：+${total.attack}</div>
+        <div>回避率：+${total.evadeRate}%</div>
+        <div>EXP：+${total.expBoost}%</div>
+      </div>
+    </div>
+  `;
+
   const skillListHtml = SKILLS.map((skill) => {
     const level = getSkillLevel(skill.id);
     const isMax = level >= skill.maxLevel;
     const requiredPoints = Number(skill.requiredPoints) || 1;
+
     const canLearn = player.unassignedPoints >= requiredPoints && !isMax;
     const canDecrease = level > 0;
-    return `
-    <div class="skill-card">
-    <div class="skill-header">
-      <div class="skill-title">${skill.name}</div>
-      <div class="skill-level">Lv.${level}/${skill.maxLevel}</div>
-    </div>
-    <div class="skill-description">${skill.description}</div>
-    <div class="skill-required">必要ポイント：${requiredPoints}</div>
 
-    <div class="skill-row">
-      <button class="skill-btn" onclick="learnSkill('${skill.id}')" ${
-      canLearn ? "" : "skill"
+    const progressPct = Math.round((level / skill.maxLevel) * 100);
+
+    return `
+      <div class="skill-card ${canLearn ? "is-affordable" : ""} ${
+      isMax ? "is-max" : ""
+    }">
+        <div class="skill-header">
+          <div class="skill-title">${skill.name}</div>
+
+          <div class="skill-meta">
+            <span class="skill-badge">必要 ${requiredPoints}pt</span>
+            <span class="skill-level">Lv.${level}/${skill.maxLevel}</span>
+          </div>
+        </div>
+
+        <div class="skill-description">${skill.description}</div>
+
+        <div class="skill-progress" aria-hidden="true">
+          <div class="skill-progress-bar" style="width:${progressPct}%"></div>
+        </div>
+
+        <div class="skill-footer">
+          <div class="skill-hint">${
+            isMax ? "MAX" : canLearn ? "習得可能" : "ポイント不足"
+          }</div>
+
+          <div class="skill-actions">
+            <button class="skill-btn" onclick="learnSkill('${skill.id}')" ${
+      canLearn ? "" : "disabled"
     }>＋</button>
-      <button class="skill-btn" onclick="unlearnSkill('${skill.id}')" ${
+            <button class="skill-btn" onclick="unlearnSkill('${skill.id}')" ${
       canDecrease ? "" : "disabled"
     }>−</button>
-    </div>
-  </div>
+          </div>
+        </div>
+      </div>
     `;
   }).join("");
 
   skillScreenContentEl.innerHTML = `
-    <div class="skill-points">${pointsLabel}</div>
+    <div class="skill-top">
+      <div class="skill-points">${pointsLabel}</div>
+      ${summaryHtml}
+    </div>
     <div class="skill-list">${skillListHtml}</div>
   `;
 }

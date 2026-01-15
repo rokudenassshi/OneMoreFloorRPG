@@ -290,10 +290,18 @@ status-actions {
   margin-bottom: 10px;
 }
 
+.skill-required-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
 .skill-required {
   font-size: 12px;
   opacity: 0.8;
   margin-bottom: 10px;
+  margin: 0;
 }
 
 .skill-actions {
@@ -405,4 +413,110 @@ status-actions {
     padding: 6px 10px;
     font-size: 14px;
   }
+}
+/* --- Skill UI 改善 --- */
+
+.skill-top {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.skill-summary {
+  background: #262626;
+  border: 1px solid #444;
+  border-radius: 10px;
+  padding: 10px;
+}
+
+.skill-summary-title {
+  font-weight: bold;
+  font-size: 13px;
+  margin-bottom: 6px;
+  opacity: 0.9;
+}
+
+.skill-summary-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 10px;
+  font-size: 12px;
+  opacity: 0.9;
+}
+
+.skill-card {
+  position: relative;
+}
+
+.skill-card.is-affordable {
+  border-color: #6c87ff;
+}
+
+.skill-card.is-max {
+  opacity: 0.92;
+}
+
+.skill-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.skill-badge {
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  border: 1px solid #555;
+  background: #222;
+  opacity: 0.9;
+}
+
+.skill-progress {
+  height: 6px;
+  background: #1e1e1e;
+  border: 1px solid #444;
+  border-radius: 999px;
+  overflow: hidden;
+  margin: 10px 0 8px;
+}
+
+.skill-progress-bar {
+  height: 100%;
+  background: #6c87ff;
+}
+
+/* 下段：左に状態、右に + / - */
+.skill-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.skill-hint {
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+/* ★ここが肝：グローバル button をスキル用だけ上書き */
+.skill-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.skill-btn {
+  width: 34px !important;
+  height: 34px !important;
+  min-height: 34px !important;     /* button { min-height:80px } を潰す */
+  padding: 0 !important;
+  flex: 0 0 auto !important;        /* button { flex:1 } を潰す */
+  font-size: 18px;
+  border-radius: 8px;
+}
+
+.skill-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
 }
