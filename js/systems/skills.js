@@ -78,22 +78,27 @@ function renderSkillScreen() {
   const skillListHtml = SKILLS.map((skill) => {
     const level = getSkillLevel(skill.id);
     const isMax = level >= skill.maxLevel;
-    const canLearn = player.unassignedPoints > 0 && !isMax;
+    const requiredPoints = Number(skill.requiredPoints) || 1;
+    const canLearn = player.unassignedPoints >= requiredPoints && !isMax;
     const canDecrease = level > 0;
-    const buttonDisabled = canLearn ? "" : "disabled";
-    const decreaseDisabled = canDecrease ? "" : "disabled";
     return `
-      <div class="skill-card">
-        <div class="skill-header">
-          <div class="skill-title">${skill.name}</div>
-          <div class="skill-level">Lv.${level}/${skill.maxLevel}</div>
-        </div>
-        <div class="skill-description">${skill.description}</div>
-        <div class="skill-actions">
-          <button class="state-btn" onclick="learnSkill('${skill.id}')">＋</button>
-          <button class="state-btn" onclick="unlearnSkill('${skill.id}')" >−</button></button>
-        </div>
-      </div>
+    <div class="skill-card">
+    <div class="skill-header">
+      <div class="skill-title">${skill.name}</div>
+      <div class="skill-level">Lv.${level}/${skill.maxLevel}</div>
+    </div>
+    <div class="skill-description">${skill.description}</div>
+    <div class="skill-required">必要ポイント：${requiredPoints}</div>
+
+    <div class="skill-row">
+      <button class="skill-btn" onclick="learnSkill('${skill.id}')" ${
+      canLearn ? "" : "skill"
+    }>＋</button>
+      <button class="skill-btn" onclick="unlearnSkill('${skill.id}')" ${
+      canDecrease ? "" : "disabled"
+    }>−</button>
+    </div>
+  </div>
     `;
   }).join("");
 
@@ -104,14 +109,15 @@ function renderSkillScreen() {
 }
 
 function learnSkill(skillId) {
-  if (player.unassignedPoints <= 0) return;
   const skill = SKILLS.find((entry) => entry.id === skillId);
   if (!skill) return;
   const current = getSkillLevel(skillId);
   if (current >= skill.maxLevel) return;
+  const requiredPoints = Number(skill.requiredPoints) || 1;
+  if (player.unassignedPoints < requiredPoints) return;
 
   player.skills[skillId] = current + 1;
-  player.unassignedPoints -= 1;
+  player.unassignedPoints -= requiredPoints;
   log(`✨ スキル習得：${skill.name} Lv.${player.skills[skillId]}`);
   refresh();
   renderSkillScreen();
@@ -122,12 +128,12 @@ function unlearnSkill(skillId) {
   if (!skill) return;
   const current = getSkillLevel(skillId);
   if (current <= 0) return;
-
+  const requiredPoints = Number(skill.requiredPoints) || 1;
   player.skills[skillId] = current - 1;
   if (player.skills[skillId] <= 0) {
     delete player.skills[skillId];
   }
-  player.unassignedPoints += 1;
+  player.unassignedPoints += requiredPoints;
   log(`🔄 スキル取り消し：${skill.name} Lv.${Math.max(current - 1, 0)}`);
   refresh();
   renderSkillScreen();

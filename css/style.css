@@ -270,12 +270,13 @@ status-actions {
 .skill-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 8px;
   margin-bottom: 6px;
 }
 
 .skill-title {
   font-weight: bold;
+  flex: 1;
 }
 
 .skill-level {
@@ -289,9 +290,16 @@ status-actions {
   margin-bottom: 10px;
 }
 
+.skill-required {
+  font-size: 12px;
+  opacity: 0.8;
+  margin-bottom: 10px;
+}
+
 .skill-actions {
   display: flex;
-  justify-content: flex-end;
+  align-items: center;
+  gap: 6px;
 }
 
 .skill-button {
@@ -356,17 +364,21 @@ status-actions {
 .status-row div {
   width: 48%;
 }
-.state-btn {
-  width: 24px !important;
-  height: 24px !important;
-  padding: 0 !important;
-
+/* スキル割り振り用 行 */
+.skill-row {
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 8px;
+}
 
-  font-size: 12px;
-  line-height: 1;
+/* スキル割り振り用 ボタン（強制的に小さくする） */
+.skill-row button {
+  width: 32px !important;
+  height: 32px !important;
+  padding: 0 !important;
+  flex: 0 0 auto !important;
+  font-size: 18px;
+  border-radius: 6px;
 }
 
 @media (max-width: 480px) {
