@@ -46,7 +46,8 @@ function updateUI() {
 
   const isBattleView =
     gameState === "BATTLE" ||
-    (gameState === "INVENTORY" && inventoryReturnState === "BATTLE");
+    (gameState === "INVENTORY" && inventoryReturnState === "BATTLE") ||
+    (gameState === "SKILL" && skillReturnState === "BATTLE");
 
   if (enemy && isBattleView) {
     enemyNameEl.textContent = enemy.name;

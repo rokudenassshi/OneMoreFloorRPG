@@ -18,11 +18,13 @@ const player = {
     agility: 5,
   },
   unassignedPoints: 0,
+  skills: {},
   weapon: null,
 };
 
 function calcMaxHp() {
   const bonus = getEquipmentBonus();
+  const skillEffects = getSkillEffects();
   const totalVitality = player.status.vitality + bonus.vitality;
   return player.baseHp + totalVitality * 10;
 }

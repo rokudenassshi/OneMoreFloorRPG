@@ -18,4 +18,6 @@ const discardAgilityInputEl = document.getElementById("discardAgilityInput");
 const statusScreenEl = document.getElementById("statusScreen");
 const statusContentEl = document.getElementById("statusContent");
 const statusVersionEl = document.getElementById("statusVersion");
+const skillScreenEl = document.getElementById("skillScreen");
+const skillScreenContentEl = document.getElementById("skillScreenContent");
 const playerLevelEl = document.getElementById("playerLevel");

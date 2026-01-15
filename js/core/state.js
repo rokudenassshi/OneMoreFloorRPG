@@ -43,6 +43,7 @@ function autoSave() {
         agility: player.baseStatus.agility,
       },
       unassignedPoints: player.unassignedPoints,
+      skills: { ...player.skills },
       weaponIndex,
     },
     inventory: inventory.map((item) => ({ ...item })),
@@ -93,6 +94,11 @@ function loadAutoSave() {
     0,
     Number(savedPlayer.unassignedPoints) || 0
   );
+
+  player.skills =
+    savedPlayer.skills && typeof savedPlayer.skills === "object"
+      ? { ...savedPlayer.skills }
+      : {};
 
   inventory.length = 0;
   if (Array.isArray(data.inventory)) {

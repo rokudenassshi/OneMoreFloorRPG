@@ -1,6 +1,7 @@
 const SCRIPT_PATHS = [
   "js/data/items.js",
   "js/data/enemies.js",
+  "js/data/skills.js",
   "js/core/dom.js",
   "js/data/special-options.js",
   "js/core/state.js",
@@ -8,6 +9,7 @@ const SCRIPT_PATHS = [
   "js/systems/explore.js",
   "js/systems/battle.js",
   "js/systems/inventory.js",
+  "js/systems/skills.js",
   "js/ui/ui.js",
   "js/ui/status.js",
   "js/game.js",

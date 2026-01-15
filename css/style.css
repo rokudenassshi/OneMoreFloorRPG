@@ -174,7 +174,8 @@ button {
 }
 
 #statusScreen,
-#discardWeakScreen {
+#discardWeakScreen,
+#skillScreen {
   background: #333;
   color: #fff;
   padding: 14px;
@@ -238,6 +239,66 @@ button {
   align-items: center;
   justify-content: space-between;
   gap: 10px;
+}
+status-actions {
+  margin-top: 12px;
+}
+
+.status-action-button {
+  width: 100%;
+  min-height: 48px;
+}
+
+.skill-points {
+  margin-bottom: 12px;
+  font-weight: bold;
+}
+
+.skill-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.skill-card {
+  background: #2b2b2b;
+  border: 1px solid #555;
+  border-radius: 10px;
+  padding: 12px;
+}
+
+.skill-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.skill-title {
+  font-weight: bold;
+}
+
+.skill-level {
+  font-size: 13px;
+  opacity: 0.8;
+}
+
+.skill-description {
+  font-size: 13px;
+  opacity: 0.9;
+  margin-bottom: 10px;
+}
+
+.skill-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.skill-button {
+  min-height: 44px;
+  padding: 6px 12px;
+  font-size: 14px;
+  flex: 0 0 auto;
 }
 
 .discard-weak-row label {

@@ -35,24 +35,21 @@ function renderStatus() {
 
     <div class="status-row">
       ちから　　：${base.power}（+${bonus.power}）
-      <button class="state-btn" onclick="addStat('power')">＋</button>
-      <button class="state-btn" onclick="subStat('power')">−</button>
     </div>
 
     <div class="status-row">
       たいりょく：${base.vitality}（+${bonus.vitality}）
-      <button class="state-btn" onclick="addStat('vitality')">＋</button>
-      <button class="state-btn" onclick="subStat('vitality')">−</button>
     </div>
 
     <div class="status-row">
       すばやさ　：${base.agility}（+${bonus.agility}）
-      <button class="state-btn" onclick="addStat('agility')">＋</button>
-      <button class="state-btn" onclick="subStat('agility')">−</button>
     </div>
 
     <hr>
     <div>装備：${weaponName}</div>
+    <div class="status-actions">
+      <button class="status-action-button" onclick="openSkillAllocation()">スキル割り振りへ</button>
+    </div>
   `;
 }
 
