@@ -21,7 +21,9 @@ function renderStatus() {
   const bonus = getEquipmentBonus();
 
   const nextExp = calcNextExp() - player.exp;
-  const weaponName = player.weapon ? player.weapon.name : "なし";
+  const weaponName = player.weapon
+    ? `${player.weapon.isRareDrop ? "★" : ""}${player.weapon.name}`
+    : "なし";
 
   statusContentEl.innerHTML = `
     <div>記録：${player.maxReachedFloor}階</div>

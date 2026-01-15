@@ -412,6 +412,7 @@ function dropItem() {
   );
 
   item.isRareDrop = !!enemy.isRare;
+  const rareDropMark = item.isRareDrop ? "★" : "";
   const thresholds = loadDiscardThresholds();
   const itemBonus = getItemTotalBonus(item);
 
@@ -420,11 +421,11 @@ function dropItem() {
     itemBonus.vitality <= thresholds.vitality &&
     itemBonus.agility <= thresholds.agility
   ) {
-    log(`⏭ ${item.name} は拾わなかった`);
+    log(`⏭ ${rareDropMark}${item.name} は拾わなかった`);
     return;
   }
   inventory.push(item);
-  log(`🎁 ${item.name}を手に入れた`);
+  log(`🎁 ${rareDropMark}${item.name}を手に入れた`);
 }
 
 function countNonZeroBaseStats(baseBonus) {

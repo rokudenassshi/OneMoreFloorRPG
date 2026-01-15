@@ -65,8 +65,9 @@ function calcAttackCount() {
     delta += stepInc; // 次の段階はさらに重くする
   }
   maxHits = Math.min(maxHits, 5);
-  const minHits = Math.min(maxHits, 1 + minHitBonus);
-  return Math.floor(Math.random() * (maxHits - minHits + 1)) + minHits;
+  const minHits = 1 + minHitBonus;
+  const adjustedMaxHits = Math.max(maxHits, minHits);
+  return Math.floor(Math.random() * (adjustedMaxHits - minHits + 1)) + minHits;
 }
 
 // ちから：敵最大HP割合の追加ダメ（上限3%）
