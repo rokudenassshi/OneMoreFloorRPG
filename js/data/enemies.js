@@ -324,7 +324,7 @@
     return list[rInt(safeRng, 0, list.length - 1)];
   }
 
-  /* ========= 出現階層（任せる条件なので、自然に伸びるカーブに設定） ========= */
+  /* ========= 出現階層 ========= */
   function tierToMinFloor(tier) {
     const table = {
       1: 1,
@@ -342,22 +342,22 @@
   }
 
   /* ========= tier基礎倍率（高tierほど強い） ========= */
-  function tierMul(tier) {
-    // 調整しやすいようにテーブル化
-    const table = {
-      1: 1.0,
-      2: 1.8,
-      3: 3.1,
-      4: 5.0,
-      5: 7.5,
-      6: 10.0,
-      7: 13.5,
-      8: 18.5,
-      9: 24.5,
-      10: 32.0,
-    };
-    return table[tier] ?? 1.0;
-  }
+  // function tierMul(tier) {
+  //   // 調整しやすいようにテーブル化
+  //   const table = {
+  //     1: 1.0,
+  //     2: 1.8,
+  //     3: 3.1,
+  //     4: 5.0,
+  //     5: 7.5,
+  //     6: 10.0,
+  //     7: 13.5,
+  //     8: 18.5,
+  //     9: 24.5,
+  //     10: 32.0,
+  //   };
+  //   return table[tier] ?? 1.0;
+  // }
 
   /* ========= 敵ごとのドロップ候補（tier帯中心に） ========= */
   function buildDrops(rng, tier) {
@@ -406,43 +406,63 @@
     const name = `${title.t}${baseName}`;
 
     // tier倍率 × 二つ名倍率（高tier二つ名ほど強くなる）
-    const mul = tierMul(tier) * title.mul;
+    // const mul = tierMul(tier) * title.mul;
+
+    // 二つ名だけで強さが決まる
+    const mul = title.mul;
 
     // 基礎値（tierで少し上げつつ、mulで一気に差が出る）
+    // const BASE_STATS_BY_TIER = {
+    //   1: { hp: [40, 60], atk: [10, 20], exp: [7, 14] },
+    //   2: { hp: [85, 120], atk: [22, 30], exp: [16, 28] },
+    //   3: { hp: [110, 160], atk: [28, 44], exp: [20, 34] },
+    //   4: { hp: [150, 210], atk: [34, 56], exp: [26, 42] },
+    //   5: { hp: [200, 280], atk: [42, 70], exp: [32, 50] },
+    //   6: { hp: [260, 360], atk: [50, 82], exp: [40, 60] },
+    //   7: { hp: [320, 440], atk: [58, 96], exp: [48, 72] },
+    //   8: { hp: [390, 540], atk: [66, 112], exp: [56, 82] },
+    //   9: { hp: [470, 650], atk: [74, 128], exp: [64, 94] },
+    //   10: { hp: [560, 780], atk: [84, 145], exp: [72, 108] },
+    // };
+    // const baseStats = BASE_STATS_BY_TIER[tier] ?? BASE_STATS_BY_TIER[1];
 
-    const BASE_STATS_BY_TIER = {
-      1: { hp: [40, 60], atk: [10, 20], exp: [7, 14] },
-      2: { hp: [85, 120], atk: [22, 30], exp: [16, 28] },
-      3: { hp: [110, 160], atk: [28, 44], exp: [20, 34] },
-      4: { hp: [150, 210], atk: [34, 56], exp: [26, 42] },
-      5: { hp: [200, 280], atk: [42, 70], exp: [32, 50] },
-      6: { hp: [260, 360], atk: [50, 82], exp: [40, 60] },
-      7: { hp: [320, 440], atk: [58, 96], exp: [48, 72] },
-      8: { hp: [390, 540], atk: [66, 112], exp: [56, 82] },
-      9: { hp: [470, 650], atk: [74, 128], exp: [64, 94] },
-      10: { hp: [560, 780], atk: [84, 145], exp: [72, 108] },
+    const BASE_STATS_BY_TITLE_TIER = {
+      1: { hp: [47, 70], atk: [11, 23], exp: [8, 16] },
+      2: { hp: [214, 302], atk: [55, 75], exp: [40, 70] },
+      3: { hp: [596, 868], atk: [151, 238], exp: [108, 184] },
+      4: { hp: [1537, 2152], atk: [348, 574], exp: [266, 430] },
+      5: { hp: [3525, 4935], atk: [740, 1233], exp: [564, 881] },
+      6: { hp: [6890, 9540], atk: [1325, 2173], exp: [1060, 1590] },
+      7: { hp: [12960, 17820], atk: [2349, 3888], exp: [1944, 2916] },
+      8: { hp: [24170, 33466], atk: [4090, 6941], exp: [3470, 5081] },
+      9: { hp: [43181, 59718], atk: [6798, 11760], exp: [5880, 8636] },
+      10: { hp: [75264, 104832], atk: [11289, 19488], exp: [9676, 14515] },
     };
-    const baseStats = BASE_STATS_BY_TIER[tier] ?? BASE_STATS_BY_TIER[1];
+    const baseStats =
+      BASE_STATS_BY_TITLE_TIER[tier] ?? BASE_STATS_BY_TITLE_TIER[1];
     const hpBase = rInt(rng, baseStats.hp[0], baseStats.hp[1]);
     const atkBase = rInt(rng, baseStats.atk[0], baseStats.atk[1]);
     const expBase = rInt(rng, baseStats.exp[0], baseStats.exp[1]);
 
-    const statBoostByTier = {
-      1: 1.18,
-      2: 1.4,
-      3: 1.75,
-      4: 2.05,
-      5: 2.35,
-      6: 2.65,
-      7: 3.0,
-      8: 3.35,
-      9: 3.75,
-      10: 4.2,
-    };
-    const statBoost = statBoostByTier[tier] ?? 1.18;
-    const hp = Math.floor(hpBase * mul * statBoost);
-    const atk = Math.floor(atkBase * mul * statBoost);
-    const exp = Math.floor(expBase * mul * statBoost);
+    const hp = Math.floor(hpBase * mul);
+    const atk = Math.floor(atkBase * mul);
+    const exp = Math.floor(expBase * mul);
+    // const statBoostByTier = {
+    //   1: 1.18,
+    //   2: 1.4,
+    //   3: 1.75,
+    //   4: 2.05,
+    //   5: 2.35,
+    //   6: 2.65,
+    //   7: 3.0,
+    //   8: 3.35,
+    //   9: 3.75,
+    //   10: 4.2,
+    // // };
+    // const statBoost = statBoostByTier[tier] ?? 1.18;
+    // const hp = Math.floor(hpBase * mul * statBoost);
+    // const atk = Math.floor(atkBase * mul * statBoost);
+    // const exp = Math.floor(expBase * mul * statBoost);
 
     return {
       id: `enemy_${seed}`,
