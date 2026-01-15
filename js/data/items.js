@@ -422,9 +422,9 @@
     const baseMultiplier = (isRareEnemy ? 1.1 : 0.95) * titleMultiplier;
     const base = baseItem.baseBonus || { power: 0, vitality: 0, agility: 0 };
     const baseBonus = {
-      power: Math.floor((base.power || 0) * baseMultiplier),
-      vitality: Math.floor((base.vitality || 0) * baseMultiplier),
-      agility: Math.floor((base.agility || 0) * baseMultiplier),
+      power: Math.max(1, Math.floor((base.power || 0) * baseMultiplier)),
+      vitality: Math.max(1, Math.floor((base.vitality || 0) * baseMultiplier)),
+      agility: Math.max(1, Math.floor((base.agility || 0) * baseMultiplier)),
     };
 
     const optionBonus = { power: 0, vitality: 0, agility: 0 };
