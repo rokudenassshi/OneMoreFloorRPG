@@ -133,7 +133,7 @@ function renderInventory() {
       return;
     }
     const isEquipped = player.weapon === item;
-    // const stars = "★".repeat(item.rarity || 0);
+    const rareDropMark = item.isRareDrop ? "★" : "";
     const specialOptions = Array.isArray(item.specialOptions)
       ? item.specialOptions
       : [];
@@ -153,7 +153,7 @@ function renderInventory() {
     div.innerHTML = `
       <div>
         ${isEquipped ? "🟢[E] " : ""}
-        ${item.name}
+        ${rareDropMark}${item.name}
       </div>
 
       <div style="margin-top:4px;">
@@ -411,6 +411,7 @@ function dropItem() {
     desiredBaseStatCount
   );
 
+  item.isRareDrop = !!enemy.isRare;
   const thresholds = loadDiscardThresholds();
   const itemBonus = getItemTotalBonus(item);
 

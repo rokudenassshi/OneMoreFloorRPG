@@ -418,7 +418,6 @@
   }
 
   function createLootItem(baseItem, { floor, isRareEnemy, titleMul }) {
-    const rarity = 3;
     const titleMultiplier = getTitleDropMultiplier(titleMul);
     const baseMultiplier = (isRareEnemy ? 1.2 : 1) * titleMultiplier;
     const base = baseItem.baseBonus || { power: 0, vitality: 0, agility: 0 };
