@@ -79,8 +79,9 @@ function renderSkillScreen() {
     const level = getSkillLevel(skill.id);
     const isMax = level >= skill.maxLevel;
     const canLearn = player.unassignedPoints > 0 && !isMax;
-    const buttonLabel = level === 0 ? "習得" : "強化";
+    const canDecrease = level > 0;
     const buttonDisabled = canLearn ? "" : "disabled";
+    const decreaseDisabled = canDecrease ? "" : "disabled";
     return `
       <div class="skill-card">
         <div class="skill-header">
@@ -89,7 +90,8 @@ function renderSkillScreen() {
         </div>
         <div class="skill-description">${skill.description}</div>
         <div class="skill-actions">
-          <button class="skill-button" onclick="learnSkill('${skill.id}')" ${buttonDisabled}>${buttonLabel}</button>
+          <button class="state-btn" onclick="learnSkill('${skill.id}')">＋</button>
+          <button class="state-btn" onclick="unlearnSkill('${skill.id}')" >−</button></button>
         </div>
       </div>
     `;
@@ -111,6 +113,22 @@ function learnSkill(skillId) {
   player.skills[skillId] = current + 1;
   player.unassignedPoints -= 1;
   log(`✨ スキル習得：${skill.name} Lv.${player.skills[skillId]}`);
+  refresh();
+  renderSkillScreen();
+}
+
+function unlearnSkill(skillId) {
+  const skill = SKILLS.find((entry) => entry.id === skillId);
+  if (!skill) return;
+  const current = getSkillLevel(skillId);
+  if (current <= 0) return;
+
+  player.skills[skillId] = current - 1;
+  if (player.skills[skillId] <= 0) {
+    delete player.skills[skillId];
+  }
+  player.unassignedPoints += 1;
+  log(`🔄 スキル取り消し：${skill.name} Lv.${Math.max(current - 1, 0)}`);
   refresh();
   renderSkillScreen();
 }

@@ -44,25 +44,15 @@ function move(dir) {
   // 11階層以降：70%戦闘 / 20%何もなし / 10%泉
   const roll = Math.random(); // 0.0〜0.999...
 
-  if (roll < 0.7) {
+  if (roll < 0.9) {
     // 70% 戦闘
     startBattle();
     autoSave();
     return;
   }
 
-  if (roll < 0.9) {
-    // 20% 何も起こらない
+    // 10% 何も起こらない
     log("…何も起こらなかった。");
     refresh();
     autoSave();
-    return;
-  }
-
-  // 10% 泉（HP全回復）
-  log("✨ 泉を発見した。");
-  player.hp = calcMaxHp();
-  log("💧 HPが回復した。");
-  autoSave();
-  refresh();
 }
