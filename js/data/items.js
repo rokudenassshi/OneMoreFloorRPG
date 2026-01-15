@@ -448,7 +448,6 @@
       tier: baseItem.tier,
       minFloor: baseItem.minFloor,
       atk: baseItem.atk || 0,
-      rarity,
       baseBonus,
       optionBonus,
       bonus,
