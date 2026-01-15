@@ -174,10 +174,8 @@ function endBattle() {
   enemy = null;
 
   if (hasBattle) {
-    battleCount += 1;
-    if (battleCount % 10 === 0) {
-      grantHerbs(1);
-    }
+    player.hp = calcMaxHp();
+    log("✨ 戦闘終了でHPが全回復した");
   }
 
   battleButtons.style.display = "none";

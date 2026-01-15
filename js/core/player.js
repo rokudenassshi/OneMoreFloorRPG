@@ -21,19 +21,6 @@ const player = {
   weapon: null,
 };
 
-// function resetPlayer() {
-//   player.level = 1;
-//   player.exp = 0;
-//   player.unassignedPoints = 0;
-//   battleCount = 0;
-
-//   player.status.power = 5;
-//   player.status.vitality = 5;
-//   player.status.agility = 5;
-//   loseUnequippedItems();
-//   grantHerbs(5);
-// }
-
 function calcMaxHp() {
   const bonus = getEquipmentBonus();
   const totalVitality = player.status.vitality + bonus.vitality;
@@ -133,7 +120,6 @@ function gainExp(exp) {
 function levelUp() {
   player.level++;
   player.unassignedPoints += 1;
-  player.hp = calcMaxHp();
   log(`🎉 レベルアップ！ Lv.${player.level}`);
   refresh();
 }

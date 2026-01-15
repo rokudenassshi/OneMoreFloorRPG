@@ -1,7 +1,6 @@
 let gameState = "EXPLORE";
 let floor = 0;
 let enemy = null;
-let battleCount = 0;
 const autosaveKey = "roguelike_autosave";
 
 function setFloor(value) {
@@ -46,7 +45,6 @@ function autoSave() {
       unassignedPoints: player.unassignedPoints,
       weaponIndex,
     },
-    battleCount,
     inventory: inventory.map((item) => ({ ...item })),
   };
 
@@ -73,7 +71,6 @@ function loadAutoSave() {
   floor = Math.max(0, Number(data.floor) || 0);
   gameState = "EXPLORE";
   enemy = null;
-  battleCount = Math.max(0, Number(data.battleCount) || 0);
 
   player.level = Math.max(1, Number(savedPlayer.level) || 1);
   player.exp = Math.max(0, Number(savedPlayer.exp) || 0);
