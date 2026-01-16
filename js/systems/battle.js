@@ -5,7 +5,7 @@ function startBattle() {
   // ★ floor 以上で出現する敵だけ抽選
   const base = EnemyGen.createEnemyForFloor(floor);
 
-  // レアエネミー
+  // レアモンスター
   const specialEffects = getEquipmentSpecialEffects();
   const baseRareRate = 0.03;
   const bonusRareRate = (specialEffects.rareEncounterBoost || 0) / 100;
@@ -178,6 +178,14 @@ function endBattle() {
   if (hasBattle) {
     player.hp = calcMaxHp();
     log("✨ 戦闘終了でHPが全回復した");
+  }
+  const skillEffects = getSkillEffects();
+  if ((skillEffects.herbBattleReward || 0) > 0) {
+    const herbCountBefore = getHerbCount();
+    grantHerbs(1, false);
+    if (getHerbCount() > herbCountBefore) {
+      log("🌿 戦闘終了でやくそうを1つ手に入れた");
+    }
   }
 
   if (shouldLogBossRest) {

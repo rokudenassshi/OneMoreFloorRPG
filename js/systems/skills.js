@@ -8,6 +8,7 @@ function getSkillEffects() {
   const total = {
     herbHealBoost: 0,
     herbCapacityBoost: 0,
+    herbBattleReward: 0,
   };
 
   SKILLS.forEach((skill) => {
@@ -82,6 +83,9 @@ function renderSkillScreen() {
         <div>やくそう回復量：+${Math.round(total.herbHealBoost * 100)}%</div>
         <div>やくそう所持上限：+${Math.floor(total.herbCapacityBoost)}</div>
         </div>
+        <div>戦闘終了のやくそう：${
+          total.herbBattleReward > 0 ? "習得済み" : "未習得"
+        }</div>
     </div>
   `;
 

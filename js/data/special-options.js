@@ -45,10 +45,10 @@
     },
     {
       id: "rare_encounter",
-      name: "レアエネミー遭遇率UP",
+      name: "レアモンスター遭遇率UP",
       min: 1,
       max: 5,
-      describe: (value) => `レアエネミー遭遇率+${value}%`,
+      describe: (value) => `レアモンスター遭遇率+${value}%`,
     },
     {
       id: "min_hits",

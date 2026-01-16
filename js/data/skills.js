@@ -15,4 +15,12 @@ const SKILLS = [
     description: "やくそうの所持上限 +1/Lv",
     effects: { herbCapacityBoost: 1 },
   },
+  {
+    id: "herb_battle_reward",
+    name: "戦闘終了時にやくそう増加",
+    maxLevel: 1,
+    requiredPoints: 20,
+    description: "戦闘終了時にやくそうを1つ手に入れる※所持上限より増えない",
+    effects: { herbBattleReward: 1 },
+  },
 ];

@@ -134,9 +134,6 @@ function renderInventory() {
           ? `<div style="margin-top:4px; font-size:12px; opacity:0.9;">${description}</div>`
           : ""
       }
-      <div style="margin-top:6px;">
-        <button onclick="useItem(${indices[0]})">使用</button>
-      </div>
       <hr>
     `;
     itemListEl.appendChild(div);
