@@ -201,6 +201,18 @@
     ],
   };
 
+  const BOSS_BASE_BY_TIER = {
+    2: "ボススライム",
+    3: "ボスゴブリン",
+    4: "ボスオーク",
+    5: "ボスオーガ",
+    6: "ボス岩巨人",
+    7: "ボスミノタウロス",
+    8: "ボスワイバーン",
+    9: "ボスデーモン",
+    10: "ボス古龍",
+  };
+
   /* ========= 二つ名（tier別・倍率付き） ========= */
   const TITLE_BY_TIER = {
     1: [
@@ -395,21 +407,25 @@
   function createEnemyForFloor(floor) {
     const seed = hashSeed(`ENEMY|F${floor}|${Date.now()}|${Math.random()}`);
     const rng = normalizeRng(mulberry32(seed));
-    const tier = resolveTierForFloor(Math.max(1, floor));
+    const normalizedFloor = Math.max(1, floor);
+    const tier = resolveTierForFloor(normalizedFloor);
     const minFloor = tierToMinFloor(tier);
+    const isBossFloor = tier > 1 && normalizedFloor === tierToMinFloor(tier);
 
-    const baseName = pick(rng, BASE_BY_TIER[tier]);
-    const title = pickTitle(rng, tier); // {t, mul}
+    const baseName = isBossFloor
+      ? BOSS_BASE_BY_TIER[tier] ?? BASE_BY_TIER[tier][0]
+      : pick(rng, BASE_BY_TIER[tier]);
+    const title = isBossFloor ? null : pickTitle(rng, tier); // {t, mul}
 
     // 表示名にtierを含める（不要なら外してOK）
     // const name = `[T${tier}] ${title.t}${baseName}`;
-    const name = `${title.t}${baseName}`;
+    const name = isBossFloor ? `${baseName}` : `${title.t}${baseName}`;
 
     // tier倍率 × 二つ名倍率（高tier二つ名ほど強くなる）
     // const mul = tierMul(tier) * title.mul;
 
     // 二つ名だけで強さが決まる
-    const mul = title.mul;
+    const mul = isBossFloor ? 1 : title.mul;
 
     // 基礎値（tierで少し上げつつ、mulで一気に差が出る）
     // const BASE_STATS_BY_TIER = {
@@ -472,8 +488,8 @@
       minFloor,
 
       // 二つ名情報（図鑑やデバッグ用）
-      title: title.t,
-      titleMul: title.mul,
+      title: title?.t ?? "",
+      titleMul: title?.mul ?? 1,
 
       // ここが固定ステータス
       maxHp: hp,
