@@ -401,6 +401,8 @@
       result.push({
         id: option.id,
         name: option.name,
+        accessoryTypes: option.accessoryTypes,
+        max: option.max,
         value,
         description: option.describe(value),
       });
@@ -415,6 +417,32 @@
     const min = Number(option.min) || 0;
     const max = Number(option.max) || min;
     return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
+  function getAccessoryName(option) {
+    const suffixes = option.accessoryTypes;
+    const baseName = `${option.name}の${pick(Math.random, suffixes)}`;
+    const maxValue = Number(option.max);
+    const currentValue = Number(option.value);
+    if (
+      Number.isFinite(maxValue) &&
+      Number.isFinite(currentValue) &&
+      currentValue >= Math.ceil(maxValue * 0.9)
+    ) {
+      return `輝く${baseName}`;
+    }
+    return baseName;
+  }
+  function createAccessoryForDrop() {
+    const specialOptions = pickSpecialOptions(1);
+    const option = specialOptions[0];
+    return {
+      id: `acc_${option?.id || "unknown"}`,
+      kind: "accessory",
+      name: getAccessoryName(option),
+      specialOptions: option ? [option] : [],
+      bonus: { power: 0, vitality: 0, agility: 0 },
+    };
   }
 
   function createLootItem(baseItem, { floor, isRareEnemy, titleMul }) {
@@ -479,5 +507,6 @@
     ITEM_TYPES,
     createBaseItemForDrop,
     createLootItemForDrop,
+    createAccessoryForDrop,
   };
 })();

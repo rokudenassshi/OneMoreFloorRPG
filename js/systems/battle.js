@@ -7,7 +7,7 @@ function startBattle() {
 
   // レアモンスター
   const specialEffects = getEquipmentSpecialEffects();
-  const baseRareRate = 0.03;
+  const baseRareRate = 2.03;
   const bonusRareRate = (specialEffects.rareEncounterBoost || 0) / 100;
   const isRare = Math.random() < Math.min(0.5, baseRareRate + bonusRareRate);
   const rate = isRare ? 3 : 1;

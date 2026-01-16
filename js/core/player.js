@@ -20,6 +20,7 @@ const player = {
   unassignedPoints: 0,
   skills: {},
   weapon: null,
+  accessory: null,
 };
 
 function calcMaxHp() {
@@ -181,10 +182,14 @@ function getEquipmentBonus() {
   };
 }
 function getEquipmentSpecialOptions() {
-  if (!player.weapon || !Array.isArray(player.weapon.specialOptions)) {
-    return [];
+  const options = [];
+  if (player.weapon && Array.isArray(player.weapon.specialOptions)) {
+    options.push(...player.weapon.specialOptions);
   }
-  return player.weapon.specialOptions;
+  if (player.accessory && Array.isArray(player.accessory.specialOptions)) {
+    options.push(...player.accessory.specialOptions);
+  }
+  return options;
 }
 
 function getEquipmentSpecialEffects() {
