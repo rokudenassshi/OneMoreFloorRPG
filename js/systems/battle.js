@@ -211,8 +211,16 @@ function applyVictoryRecovery() {
 
 function gameOver() {
   log("☠ 力尽きた。下層へと叩き落とされた。");
+  const wasBossBattle = isBossFloor(floor);
   endBattle();
-  floor = Math.max(0, Math.floor(floor / 50) * 50);
+
+  const penaltyFloor = Math.max(0, floor - 20);
+  const checkpointFloor = Math.max(0, Math.floor(floor / 50) * 50);
+
+  floor = wasBossBattle
+    ? penaltyFloor // ボス戦は純粋に-20
+    : Math.max(penaltyFloor, checkpointFloor);
+
   player.hp = calcMaxHp();
   setHerbCount(getHerbMaxCount(), false);
   refresh();
