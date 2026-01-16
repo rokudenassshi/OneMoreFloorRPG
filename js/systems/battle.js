@@ -170,6 +170,8 @@ function rollDamage(base, variance = 0.3) {
 
 function endBattle() {
   const hasBattle = !!enemy;
+  const shouldLogBossRest = pendingBossRestLog && isBossFloor(floor);
+  pendingBossRestLog = false;
   gameState = "EXPLORE";
   enemy = null;
 
@@ -178,6 +180,9 @@ function endBattle() {
     log("✨ 戦闘終了でHPが全回復した");
   }
 
+  if (shouldLogBossRest) {
+    log("🔥静かに炎が燈っている。ここでは休めそうだ。");
+  }
   battleButtons.style.display = "none";
   exploreButtons.style.display = "block";
   refresh();

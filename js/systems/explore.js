@@ -1,3 +1,4 @@
+let pendingBossRestLog = false;
 function goToBase() {
   floor = 0;
   enemy = null;
@@ -22,12 +23,16 @@ function move(dir) {
     autoSave();
     return;
   }
-
+  // ボス階層：戦闘を強制
+  if (isBossFloor(floor)) {
+    pendingBossRestLog = true;
+    startBattle();
+    autoSave();
+    return;
+  }
   // 50階層ごとの節目：必ずHP全回復
   if (floor % 50 === 0) {
     log("🔥静かに炎が燈っている。ここでは休めそうだ。");
-    player.hp = calcMaxHp();
-    log("HPが最大まで回復した。");
     autoSave();
     refresh();
     return;
@@ -51,8 +56,8 @@ function move(dir) {
     return;
   }
 
-    // 10% 何も起こらない
-    log("…何も起こらなかった。");
-    refresh();
-    autoSave();
+  // 10% 何も起こらない
+  log("…何も起こらなかった。");
+  refresh();
+  autoSave();
 }

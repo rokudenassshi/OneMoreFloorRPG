@@ -454,11 +454,18 @@
       9: { hp: [43181, 59718], atk: [6798, 11760], exp: [5880, 8636] },
       10: { hp: [75264, 104832], atk: [11289, 19488], exp: [9676, 14515] },
     };
+    const bossBaseTier = isBossFloor ? Math.min(tier + 1, 10) : tier;
     const baseStats =
-      BASE_STATS_BY_TITLE_TIER[tier] ?? BASE_STATS_BY_TITLE_TIER[1];
-    const hpBase = rInt(rng, baseStats.hp[0], baseStats.hp[1]);
-    const atkBase = rInt(rng, baseStats.atk[0], baseStats.atk[1]);
-    const expBase = rInt(rng, baseStats.exp[0], baseStats.exp[1]);
+      BASE_STATS_BY_TITLE_TIER[bossBaseTier] ?? BASE_STATS_BY_TITLE_TIER[1];
+    const hpBase = isBossFloor
+      ? baseStats.hp[0]
+      : rInt(rng, baseStats.hp[0], baseStats.hp[1]);
+    const atkBase = isBossFloor
+      ? baseStats.atk[0]
+      : rInt(rng, baseStats.atk[0], baseStats.atk[1]);
+    const expBase = isBossFloor
+      ? baseStats.exp[0]
+      : rInt(rng, baseStats.exp[0], baseStats.exp[1]);
 
     const hp = Math.floor(hpBase * mul);
     const atk = Math.floor(atkBase * mul);
