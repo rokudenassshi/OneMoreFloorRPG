@@ -338,19 +338,8 @@
 
   /* ========= 出現階層 ========= */
   function tierToMinFloor(tier) {
-    const table = {
-      1: 1,
-      2: 50,
-      3: 200,
-      4: 500,
-      5: 800,
-      6: 1000,
-      7: 1500,
-      8: 3000,
-      9: 5000,
-      10: 10000,
-    };
-    return table[tier] ?? 1;
+    if (tier <= 1) return 1;
+    return BOSS_FLOORS[tier - 2] ?? 1;
   }
 
   /* ========= tier基礎倍率（高tierほど強い） ========= */

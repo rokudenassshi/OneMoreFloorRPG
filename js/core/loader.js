@@ -1,4 +1,5 @@
 const SCRIPT_PATHS = [
+  "js/core/constants.js",
   "js/data/items.js",
   "js/data/enemies.js",
   "js/data/skills.js",

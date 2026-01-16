@@ -2,7 +2,6 @@ let gameState = "EXPLORE";
 let floor = 0;
 let enemy = null;
 const autosaveKey = "roguelike_autosave";
-const BOSS_FLOORS = [50, 200, 500, 800, 1000, 1500, 3000, 5000, 10000];
 
 function isBossFloor(currentFloor) {
   return BOSS_FLOORS.includes(currentFloor);
