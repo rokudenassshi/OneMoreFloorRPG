@@ -7,6 +7,7 @@ function getSkillLevel(skillId) {
 function getSkillEffects() {
   const total = {
     herbHealBoost: 0,
+    herbCapacityBoost: 0,
   };
 
   SKILLS.forEach((skill) => {
@@ -79,7 +80,8 @@ function renderSkillScreen() {
       <div class="skill-summary-title">合計効果</div>
       <div class="skill-summary-grid">
         <div>やくそう回復量：+${Math.round(total.herbHealBoost * 100)}%</div>
-      </div>
+        <div>やくそう所持上限：+${Math.floor(total.herbCapacityBoost)}</div>
+        </div>
     </div>
   `;
 
@@ -145,7 +147,6 @@ function learnSkill(skillId) {
 
   player.skills[skillId] = current + 1;
   player.unassignedPoints -= requiredPoints;
-  log(`✨ スキル習得：${skill.name} Lv.${player.skills[skillId]}`);
   refresh();
   renderSkillScreen();
 }
@@ -161,7 +162,6 @@ function unlearnSkill(skillId) {
     delete player.skills[skillId];
   }
   player.unassignedPoints += requiredPoints;
-  log(`🔄 スキル取り消し：${skill.name} Lv.${Math.max(current - 1, 0)}`);
   refresh();
   renderSkillScreen();
 }

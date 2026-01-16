@@ -13,31 +13,44 @@ const HERB_ITEM_TEMPLATE = {
   description: "最大HPの50%回復",
 };
 
+const HERB_BASE_MAX = 10;
+
 const discardThresholdsKey = "roguelike_discard_thresholds";
 const discardThresholdDefaults = { power: 0, vitality: 0, agility: 0 };
 let discardThresholds = { ...discardThresholdDefaults };
 
 function grantHerbs(count, shouldLog = true) {
-  for (let i = 0; i < count; i++) {
+  const maxHerbCount = getHerbMaxCount();
+  const currentCount = getHerbCount();
+  const canAdd = Math.max(0, maxHerbCount - currentCount);
+  const actualCount = Math.min(count, canAdd);
+  for (let i = 0; i < actualCount; i++) {
     const herb = { ...HERB_ITEM_TEMPLATE };
     inventory.push(herb);
-  }
-  if (shouldLog && count > 0) {
-    log(`🎁 やくそう ×${count} を手に入れた`);
   }
 }
 
 function setHerbCount(count, shouldLog = true) {
+  const cappedCount = Math.min(count, getHerbMaxCount());
   const herbCount = inventory.filter(
     (item) => item && item.id === HERB_ITEM_TEMPLATE.id
   ).length;
-  const needed = count - herbCount;
+  const needed = cappedCount - herbCount;
   if (needed > 0) {
     grantHerbs(needed, shouldLog);
     return;
   }
 }
+function getHerbCount() {
+  return inventory.filter((item) => item && item.id === HERB_ITEM_TEMPLATE.id)
+    .length;
+}
 
+function getHerbMaxCount() {
+  const skillEffects = getSkillEffects();
+  const capacityBoost = Math.max(0, skillEffects.herbCapacityBoost || 0);
+  return HERB_BASE_MAX + Math.floor(capacityBoost);
+}
 /* =====================
    インベントリ画面
 ===================== */

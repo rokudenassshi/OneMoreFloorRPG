@@ -214,7 +214,7 @@ function gameOver() {
   endBattle();
   floor = Math.max(0, Math.floor(floor / 50) * 50);
   player.hp = calcMaxHp();
-  setHerbCount(10, false);
+  setHerbCount(getHerbMaxCount(), false);
   refresh();
   autoSave({ saveHp: true });
 }
