@@ -216,9 +216,6 @@ function getEquipmentSpecialEffects() {
       case "combo_boost":
         effects.comboBoost += value;
         break;
-      case "victory_recover":
-        effects.victoryRecover += value;
-        break;
       case "evade_boost":
         effects.evadeBoost += value;
         break;

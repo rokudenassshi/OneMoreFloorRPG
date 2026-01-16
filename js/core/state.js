@@ -25,6 +25,8 @@ function clearEnemy() {
 function autoSave() {
   const weaponIndex =
     player && player.weapon ? inventory.indexOf(player.weapon) : -1;
+  const accessoryIndex =
+    player && player.accessory ? inventory.indexOf(player.accessory) : -1;
   const data = {
     version: 1,
     savedAt: Date.now(),
@@ -49,6 +51,7 @@ function autoSave() {
       unassignedPoints: player.unassignedPoints,
       skills: { ...player.skills },
       weaponIndex,
+      accessoryIndex,
     },
     inventory: inventory.map((item) => ({ ...item })),
   };
@@ -115,6 +118,11 @@ function loadAutoSave() {
   player.weapon =
     Number.isInteger(weaponIndex) && inventory[weaponIndex]
       ? inventory[weaponIndex]
+      : null;
+  const accessoryIndex = Number(savedPlayer.accessoryIndex);
+  player.accessory =
+    Number.isInteger(accessoryIndex) && inventory[accessoryIndex]
+      ? inventory[accessoryIndex]
       : null;
 
   const loadedHp = Number(savedPlayer.hp);
