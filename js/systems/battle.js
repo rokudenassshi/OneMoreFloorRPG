@@ -43,7 +43,7 @@ function attack() {
 
   const atk = calcAttack();
   const hits = calcAttackCount();
-  const specialEffects = getEquipmentSpecialEffects();
+  const specialEffects = getSpecialEffects();
   const comboBoostRate = (specialEffects.comboBoost || 0) / 100;
 
   let total = 0;
@@ -138,7 +138,7 @@ function enemyAttack() {
   const result = damagePlayer(damage);
   if (result?.evaded) return;
 
-  const specialEffects = getEquipmentSpecialEffects();
+  const specialEffects = getSpecialEffects();
   const reflectRate = (specialEffects.reflect || 0) / 100;
   if (reflectRate > 0 && enemy) {
     const reflectDamage = Math.floor((result?.damage || 0) * reflectRate);

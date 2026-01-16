@@ -30,54 +30,63 @@ function calcMaxHp() {
 }
 
 function calcAttack() {
-  const weaponAtk = player.weapon ? player.weapon.atk : 0;
   const bonus = getEquipmentBonus();
-  return (player.status.power + bonus.power) * 2 + weaponAtk;
+  const basePower = player.status.power + bonus.power;
+  const totalAgility = player.status.agility + bonus.agility;
+  const totalVitality = player.status.vitality + bonus.vitality;
+  const skillEffects = getSkillEffects();
+  console.log("skillEffects", skillEffects);
+  let attackSource = basePower;
+
+  if (skillEffects.agilityAttackRate > 0) {
+    attackSource = Math.floor(totalAgility * skillEffects.agilityAttackRate);
+  }
+
+  if (skillEffects.vitalityAttackRate > 0) {
+    attackSource = Math.floor(totalVitality * skillEffects.vitalityAttack);
+  }
+
+  return attackSource;
 }
 
 function calcAttackCount() {
   const bonus = getEquipmentBonus();
   const totalAgility = Number(player.status.agility) + bonus.agility;
-  const specialEffects = getEquipmentSpecialEffects();
+  const specialEffects = getSpecialEffects();
   const minHitBonus = Math.max(0, Math.floor(specialEffects.minHits || 0));
   // 1hitは常に保証、2hit以降の要求値を「段階的に増加」させる
   const base = 50; // 最初の増分（2hitに必要な追加量）
-  const stepInc = 30; // 段階が1上がるごとに増分を+30
+  const stepInc = 200; // 段階が1上がるごとに増分を+30
 
   let maxHits = 1;
   let required = 0;
   let delta = base;
 
-  while (totalAgility >= required + delta) {
+  // 5ヒットまで（段階式）
+  while (maxHits < 5 && totalAgility >= required + delta) {
     required += delta;
-    maxHits += 1;
-    delta += stepInc; // 次の段階はさらに重くする
+    maxHits++;
+    delta += stepInc;
   }
-  maxHits = Math.min(maxHits, 5);
+
+  // ★ 6ヒット以降の要求値（変数化）
+  const OVER_HIT_BASE_AGI = 10000;
+  if (totalAgility >= OVER_HIT_BASE_AGI) {
+    const extraHits =
+      Math.floor((totalAgility - OVER_HIT_BASE_AGI) / OVER_HIT_BASE_AGI) + 1;
+    maxHits = Math.max(maxHits, 5 + extraHits);
+  }
+
   const minHits = 1 + minHitBonus;
   const adjustedMaxHits = Math.max(maxHits, minHits);
+
   return Math.floor(Math.random() * (adjustedMaxHits - minHits + 1)) + minHits;
-}
-
-// ちから：敵最大HP割合の追加ダメ（上限3%）
-function calcPowerBonusDamage(enemyMaxHp) {
-  const power = Number(player.status.power) || 0;
-  const rate = Math.min(0.03, power * 0.0006); // power1あたり0.06%
-  const bonus = Math.floor(enemyMaxHp * rate);
-  return Math.max(1, bonus); // 体感のため最低1保証
-}
-
-// たいりょく：被ダメ割合軽減（上限25%）
-function applyVitalityReduction(rawDamage) {
-  const vit = Number(player.status.vitality) || 0;
-  const reduceRate = Math.min(0.25, vit * 0.003); // vit1あたり0.3%
-  return Math.max(1, Math.floor(rawDamage * (1 - reduceRate)));
 }
 
 // すばやさ：回避（上限20%）
 function rollEvade() {
   const baseRate = 0.05; // 固定5%
-  const specialEffects = getEquipmentSpecialEffects();
+  const specialEffects = getSpecialEffects();
   const extraRate = (specialEffects.evadeBoost || 0) / 100;
 
   const evadeRate = Math.min(0.5, baseRate + extraRate);
@@ -228,4 +237,19 @@ function getEquipmentSpecialEffects() {
   });
 
   return effects;
+}
+function getSpecialEffects() {
+  const equipmentEffects = getEquipmentSpecialEffects();
+  const skillEffects =
+    typeof getSkillEffects === "function" ? getSkillEffects() : {};
+
+  return {
+    ...equipmentEffects,
+    lifeSteal: equipmentEffects.lifeSteal + (skillEffects.lifeSteal || 0),
+    reflect: equipmentEffects.reflect + (skillEffects.reflect || 0),
+    evadeBoost: equipmentEffects.evadeBoost + (skillEffects.evadeBoost || 0),
+    minHits: equipmentEffects.minHits + (skillEffects.minHits || 0),
+    agilityAttack: skillEffects.agilityAttack || 0,
+    vitalityAttack: skillEffects.vitalityAttack || 0,
+  };
 }

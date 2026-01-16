@@ -9,6 +9,12 @@ function getSkillEffects() {
     herbHealBoost: 0,
     herbCapacityBoost: 0,
     herbBattleReward: 0,
+    lifeSteal: 0,
+    reflect: 0,
+    evadeBoost: 0,
+    minHits: 0,
+    agilityAttack: 0,
+    speedAttackVitality: 0,
   };
 
   SKILLS.forEach((skill) => {
@@ -82,9 +88,18 @@ function renderSkillScreen() {
       <div class="skill-summary-grid">
         <div>やくそう回復量：+${Math.round(total.herbHealBoost * 100)}%</div>
         <div>やくそう所持上限：+${Math.floor(total.herbCapacityBoost)}</div>
-        </div>
         <div>戦闘終了のやくそう：${
           total.herbBattleReward > 0 ? "習得済み" : "未習得"
+        }</div>
+        <div>吸血：+${Math.floor(total.lifeSteal)}%</div>
+        <div>ダメージ反射：+${Math.floor(total.reflect)}%</div>
+        <div>回避率：+${Math.floor(total.evadeBoost)}%</div>
+        <div>連続攻撃の最低ヒット数：+${Math.floor(total.minHits)}</div>
+        <div>シールドバッシュ：${
+          total.speedAttackVitality > 0 ? "習得済み" : "未習得"
+        }</div>
+        <div>スピードアタック：${
+          total.agilityAttack > 0 ? "習得済み" : "未習得"
         }</div>
     </div>
   `;
