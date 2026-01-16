@@ -7,7 +7,7 @@ function startBattle() {
 
   // レアモンスター
   const specialEffects = getEquipmentSpecialEffects();
-  const baseRareRate = 2.03;
+  const baseRareRate = 0.03;
   const bonusRareRate = (specialEffects.rareEncounterBoost || 0) / 100;
   const isRare = Math.random() < Math.min(0.5, baseRareRate + bonusRareRate);
   const rate = isRare ? 3 : 1;
@@ -47,7 +47,6 @@ function attack() {
   const comboBoostRate = (specialEffects.comboBoost || 0) / 100;
 
   let total = 0;
-  const bonusAtk = calcPowerBonusDamage(enemy.maxHp ?? enemy.hp);
   const enemyHpBefore = enemy.hp;
 
   const hitDamages = [];
@@ -69,8 +68,6 @@ function attack() {
     hitComboBonusDamages.push(comboBonusDamage);
   }
 
-  enemy.hp -= bonusAtk;
-  total += bonusAtk;
   if (hits > 1) {
     log(`▶ ${hits}回の連続攻撃。`);
     hitDamages.forEach((damage, index) => {
@@ -83,9 +80,6 @@ function attack() {
     });
   } else {
     log(`▶ 攻撃！ ${hits}回ヒット（${total}ダメージ）`);
-  }
-  if (bonusAtk > 0) {
-    log(`追加ダメージ ${bonusAtk}`);
   }
 
   const lifeStealRate = (specialEffects.lifeSteal || 0) / 100;

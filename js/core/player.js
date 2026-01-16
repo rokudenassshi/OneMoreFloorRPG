@@ -25,7 +25,6 @@ const player = {
 
 function calcMaxHp() {
   const bonus = getEquipmentBonus();
-  const skillEffects = getSkillEffects();
   const totalVitality = player.status.vitality + bonus.vitality;
   return player.baseHp + totalVitality * 10;
 }
@@ -77,10 +76,10 @@ function applyVitalityReduction(rawDamage) {
 
 // すばやさ：回避（上限20%）
 function rollEvade() {
-  const agi = Number(player.status.agility) || 0;
-  const baseRate = Math.min(0.2, agi * 0.0025); // agi1あたり0.25%
+  const baseRate = 0.05; // 固定5%
   const specialEffects = getEquipmentSpecialEffects();
   const extraRate = (specialEffects.evadeBoost || 0) / 100;
+
   const evadeRate = Math.min(0.5, baseRate + extraRate);
   return Math.random() < evadeRate;
 }
@@ -134,20 +133,15 @@ function damagePlayer(amount) {
     return { evaded: true, damage: 0 };
   }
 
-  // たいりょく軽減（装備参照なし）
-  const reduced = applyVitalityReduction(amount);
-
-  player.hp -= reduced;
+  player.hp -= amount;
   if (player.hp < 0) player.hp = 0;
-
-  log(`ダメージ ${reduced}（軽減前 ${amount}）`);
 
   refresh();
 
   if (player.hp === 0) {
     gameOver();
   }
-  return { evaded: false, damage: reduced };
+  return { evaded: false, damage: amount };
 }
 function getBaseStatus() {
   return {
