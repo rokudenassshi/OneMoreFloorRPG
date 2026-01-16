@@ -17,7 +17,6 @@ function closeStatus() {
 }
 
 function renderStatus() {
-  const base = getBaseStatus();
   const bonus = getEquipmentBonus();
 
   const nextExp = calcNextExp() - player.exp;
@@ -32,15 +31,15 @@ function renderStatus() {
     <hr>
 
     <div class="status-row">
-      ちから　　：${base.power}（+${bonus.power}）
+      ちから　　：${bonus.power}
     </div>
 
     <div class="status-row">
-      たいりょく：${base.vitality}（+${bonus.vitality}）
+      たいりょく：${bonus.vitality}
     </div>
 
     <div class="status-row">
-      すばやさ　：${base.agility}（+${bonus.agility}）
+      すばやさ　：${bonus.agility}
     </div>
 
     <hr>

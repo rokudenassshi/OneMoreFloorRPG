@@ -76,20 +76,6 @@ function renderSkillScreen() {
 
   const pointsLabel = `未使用スキルポイント：${player.unassignedPoints}`;
 
-  // （任意）合計効果を上に出す：すでに getSkillEffects() があるので活用
-  const total = getSkillEffects();
-  const summaryHtml = `
-    <div class="skill-summary">
-      <div class="skill-summary-title">合計効果</div>
-      <div class="skill-summary-grid">
-        <div>最大HP：+${total.maxHp}</div>
-        <div>攻撃力：+${total.attack}</div>
-        <div>回避率：+${total.evadeRate}%</div>
-        <div>EXP：+${total.expBoost}%</div>
-      </div>
-    </div>
-  `;
-
   const skillListHtml = SKILLS.map((skill) => {
     const level = getSkillLevel(skill.id);
     const isMax = level >= skill.maxLevel;

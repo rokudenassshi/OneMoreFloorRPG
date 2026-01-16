@@ -416,6 +416,25 @@
     }
     const min = Number(option.min) || 0;
     const max = Number(option.max) || min;
+    if (option?.id === "min_hits" && max > min) {
+      const maxRollChance = 0.05;
+      if (Math.random() < maxRollChance) {
+        return max;
+      }
+      return Math.floor(Math.random() * (max - min)) + min;
+    }
+    if (max > min) {
+      const highRollChance = 0.1;
+      const highThreshold = Math.max(min, Math.ceil(max * 0.9));
+      if (Math.random() < highRollChance && highThreshold <= max) {
+        return (
+          Math.floor(Math.random() * (max - highThreshold + 1)) + highThreshold
+        );
+      }
+      if (highThreshold > min) {
+        return Math.floor(Math.random() * (highThreshold - min)) + min;
+      }
+    }
     return Math.floor(Math.random() * (max - min + 1)) + min;
   }
 

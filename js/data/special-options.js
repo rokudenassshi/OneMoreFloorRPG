@@ -22,8 +22,8 @@
       id: "combo_boost",
       name: "連撃強化",
       accessoryTypes: ACCESSORY_TYPES,
-      min: 1,
-      max: 20,
+      min: 5,
+      max: 30,
       describe: (value) => `連続攻撃でダメージが${value}%ずつ増加`,
     },
     {
