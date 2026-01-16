@@ -143,7 +143,7 @@ function renderInventory() {
     if (item.kind === "consumable") {
       return;
     }
-    const isEquipped = player.weapon === item;
+    const isEquipped = player.weapon === item || player.accessory === item;
     const rareDropMark = item.isRareDrop ? "★" : "";
     const specialOptions = Array.isArray(item.specialOptions)
       ? item.specialOptions
@@ -152,13 +152,16 @@ function renderInventory() {
       .map((option) => option.description || option.name)
       .filter(Boolean);
 
+    const isAccessory = item.kind === "accessory";
     const totalBonus = getItemTotalBonus(item);
     const totalParts = [];
     if (totalBonus.power) totalParts.push(`ちから+${totalBonus.power}`);
     if (totalBonus.vitality)
       totalParts.push(`たいりょく+${totalBonus.vitality}`);
     if (totalBonus.agility) totalParts.push(`すばやさ+${totalBonus.agility}`);
-
+    if (isAccessory && specialLines.length) {
+      totalParts.push(...specialLines);
+    }
     const div = document.createElement("div");
 
     div.innerHTML = `
@@ -171,22 +174,8 @@ function renderInventory() {
         <div style="font-size:12px; opacity:0.9;">能力値</div>
         <div>${totalParts.length ? totalParts.join(" / ") : "なし"}</div>
       </div>
-            ${
-              specialLines.length
-                ? `<div style="margin-top:6px;">
-        <div style="font-size:12px; opacity:0.9;">特殊オプション</div>
-        <div>${specialLines.join(" / ")}</div>
-      </div>`
-                : ""
-            }
       <div style="margin-top:6px; display:flex; gap:10px; flex-wrap:wrap;">
-        ${
-          isEquipped
-            ? ""
-            : gameState === "BATTLE"
-            ? `<button disabled>戦闘中は装備不可</button>`
-            : `<button onclick="equip(${index})">装備</button>`
-        }
+${isEquipped ? "" : `<button onclick="equip(${index})">装備</button>`}
                     ${
                       isEquipped
                         ? ""
@@ -278,14 +267,18 @@ function discardEquipment(index) {
   const item = inventory[index];
   if (!item || item.kind === "consumable") return;
 
-  const wasEquipped = player.weapon === item;
-  const prevMaxHp = wasEquipped ? calcMaxHp() : null;
+  const wasWeaponEquipped = player.weapon === item;
+  const wasAccessoryEquipped = player.accessory === item;
+  const prevMaxHp = wasWeaponEquipped ? calcMaxHp() : null;
   inventory.splice(index, 1);
 
-  if (wasEquipped) {
+  if (wasWeaponEquipped) {
     player.weapon = null;
     const nextMaxHp = calcMaxHp();
     adjustHpForMaxChange(prevMaxHp, nextMaxHp);
+  }
+  if (wasAccessoryEquipped) {
+    player.accessory = null;
   }
 
   log(`🗑 ${item.name}を捨てた`);
@@ -314,6 +307,13 @@ function equip(index) {
   const item = inventory[index];
   if (!item) return;
 
+  if (item.kind === "accessory") {
+    player.accessory = item;
+    log(`💍 ${item.name}を装備した`);
+    closeInventory();
+    refresh();
+    return;
+  }
   const prevMaxHp = calcMaxHp();
   player.weapon = item;
 
@@ -404,6 +404,13 @@ function useHerbInBattle() {
 function dropItem() {
   if (!enemy) return;
 
+  if (enemy.isRare) {
+    const item = window.ItemGen.createAccessoryForDrop();
+    item.isRareDrop = true;
+    inventory.push(item);
+    log(`🎁 ★${item.name}を手に入れた`);
+    return;
+  }
   // 敵tierに合わせてアイテムtierを決める（±1くらい揺らす）
   const t = enemy.tier || 1;
   const tier = Math.max(
@@ -416,7 +423,7 @@ function dropItem() {
 
   // ドロップ率（好みで）
   const roll = Math.random();
-  if (!enemy.isRare && roll >= 0.5) return;
+  if (roll >= 0.5) return;
 
   const desiredBaseStatCount = 3;
   const item = window.ItemGen.createLootItemForDrop(
