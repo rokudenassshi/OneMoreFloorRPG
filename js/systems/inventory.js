@@ -342,7 +342,12 @@ function useItem(index) {
       return false;
     }
 
-    const healAmount = Math.max(1, Math.floor(maxHp * item.healRatio));
+    const skillEffects = getSkillEffects();
+    const herbHealBoost = Math.max(0, skillEffects.herbHealBoost || 0);
+    const healAmount = Math.max(
+      1,
+      Math.floor(maxHp * (item.healRatio + herbHealBoost))
+    );
     player.hp = Math.min(maxHp, player.hp + healAmount);
     log(`🌿 ${item.name} を使用してHPを回復した`);
   }

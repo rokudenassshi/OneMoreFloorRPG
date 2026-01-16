@@ -6,11 +6,7 @@ function getSkillLevel(skillId) {
 
 function getSkillEffects() {
   const total = {
-    maxHp: 0,
-    attack: 0,
-    evadeRate: 0,
-    expBoost: 0,
-    minHits: 0,
+    herbHealBoost: 0,
   };
 
   SKILLS.forEach((skill) => {
@@ -82,10 +78,7 @@ function renderSkillScreen() {
     <div class="skill-summary">
       <div class="skill-summary-title">合計効果</div>
       <div class="skill-summary-grid">
-        <div>最大HP：+${total.maxHp}</div>
-        <div>攻撃力：+${total.attack}</div>
-        <div>回避率：+${total.evadeRate}%</div>
-        <div>EXP：+${total.expBoost}%</div>
+        <div>やくそう回復量：+${Math.round(total.herbHealBoost * 100)}%</div>
       </div>
     </div>
   `;
