@@ -442,7 +442,7 @@
     const maxValue = Number(option.max);
     const currentValue = Number(option.value);
     if (
-      floor >= 10000 &&
+      floor >= UNLOCK_FLOOR &&
       Number.isFinite(maxValue) &&
       Number.isFinite(currentValue) &&
       currentValue >= Math.ceil(maxValue * 0.9)
