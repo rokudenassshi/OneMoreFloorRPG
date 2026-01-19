@@ -18,7 +18,7 @@ const HERB_BASE_MAX = 10;
 const discardThresholdsKey = "roguelike_discard_thresholds";
 const discardThresholdDefaults = { power: 0, vitality: 0, agility: 0 };
 let discardThresholds = { ...discardThresholdDefaults };
-
+let currentInventoryTab = "equipment";
 function grantHerbs(count, shouldLog = true) {
   const maxHerbCount = getHerbMaxCount();
   const currentCount = getHerbCount();
@@ -63,6 +63,7 @@ function openInventory() {
   exploreButtons.style.display = "none";
   battleButtons.style.display = "none";
 
+  updateInventoryTabs();
   renderInventory();
 }
 
@@ -90,7 +91,19 @@ function closeDiscardWeakScreen() {
   inventoryEl.style.display = "block";
   renderInventory();
 }
+function setInventoryTab(tab) {
+  currentInventoryTab = tab;
+  updateInventoryTabs();
+  renderInventory();
+}
 
+function updateInventoryTabs() {
+  inventoryTabButtons.forEach((button) => {
+    const isActive = button.dataset.tab === currentInventoryTab;
+    button.classList.toggle("is-active", isActive);
+    button.setAttribute("aria-selected", String(isActive));
+  });
+}
 /* =====================
    インベントリ描画（装備中は[E]を表示）
    - 攻撃は表示しない
@@ -104,6 +117,14 @@ function renderInventory() {
     return;
   }
 
+  if (currentInventoryTab === "accessory") {
+    renderAccessoryItems();
+    return;
+  }
+
+  renderEquipmentItems();
+}
+function renderConsumableItems() {
   const consumableGroups = [];
   const consumableMap = new Map();
 
@@ -138,11 +159,38 @@ function renderInventory() {
     `;
     itemListEl.appendChild(div);
   });
+  return consumableGroups.length;
+}
 
+function renderEquipmentItems() {
+  let hasContent = false;
+
+  if (renderConsumableItems() > 0) {
+    hasContent = true;
+  }
+
+  const equipmentItems = [];
   inventory.forEach((item, index) => {
     if (item.kind === "consumable") {
       return;
     }
+    const isAccessory = item.kind === "accessory";
+    if (isAccessory) {
+      return;
+    }
+    equipmentItems.push({ item, index, isAccessory });
+  });
+
+  if (equipmentItems.length === 0 && !hasContent) {
+    itemListEl.textContent = "アイテムなし";
+    return;
+  }
+
+  if (equipmentItems.length > 0) {
+    hasContent = true;
+  }
+
+  equipmentItems.forEach(({ item, index, isAccessory }) => {
     const isEquipped = player.weapon === item || player.accessory === item;
     const rareDropMark = item.isRareDrop ? "★" : "";
     const specialOptions = Array.isArray(item.specialOptions)
@@ -152,7 +200,67 @@ function renderInventory() {
       .map((option) => option.description || option.name)
       .filter(Boolean);
 
-    const isAccessory = item.kind === "accessory";
+    const totalBonus = getItemTotalBonus(item);
+    const totalParts = [];
+    if (totalBonus.power) totalParts.push(`ちから+${totalBonus.power}`);
+    if (totalBonus.vitality)
+      totalParts.push(`たいりょく+${totalBonus.vitality}`);
+    if (totalBonus.agility) totalParts.push(`すばやさ+${totalBonus.agility}`);
+    if (isAccessory && specialLines.length) {
+      totalParts.push(...specialLines);
+    }
+    const div = document.createElement("div");
+
+    div.innerHTML = `
+      <div>
+        ${isEquipped ? "🟢[E] " : ""}
+        ${rareDropMark}${item.name}
+      </div>
+
+      <div style="margin-top:4px;">
+        <div style="font-size:12px; opacity:0.9;">能力値</div>
+        <div>${totalParts.length ? totalParts.join(" / ") : "なし"}</div>
+      </div>
+      <div style="margin-top:6px; display:flex; gap:10px; flex-wrap:wrap;">
+${isEquipped ? "" : `<button onclick="equip(${index})">装備</button>`}
+                    ${
+                      isEquipped
+                        ? ""
+                        : `<button onclick="discardEquipment(${index})">捨てる</button>`
+                    }
+      </div>
+      <hr>
+    `;
+
+    itemListEl.appendChild(div);
+  });
+}
+
+function renderAccessoryItems() {
+  const accessoryItems = [];
+
+  inventory.forEach((item, index) => {
+    if (item.kind !== "accessory") {
+      return;
+    }
+    accessoryItems.push({ item, index, isAccessory: true });
+  });
+
+  if (accessoryItems.length === 0) {
+    itemListEl.textContent = "アイテムなし";
+    return;
+  }
+
+  accessoryItems.forEach(({ item, index, isAccessory }) => {
+    const isEquipped = player.weapon === item || player.accessory === item;
+    const rareDropMark = item.isRareDrop ? "★" : "";
+    const specialOptions = Array.isArray(item.specialOptions)
+      ? item.specialOptions
+      : [];
+    const specialLines = specialOptions
+      .map((option) => option.description || option.name)
+      .filter(Boolean);
+
     const totalBonus = getItemTotalBonus(item);
     const totalParts = [];
     if (totalBonus.power) totalParts.push(`ちから+${totalBonus.power}`);

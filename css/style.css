@@ -209,6 +209,28 @@ button {
   margin: 0;
   font-size: 18px;
 }
+.inventory-tabs {
+  display: flex;
+  gap: 8px;
+  margin: 6px 0 12px;
+}
+
+.inventory-tab {
+  flex: 1;
+  min-height: 40px;
+  border-radius: 8px;
+  border: 1px solid #555;
+  background: #1f1f1f;
+  color: #e0e0e0;
+  font-size: 14px;
+}
+
+.inventory-tab.is-active {
+  background: #6c87ff;
+  border-color: #6c87ff;
+  color: #fff;
+}
+
 .back-button {
   flex: 0 0 auto;
   min-height: 44px;

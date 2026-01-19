@@ -13,6 +13,9 @@ const battleButtons = document.getElementById("battleButtons");
 const inventoryEl = document.getElementById("inventory");
 const itemListEl = document.getElementById("itemList");
 const discardWeakScreenEl = document.getElementById("discardWeakScreen");
+const inventoryTabButtons = Array.from(
+  document.querySelectorAll(".inventory-tab"),
+);
 const discardPowerInputEl = document.getElementById("discardPowerInput");
 const discardVitalityInputEl = document.getElementById("discardVitalityInput");
 const discardAgilityInputEl = document.getElementById("discardAgilityInput");
