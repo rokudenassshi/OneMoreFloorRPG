@@ -8,7 +8,7 @@ const player = {
   maxReachedFloor: 0,
 
   status: {
-    power: 5,
+    power: 10,
     vitality: 5,
     agility: 5,
   },
@@ -38,12 +38,14 @@ function calcAttack() {
   console.log("skillEffects", skillEffects);
   let attackSource = basePower;
 
-  if (skillEffects.agilityAttackRate > 0) {
-    attackSource = Math.floor(totalAgility * skillEffects.agilityAttackRate);
+  const agiRate = Number(skillEffects.agilityAttackRate) || 0;
+  const vitRate = Number(skillEffects.vitalityAttackRate) || 0;
+  if (agiRate > 0) {
+    attackSource = Math.floor(totalAgility * agiRate);
   }
 
-  if (skillEffects.vitalityAttackRate > 0) {
-    attackSource = Math.floor(totalVitality * skillEffects.vitalityAttack);
+  if (vitRate > 0) {
+    attackSource = Math.floor(totalVitality * vitRate);
   }
 
   return attackSource;
@@ -89,7 +91,7 @@ function rollEvade() {
   const specialEffects = getSpecialEffects();
   const extraRate = (specialEffects.evadeBoost || 0) / 100;
 
-  const evadeRate = Math.min(0.5, baseRate + extraRate);
+  const evadeRate = baseRate + extraRate;
   return Math.random() < evadeRate;
 }
 
@@ -249,7 +251,7 @@ function getSpecialEffects() {
     reflect: equipmentEffects.reflect + (skillEffects.reflect || 0),
     evadeBoost: equipmentEffects.evadeBoost + (skillEffects.evadeBoost || 0),
     minHits: equipmentEffects.minHits + (skillEffects.minHits || 0),
-    agilityAttack: skillEffects.agilityAttack || 0,
-    vitalityAttack: skillEffects.vitalityAttack || 0,
+    agilityAttackRate: skillEffects.agilityAttackRate || 0,
+    vitalityAttackRate: skillEffects.vitalityAttackRate || 0,
   };
 }

@@ -13,8 +13,8 @@ function getSkillEffects() {
     reflect: 0,
     evadeBoost: 0,
     minHits: 0,
-    agilityAttack: 0,
-    speedAttackVitality: 0,
+    agilityAttackRate: 0,
+    speedAttackVitalityRate: 0,
   };
 
   SKILLS.forEach((skill) => {

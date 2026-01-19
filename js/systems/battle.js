@@ -204,11 +204,6 @@ function applyVictoryRecovery() {
   if (recoverRate <= 0) return;
 
   const maxHp = calcMaxHp();
-  const recoverAmount = Math.floor(maxHp * recoverRate);
-  if (recoverAmount <= 0) return;
-
-  player.hp = Math.min(maxHp, player.hp + recoverAmount);
-  log(`✨ 勝利時リカバーでHPを${recoverAmount}回復`);
 }
 
 function gameOver() {
