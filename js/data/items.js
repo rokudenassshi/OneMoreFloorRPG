@@ -286,10 +286,8 @@
     return pick(rng, ITEM_TYPES);
   }
 
-  // 同じ (tier, type, title) なら固有値が完全一致する生成
-  function buildFixedBaseBonus(tier, floor, type, title) {
-    const seed = hashSeed(`T${tier}|F${floor}|${type}|${title.t}|BASE`);
-    const rng = mulberry32(seed);
+  // 固有値は都度ランダムに生成
+  function buildBaseBonus(rng, tier, floor, type, title) {
     const floorMul = Math.max(0, Math.floor(floor || 0));
     const cap = Math.max(1, floorMul);
     const roll = () => {
@@ -333,7 +331,7 @@
 
   function createBaseItemForDrop(tier, floor) {
     // 見た目要素は毎回変わってOK（素材など）
-    // 固有値だけ「二つ名×TYPE（＋tier）」で固定にする
+    // 固有値もドロップごとに変動させる
     const visSeed = hashSeed(`VIS|T${tier}|${Date.now()}|${Math.random()}`);
     const rngVis = mulberry32(visSeed);
 
@@ -341,7 +339,7 @@
     const title = getTierTitle(rngVis, tier);
     const material = getTierMaterial(rngVis, tier);
 
-    const baseBonus = buildFixedBaseBonus(tier, floor, typeDef.type, title);
+    const baseBonus = buildBaseBonus(rngVis, tier, floor, typeDef.type, title);
     return {
       id: `gen_${tier}_${typeDef.type}_${title.t}`, // 一意でなくてもOK（必要なら素材も入れる）
       tier,

@@ -414,19 +414,6 @@
     const mul = isBossFloor ? 1 : title.mul;
 
     // 基礎値（tierで少し上げつつ、mulで一気に差が出る）
-    // const BASE_STATS_BY_TIER = {
-    //   1: { hp: [40, 60], atk: [10, 20], exp: [7, 14] },
-    //   2: { hp: [85, 120], atk: [22, 30], exp: [16, 28] },
-    //   3: { hp: [110, 160], atk: [28, 44], exp: [20, 34] },
-    //   4: { hp: [150, 210], atk: [34, 56], exp: [26, 42] },
-    //   5: { hp: [200, 280], atk: [42, 70], exp: [32, 50] },
-    //   6: { hp: [260, 360], atk: [50, 82], exp: [40, 60] },
-    //   7: { hp: [320, 440], atk: [58, 96], exp: [48, 72] },
-    //   8: { hp: [390, 540], atk: [66, 112], exp: [56, 82] },
-    //   9: { hp: [470, 650], atk: [74, 128], exp: [64, 94] },
-    //   10: { hp: [560, 780], atk: [84, 145], exp: [72, 108] },
-    // };
-    // const baseStats = BASE_STATS_BY_TIER[tier] ?? BASE_STATS_BY_TIER[1];
 
     const BASE_STATS_BY_TITLE_TIER = {
       1: { hp: [47, 70], atk: [11, 23], exp: [8, 16] },
@@ -456,22 +443,6 @@
     const hp = Math.floor(hpBase * mul);
     const atk = Math.floor(atkBase * mul);
     const exp = Math.floor(expBase * mul);
-    // const statBoostByTier = {
-    //   1: 1.18,
-    //   2: 1.4,
-    //   3: 1.75,
-    //   4: 2.05,
-    //   5: 2.35,
-    //   6: 2.65,
-    //   7: 3.0,
-    //   8: 3.35,
-    //   9: 3.75,
-    //   10: 4.2,
-    // // };
-    // const statBoost = statBoostByTier[tier] ?? 1.18;
-    // const hp = Math.floor(hpBase * mul * statBoost);
-    // const atk = Math.floor(atkBase * mul * statBoost);
-    // const exp = Math.floor(expBase * mul * statBoost);
 
     return {
       id: `enemy_${seed}`,
