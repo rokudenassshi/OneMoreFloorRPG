@@ -26,12 +26,12 @@ function renderStatus() {
   const statPointNote = isStatPointUnlocked
     ? ""
     : `<div class="status-note">${unlockFloor}階層突破で開放</div>`;
-  const powerTotal = player.status.power + bonus.power;
-  const vitalityTotal = player.status.vitality + bonus.vitality;
-  const agilityTotal = player.status.agility + bonus.agility;
-  const powerBonusText = bonus.power ? ` (+${bonus.power})` : "";
-  const vitalityBonusText = bonus.vitality ? ` (+${bonus.vitality})` : "";
-  const agilityBonusText = bonus.agility ? ` (+${bonus.agility})` : "";
+  const powerBase = player.status.power;
+  const vitalityBase = player.status.vitality;
+  const agilityBase = player.status.agility;
+  const powerBonusText = bonus.power ? `（装備+${bonus.power}）` : "";
+  const vitalityBonusText = bonus.vitality ? `（装備+${bonus.vitality}）` : "";
+  const agilityBonusText = bonus.agility ? `（装備+${bonus.agility}）` : "";
   const powerDecreaseDisabled =
     !isStatPointUnlocked || player.status.power <= player.baseStatus.power;
   const vitalityDecreaseDisabled =
@@ -54,48 +54,48 @@ function renderStatus() {
     <hr>
 
 <div class="status-row">
-      ちから　　：${powerTotal}${powerBonusText}
+      ちから　　：${powerBase}${powerBonusText}
       ${
         isStatPointUnlocked
           ? `<span class="status-controls">
-              <button onclick="subStat('power')" ${
-                powerDecreaseDisabled ? "disabled" : ""
-              }>-</button>
               <button onclick="addStat('power')" ${
                 addDisabled ? "disabled" : ""
               }>+</button>
+              <button onclick="subStat('power')" ${
+                powerDecreaseDisabled ? "disabled" : ""
+              }>-</button>
             </span>`
           : ""
       }
     </div>
 
     <div class="status-row">
-      たいりょく：${vitalityTotal}${vitalityBonusText}
+      たいりょく：${vitalityBase}${vitalityBonusText}
       ${
         isStatPointUnlocked
           ? `<span class="status-controls">
-              <button onclick="subStat('vitality')" ${
-                vitalityDecreaseDisabled ? "disabled" : ""
-              }>-</button>
               <button onclick="addStat('vitality')" ${
                 addDisabled ? "disabled" : ""
               }>+</button>
+              <button onclick="subStat('vitality')" ${
+                vitalityDecreaseDisabled ? "disabled" : ""
+              }>-</button>
             </span>`
           : ""
       }
     </div>
 
     <div class="status-row">
-      すばやさ　：${agilityTotal}${agilityBonusText}
+      すばやさ　：${agilityBase}${agilityBonusText}
       ${
         isStatPointUnlocked
           ? `<span class="status-controls">
-              <button onclick="subStat('agility')" ${
-                agilityDecreaseDisabled ? "disabled" : ""
-              }>-</button>
               <button onclick="addStat('agility')" ${
                 addDisabled ? "disabled" : ""
               }>+</button>
+              <button onclick="subStat('agility')" ${
+                agilityDecreaseDisabled ? "disabled" : ""
+              }>-</button>
             </span>`
           : ""
       }
@@ -114,8 +114,7 @@ function addStat(stat) {
   if (player.maxReachedFloor < UNLOCK_FLOOR) return;
   if (player.statPoints <= 0) return;
 
-  player.status[stat]++;
-  // player.unassignedPoints--;
+  player.status[stat] += 5;
   player.statPoints--;
 
   refresh();
@@ -124,8 +123,7 @@ function addStat(stat) {
 function subStat(stat) {
   if (player.status[stat] <= player.baseStatus[stat]) return;
   if (player.maxReachedFloor < UNLOCK_FLOO) return;
-  player.status[stat]--;
-  // player.unassignedPoints++;
+  player.status[stat] -= 5;
   player.statPoints++;
 
   refresh();
