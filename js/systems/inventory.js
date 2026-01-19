@@ -433,8 +433,9 @@ function dropItem() {
   if (enemy.isBroken) {
     const roll = Math.random();
     if (roll < 0.1) {
+      // 壊れた 10%
       const item = window.ItemGen.createLootItemForDrop(
-        enemy.tier || 1,
+        enemy.tier,
         floor,
         false,
         enemy.titleMul,
@@ -445,10 +446,10 @@ function dropItem() {
       inventory.push(item);
       log(`🎁 ${item.name}を手に入れた`);
       return;
-    }
-    if (roll < 0.2) {
+    } else if (roll < 0.11) {
+      // 神の 1%（0.10～0.11）
       const item = window.ItemGen.createLootItemForDrop(
-        enemy.tier || 1,
+        enemy.tier,
         floor,
         false,
         enemy.titleMul,
@@ -460,9 +461,6 @@ function dropItem() {
       log(`🎁 ${item.name}を手に入れた`);
       return;
     }
-    // const item = window.ItemGen.createAccessoryForDrop(floor);
-    // inventory.push(item);
-    // log(`🎁 ${item.name}を手に入れた`);
     return;
   }
   if (enemy.isRare) {

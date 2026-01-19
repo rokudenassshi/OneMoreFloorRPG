@@ -29,9 +29,9 @@ function renderStatus() {
   const powerBase = player.status.power;
   const vitalityBase = player.status.vitality;
   const agilityBase = player.status.agility;
-  const powerBonusText = bonus.power ? `（装備+${bonus.power}）` : "";
-  const vitalityBonusText = bonus.vitality ? `（装備+${bonus.vitality}）` : "";
-  const agilityBonusText = bonus.agility ? `（装備+${bonus.agility}）` : "";
+  const powerBonusText = bonus.power ? `（+${bonus.power}）` : "";
+  const vitalityBonusText = bonus.vitality ? `（+${bonus.vitality}）` : "";
+  const agilityBonusText = bonus.agility ? `（+${bonus.agility}）` : "";
   const powerDecreaseDisabled = !isStatPointUnlocked;
   const vitalityDecreaseDisabled = !isStatPointUnlocked;
   const agilityDecreaseDisabled = !isStatPointUnlocked;
@@ -117,7 +117,7 @@ function addStat(stat) {
   renderStatus();
 }
 function subStat(stat) {
-  if (player.status[stat] <= player.baseStatus[stat]) return;
+  if (player.status[stat] <= player.status[stat]) return;
   if (player.maxReachedFloor < UNLOCK_FLOOR) return;
   player.status[stat] -= 2;
   player.statPoints++;
