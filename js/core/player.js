@@ -55,7 +55,7 @@ function calcAttackCount() {
     typeof getSkillEffects === "function" ? getSkillEffects() : {};
   const minHitBonus = Math.max(
     0,
-    Math.floor((equipmentEffects.minHits || 0) + (skillEffects.minHits || 0))
+    Math.floor((equipmentEffects.minHits || 0) + (skillEffects.minHits || 0)),
   );
   // 1hitは常に保証、2hit以降の要求値を「段階的に増加」させる
   const base = 50; // 最初の増分（2hitに必要な追加量）
@@ -112,7 +112,7 @@ function calcNextExp() {
   return Math.floor(
     base +
       extra * 120 + // 線形成長
-      Math.pow(extra, 1.4) * 40 // 緩やかな曲線
+      Math.pow(extra, 1.4) * 40, // 緩やかな曲線
   );
 }
 
@@ -122,9 +122,6 @@ function gainExp(exp) {
   const boostedExp = Math.floor(exp * (1 + boostRate));
   player.exp += boostedExp;
   log(`✨ 経験値 ${boostedExp} 獲得`);
-  if (boostRate > 0) {
-    log(`📈 経験値ブースト +${specialEffects.expBoost}%`);
-  }
 
   while (player.exp >= calcNextExp()) {
     player.exp -= calcNextExp();

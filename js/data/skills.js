@@ -42,7 +42,7 @@ const SKILLS = [
   },
   {
     id: "evade_boost",
-    name: "回避率上昇",
+    name: "回避率up",
     maxLevel: 10,
     requiredPoints: 5,
     description: "回避率+1%/Lv",

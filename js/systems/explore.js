@@ -24,16 +24,16 @@ function move(dir) {
     autoSave();
     return;
   }
-  // ボス階層：戦闘を強制
-  if (isBossFloor(floor)) {
-    pendingBossRestLog = true;
-    startBattle();
+  // 50階層ごとの節目：必ずHP全回復（ボス階層は勝利時に表示）
+  if (floor % 50 === 0 && !isBossFloor(floor)) {
+    log("🔥静かに炎が燈っている。ここでは休めそうだ。");
     autoSave();
+    refresh();
     return;
   }
-  // 50階層ごとの節目：必ずHP全回復
-  if (floor % 50 === 0) {
-    log("🔥静かに炎が燈っている。ここでは休めそうだ。");
+  // ボス階層：戦闘を強制
+  if (isBossFloor(floor)) {
+    startBattle();
     autoSave();
     refresh();
     return;

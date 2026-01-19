@@ -158,6 +158,8 @@ function enemyAttack() {
       log(`🛡️ ${enemy.name} に${reflectDamage}ダメージ反射`);
       if (enemy.hp <= 0) {
         handleEnemyDefeat();
+      } else {
+        refresh();
       }
     }
   }
@@ -207,6 +209,9 @@ function handleEnemyDefeat() {
   gainExp(enemy.exp);
   dropItem();
   applyVictoryRecovery();
+  if (isBossFloor(floor)) {
+    pendingBossRestLog = true;
+  }
   endBattle();
 }
 
@@ -214,8 +219,6 @@ function applyVictoryRecovery() {
   const specialEffects = getEquipmentSpecialEffects();
   const recoverRate = (specialEffects.victoryRecover || 0) / 100;
   if (recoverRate <= 0) return;
-
-  const maxHp = calcMaxHp();
 }
 
 function gameOver() {

@@ -28,7 +28,7 @@
     },
     {
       id: "evade_boost",
-      name: "回避率上昇",
+      name: "回避率up",
       accessoryTypes: ACCESSORY_TYPES,
       min: 5,
       max: 30,
@@ -36,7 +36,7 @@
     },
     {
       id: "exp_boost",
-      name: "経験値ブースト",
+      name: "経験値up",
       accessoryTypes: ACCESSORY_TYPES,
       min: 10,
       max: 50,
@@ -52,7 +52,7 @@
     },
     {
       id: "min_hits",
-      name: "連続攻撃の安定化",
+      name: "連続攻撃の",
       accessoryTypes: ACCESSORY_TYPES,
       min: 1,
       max: 2,
