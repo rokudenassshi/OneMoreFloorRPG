@@ -48,6 +48,8 @@ function autoSave() {
         vitality: player.baseStatus.vitality,
         agility: player.baseStatus.agility,
       },
+      statPoints: player.statPoints,
+      statPointUnlockGranted: player.statPointUnlockGranted,
       unassignedPoints: player.unassignedPoints,
       skills: { ...player.skills },
       weaponIndex,
@@ -96,7 +98,8 @@ function loadAutoSave() {
     Number(savedBaseStatus.vitality) || player.status.vitality;
   player.baseStatus.agility =
     Number(savedBaseStatus.agility) || player.status.agility;
-
+  player.statPoints = Math.max(0, Number(savedPlayer.statPoints) || 0);
+  player.statPointUnlockGranted = Boolean(savedPlayer.statPointUnlockGranted);
   player.unassignedPoints = Math.max(
     0,
     Number(savedPlayer.unassignedPoints) || 0

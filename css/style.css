@@ -372,6 +372,26 @@ status-actions {
 .status-row div {
   width: 48%;
 }
+.status-controls {
+  margin-left: auto;
+  display: flex;
+  gap: 4px;
+}
+
+.status-controls button {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  flex: 0 0 auto;
+  font-size: 18px;
+  border-radius: 6px;
+}
+
+.status-note {
+  font-size: 12px;
+  color: #bbb;
+  margin-bottom: 6px;
+}
 /* スキル割り振り用 行 */
 .skill-row {
   display: flex;

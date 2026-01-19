@@ -18,6 +18,8 @@ const player = {
     agility: 5,
   },
   unassignedPoints: 0,
+  statPoints: 0,
+  statPointUnlockGranted: false,
   skills: {},
   weapon: null,
   accessory: null,
@@ -138,8 +140,22 @@ function gainExp(exp) {
 
 function levelUp() {
   player.level++;
+  if (player.maxReachedFloor >= UNLOCK_FLOOR) {
+    player.statPoints += 1;
+    log("✨ ステータスポイント +1");
+  }
   player.unassignedPoints += 1;
   log(`🎉 レベルアップ！ Lv.${player.level}`);
+  refresh();
+}
+
+function awardStatPointUnlock() {
+  if (player.statPointUnlockGranted) return;
+  if (player.maxReachedFloor < UNLOCK_FLOOR) return;
+
+  player.statPoints += player.level;
+  player.statPointUnlockGranted = true;
+  log(`✨ ステータスポイント +${player.level}`);
   refresh();
 }
 function damagePlayer(amount) {
