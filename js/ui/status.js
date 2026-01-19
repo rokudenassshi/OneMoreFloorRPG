@@ -42,9 +42,9 @@ function renderStatus() {
   statusContentEl.innerHTML = `
     <div>記録：${player.maxReachedFloor}階</div>
     <div>Lv：${player.level}</div>    
+    <div>未使用スキルポイント：${player.unassignedPoints}</div>
     <div>${statPointLabel}</div>
     ${statPointNote}
-    <div>未使用スキルポイント：${player.unassignedPoints}</div>
     <div>EXP：${player.exp} / ${calcNextExp()}</div>
     <div>次のLvまで：${nextExp}</div>
     <hr>

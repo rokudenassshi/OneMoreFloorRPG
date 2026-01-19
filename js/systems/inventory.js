@@ -192,7 +192,9 @@ function renderEquipmentItems() {
 
   equipmentItems.forEach(({ item, index, isAccessory }) => {
     const isEquipped = player.weapon === item || player.accessory === item;
-    const rareDropMark = item.isRareDrop ? "★" : "";
+    const isLocked = !!item.isLocked;
+    // const rareDropMark = item.isRareDrop ? "★" : "";
+    const lockMark = isLocked ? "🔒" : "";
     const specialOptions = Array.isArray(item.specialOptions)
       ? item.specialOptions
       : [];
@@ -214,19 +216,28 @@ function renderEquipmentItems() {
     div.innerHTML = `
       <div>
         ${isEquipped ? "🟢[E] " : ""}
-        ${rareDropMark}${item.name}
+        ${lockMark}${item.name}
       </div>
 
       <div style="margin-top:4px;">
         <div style="font-size:12px; opacity:0.9;">能力値</div>
         <div>${totalParts.length ? totalParts.join(" / ") : "なし"}</div>
       </div>
-      <div style="margin-top:6px; display:flex; gap:10px; flex-wrap:wrap;">
+      <div style="margin-top:6px; display:flex; gap:10px; flex-wrap:wrap;">     
+            ${
+              isEquipped
+                ? ""
+                : `<button onclick="toggleItemLock(${index})">${
+                    isLocked ? "解除" : "ロック"
+                  }</button>`
+            }
 ${isEquipped ? "" : `<button onclick="equip(${index})">装備</button>`}
                     ${
                       isEquipped
                         ? ""
-                        : `<button onclick="discardEquipment(${index})">捨てる</button>`
+                        : isLocked
+                          ? `<button disabled title="ロック中は捨てられません">捨てる</button>`
+                          : `<button onclick="discardEquipment(${index})">捨てる</button>`
                     }
       </div>
       <hr>
@@ -253,7 +264,9 @@ function renderAccessoryItems() {
 
   accessoryItems.forEach(({ item, index, isAccessory }) => {
     const isEquipped = player.weapon === item || player.accessory === item;
-    const rareDropMark = item.isRareDrop ? "★" : "";
+    const isLocked = !!item.isLocked;
+    // const rareDropMark = item.isRareDrop ? "★" : "";
+    const lockMark = isLocked ? "🔒" : "";
     const specialOptions = Array.isArray(item.specialOptions)
       ? item.specialOptions
       : [];
@@ -275,7 +288,7 @@ function renderAccessoryItems() {
     div.innerHTML = `
       <div>
         ${isEquipped ? "🟢[E] " : ""}
-        ${rareDropMark}${item.name}
+        ${lockMark}${item.name}
       </div>
 
       <div style="margin-top:4px;">
@@ -283,11 +296,20 @@ function renderAccessoryItems() {
         <div>${totalParts.length ? totalParts.join(" / ") : "なし"}</div>
       </div>
       <div style="margin-top:6px; display:flex; gap:10px; flex-wrap:wrap;">
+        ${
+          isEquipped
+            ? ""
+            : `<button onclick="toggleItemLock(${index})">${
+                isLocked ? "解除" : "ロック"
+              }</button>`
+        }
 ${isEquipped ? "" : `<button onclick="equip(${index})">装備</button>`}
                     ${
                       isEquipped
                         ? ""
-                        : `<button onclick="discardEquipment(${index})">捨てる</button>`
+                        : isLocked
+                          ? `<button disabled title="ロック中は捨てられません">捨てる</button>`
+                          : `<button onclick="discardEquipment(${index})">捨てる</button>`
                     }
       </div>
       <hr>
@@ -393,7 +415,18 @@ function discardEquipment(index) {
   renderInventory();
   refresh();
 }
+function toggleItemLock(index) {
+  const item = inventory[index];
+  if (!item || item.kind === "consumable") return;
 
+  item.isLocked = !item.isLocked;
+  log(
+    `${item.isLocked ? "🔒" : "🔓"} ${item.name} を${
+      item.isLocked ? "ロック" : "解除"
+    }した`,
+  );
+  renderInventory();
+}
 /* =====================
    アイテムフィルターの設定を保存
 ===================== */
