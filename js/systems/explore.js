@@ -16,6 +16,7 @@ function move(dir) {
   if (gameState !== "EXPLORE") return;
   floor = Math.max(0, floor + dir);
   player.maxReachedFloor = Math.max(player.maxReachedFloor, floor);
+  awardStatPointUnlock();
 
   // 拠点（0階層）
   if (floor === 0) {

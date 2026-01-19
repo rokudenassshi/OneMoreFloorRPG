@@ -14,7 +14,8 @@ function getSkillEffects() {
     evadeBoost: 0,
     minHits: 0,
     agilityAttackRate: 0,
-    speedAttackVitalityRate: 0,
+    vitalityAttackRate: 0,
+    expBoost: 0,
   };
 
   SKILLS.forEach((skill) => {
@@ -96,23 +97,30 @@ function renderSkillScreen() {
         <div>回避率：+${Math.floor(total.evadeBoost)}%</div>
         <div>連続攻撃の最低ヒット数：+${Math.floor(total.minHits)}</div>
         <div>シールドバッシュ：${
-          total.speedAttackVitality > 0 ? "習得済み" : "未習得"
+          total.vitalityAttackRate > 0 ? "習得済み" : "未習得"
         }</div>
         <div>スピードアタック：${
-          total.agilityAttack > 0 ? "習得済み" : "未習得"
+          total.agilityAttackRate > 0 ? "習得済み" : "未習得"
         }</div>
+        <div>獲得経験値：+${Math.floor(total.expBoost)}%</div>
     </div>
   `;
 
   const skillListHtml = SKILLS.map((skill) => {
     const level = getSkillLevel(skill.id);
-    const isMax = level >= skill.maxLevel;
+    const isMax = Number.isFinite(skill.maxLevel)
+      ? level >= skill.maxLevel
+      : false;
     const requiredPoints = Number(skill.requiredPoints) || 1;
 
     const canLearn = player.unassignedPoints >= requiredPoints && !isMax;
     const canDecrease = level > 0;
-
-    const progressPct = Math.round((level / skill.maxLevel) * 100);
+    const progressPct = Number.isFinite(skill.maxLevel)
+      ? Math.round((level / skill.maxLevel) * 100)
+      : 0;
+    const maxLevelLabel = Number.isFinite(skill.maxLevel)
+      ? skill.maxLevel
+      : "∞";
 
     return `
       <div class="skill-card ${canLearn ? "is-affordable" : ""} ${
@@ -123,7 +131,7 @@ function renderSkillScreen() {
 
           <div class="skill-meta">
             <span class="skill-badge">必要 ${requiredPoints}pt</span>
-            <span class="skill-level">Lv.${level}/${skill.maxLevel}</span>
+            <span class="skill-level">Lv.${level}/${maxLevelLabel}</span>
           </div>
         </div>
 

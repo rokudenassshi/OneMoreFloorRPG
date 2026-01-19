@@ -436,12 +436,13 @@
     return Math.floor(Math.random() * (max - min + 1)) + min;
   }
 
-  function getAccessoryName(option) {
+  function getAccessoryName(option, floor = 0) {
     const suffixes = option.accessoryTypes;
     const baseName = `${option.name}の${pick(Math.random, suffixes)}`;
     const maxValue = Number(option.max);
     const currentValue = Number(option.value);
     if (
+      floor >= 10000 &&
       Number.isFinite(maxValue) &&
       Number.isFinite(currentValue) &&
       currentValue >= Math.ceil(maxValue * 0.9)
@@ -450,13 +451,13 @@
     }
     return baseName;
   }
-  function createAccessoryForDrop() {
+  function createAccessoryForDrop(floor = 0) {
     const specialOptions = pickSpecialOptions(1);
     const option = specialOptions[0];
     return {
       id: `acc_${option?.id || "unknown"}`,
       kind: "accessory",
-      name: getAccessoryName(option),
+      name: getAccessoryName(option, floor),
       specialOptions: option ? [option] : [],
       bonus: { power: 0, vitality: 0, agility: 0 },
     };

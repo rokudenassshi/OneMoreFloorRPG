@@ -123,7 +123,34 @@
        JavaScript 読み込み
   ===================== -->
   <!-- エントリーポイント -->
-  <script src="js/core/version.js?v=1.0.2"></script>
-  <script src="js/core/loader.js?v=1.0.2"></script>
+  <script src="js/core/version.js?v=1.0.10"></script>
+  <script src="js/core/loader.js?v=1.0.10"></script>
+  <script>
+    const REQUIRED_PASSWORD = "rokudemonai";
+    const enteredPassword = window.prompt("パスワードを入力してください");
+
+    if (enteredPassword !== REQUIRED_PASSWORD) {
+      window.alert("パスワードが違います。トップへ戻ります。");
+      window.location.href = "index.html";
+    } else {
+      const appendScript = (src) =>
+        new Promise((resolve, reject) => {
+          const script = document.createElement("script");
+          script.src = src;
+          script.async = false;
+          script.onload = resolve;
+          script.onerror = () =>
+            reject(new Error(`スクリプトの読み込みに失敗しました: ${src}`));
+          document.body.appendChild(script);
+        });
+
+      appendScript("js/core/version.js?v=1.0.2")
+        .then(() => appendScript("js/core/loader.js?v=1.0.2"))
+        .catch((error) => {
+          console.error(error);
+          window.alert("初期化に失敗しました。再読み込みしてください。");
+        });
+    }
+  </script>
 </body>
 </html>

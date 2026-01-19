@@ -15,7 +15,7 @@
       name: "ダメージ反射",
       accessoryTypes: ACCESSORY_TYPES,
       min: 5,
-      max: 30,
+      max: 20,
       describe: (value) => `被ダメージの${value}%を相手に反射`,
     },
     {
@@ -56,7 +56,7 @@
       accessoryTypes: ACCESSORY_TYPES,
       min: 1,
       max: 2,
-      describe: (value) => `最低ヒット数を+${value}`,
+      describe: (value) => `ヒット数を+${value}`,
     },
   ];
 

@@ -405,7 +405,7 @@ function dropItem() {
   if (!enemy) return;
 
   if (enemy.isRare) {
-    const item = window.ItemGen.createAccessoryForDrop();
+    const item = window.ItemGen.createAccessoryForDrop(floor);
     item.isRareDrop = true;
     inventory.push(item);
     log(`🎁 ★${item.name}を手に入れた`);

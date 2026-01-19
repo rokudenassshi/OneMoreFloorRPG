@@ -24,7 +24,7 @@ function renderStatus() {
   const accessoryName = player.accessory ? `${player.accessory.name}` : "なし";
   statusContentEl.innerHTML = `
     <div>記録：${player.maxReachedFloor}階</div>
-    <div>Lv：${player.level}</div>
+    <div>Lv：${player.level}</div>    
     <div>未割り振りポイント：${player.unassignedPoints}</div>
     <div>EXP：${player.exp} / ${calcNextExp()}</div>
     <div>次のLvまで：${nextExp}</div>

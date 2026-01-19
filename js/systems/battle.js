@@ -10,7 +10,7 @@ function startBattle() {
   const baseRareRate = 0.03;
   const bonusRareRate = (specialEffects.rareEncounterBoost || 0) / 100;
   const isRare = Math.random() < Math.min(0.5, baseRareRate + bonusRareRate);
-  const rate = isRare ? 3 : 1;
+  const rate = isRare ? 2 : 1;
 
   enemy = {
     id: base.id,
@@ -158,7 +158,7 @@ function rollDamageWithRoll(base, variance, roll) {
   return Math.max(1, Math.floor(roll * (max - min + 1)) + min);
 }
 
-function rollDamage(base, variance = 0.3) {
+function rollDamage(base, variance = 0.2) {
   return rollDamageWithRoll(base, variance, Math.random());
 }
 
@@ -174,14 +174,15 @@ function endBattle() {
     log("✨ 戦闘終了でHPが全回復した");
   }
   const skillEffects = getSkillEffects();
-  if ((skillEffects.herbBattleReward || 0) > 0) {
+  const herbBattleRewardCount = Math.floor(skillEffects.herbBattleReward || 0);
+  if (herbBattleRewardCount > 0) {
     const herbCountBefore = getHerbCount();
-    grantHerbs(1, false);
-    if (getHerbCount() > herbCountBefore) {
-      log("🌿 戦闘終了でやくそうを1つ手に入れた");
+    grantHerbs(herbBattleRewardCount, false);
+    const addedHerbCount = getHerbCount() - herbCountBefore;
+    if (addedHerbCount > 0) {
+      log(`🌿 戦闘終了でやくそうを${addedHerbCount}つ手に入れた`);
     }
   }
-
   if (shouldLogBossRest) {
     log("🔥静かに炎が燈っている。ここでは休めそうだ。");
   }

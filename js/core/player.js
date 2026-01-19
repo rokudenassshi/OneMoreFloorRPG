@@ -54,8 +54,13 @@ function calcAttack() {
 function calcAttackCount() {
   const bonus = getEquipmentBonus();
   const totalAgility = Number(player.status.agility) + bonus.agility;
-  const specialEffects = getSpecialEffects();
-  const minHitBonus = Math.max(0, Math.floor(specialEffects.minHits || 0));
+  const equipmentEffects = getEquipmentSpecialEffects();
+  const skillEffects =
+    typeof getSkillEffects === "function" ? getSkillEffects() : {};
+  const minHitBonus = Math.max(
+    0,
+    Math.floor((equipmentEffects.minHits || 0) + (skillEffects.minHits || 0))
+  );
   // 1hitは常に保証、2hit以降の要求値を「段階的に増加」させる
   const base = 50; // 最初の増分（2hitに必要な追加量）
   const stepInc = 200; // 段階が1上がるごとに増分を+30
@@ -79,6 +84,7 @@ function calcAttackCount() {
     maxHits = Math.max(maxHits, 5 + extraHits);
   }
 
+  maxHits += minHitBonus;
   const minHits = 1 + minHitBonus;
   const adjustedMaxHits = Math.max(maxHits, minHits);
 
@@ -115,7 +121,7 @@ function calcNextExp() {
 }
 
 function gainExp(exp) {
-  const specialEffects = getEquipmentSpecialEffects();
+  const specialEffects = getSpecialEffects();
   const boostRate = (specialEffects.expBoost || 0) / 100;
   const boostedExp = Math.floor(exp * (1 + boostRate));
   player.exp += boostedExp;
@@ -251,6 +257,7 @@ function getSpecialEffects() {
     reflect: equipmentEffects.reflect + (skillEffects.reflect || 0),
     evadeBoost: equipmentEffects.evadeBoost + (skillEffects.evadeBoost || 0),
     minHits: equipmentEffects.minHits + (skillEffects.minHits || 0),
+    expBoost: equipmentEffects.expBoost + (skillEffects.expBoost || 0),
     agilityAttackRate: skillEffects.agilityAttackRate || 0,
     vitalityAttackRate: skillEffects.vitalityAttackRate || 0,
   };

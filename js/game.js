@@ -25,4 +25,5 @@ if (!hasAutoSave) {
   log("💾 オートセーブをロード");
 }
 
+awardStatPointUnlock();
 refresh();
