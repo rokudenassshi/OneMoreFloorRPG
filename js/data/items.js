@@ -289,7 +289,12 @@
   // 固有値は都度ランダムに生成
   function buildBaseBonus(rng, tier, floor, type, title) {
     const floorMul = Math.max(0, Math.floor(floor || 0));
-    const cap = Math.max(1, floorMul);
+
+    const hasUnlock = Number(floor || 0) >= UNLOCK_FLOOR;
+    const unlockCapMultiplier = 1.2;
+    const cap = hasUnlock
+      ? Math.max(1, Math.floor(floorMul * unlockCapMultiplier))
+      : Math.max(1, floorMul);
     const roll = () => {
       const variance = 0.5 + rng() * 1.0;
       return Math.max(1, Math.floor(rng() * floorMul * title.mul * variance));
@@ -353,7 +358,7 @@
     if (!baseBonus) return 0;
     return ["power", "vitality", "agility"].reduce(
       (count, key) => count + (baseBonus[key] ? 1 : 0),
-      0
+      0,
     );
   }
 
@@ -476,7 +481,7 @@
     const optionBonus = { power: 0, vitality: 0, agility: 0 };
     const cap = Math.max(0, Math.floor((floor || 0) / 10));
     const stats = ["power", "vitality", "agility"].sort(
-      () => Math.random() - 0.5
+      () => Math.random() - 0.5,
     );
 
     const bonus = {
@@ -505,7 +510,7 @@
     floor,
     isRareEnemy,
     titleMul,
-    desiredBaseStatCount = 3
+    desiredBaseStatCount = 3,
   ) {
     let base = createBaseItemForDrop(tier, floor);
     let rerollCount = 0;

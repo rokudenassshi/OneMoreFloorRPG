@@ -32,13 +32,9 @@ function renderStatus() {
   const powerBonusText = bonus.power ? `（装備+${bonus.power}）` : "";
   const vitalityBonusText = bonus.vitality ? `（装備+${bonus.vitality}）` : "";
   const agilityBonusText = bonus.agility ? `（装備+${bonus.agility}）` : "";
-  const powerDecreaseDisabled =
-    !isStatPointUnlocked || player.status.power <= player.baseStatus.power;
-  const vitalityDecreaseDisabled =
-    !isStatPointUnlocked ||
-    player.status.vitality <= player.baseStatus.vitality;
-  const agilityDecreaseDisabled =
-    !isStatPointUnlocked || player.status.agility <= player.baseStatus.agility;
+  const powerDecreaseDisabled = !isStatPointUnlocked;
+  const vitalityDecreaseDisabled = !isStatPointUnlocked;
+  const agilityDecreaseDisabled = !isStatPointUnlocked;
   const addDisabled = !isStatPointUnlocked || player.statPoints <= 0;
   const nextExp = calcNextExp() - player.exp;
   const weaponName = player.weapon ? `${player.weapon.name}` : "なし";
@@ -114,7 +110,7 @@ function addStat(stat) {
   if (player.maxReachedFloor < UNLOCK_FLOOR) return;
   if (player.statPoints <= 0) return;
 
-  player.status[stat] += 5;
+  player.status[stat] += 2;
   player.statPoints--;
 
   refresh();
@@ -122,8 +118,8 @@ function addStat(stat) {
 }
 function subStat(stat) {
   if (player.status[stat] <= player.baseStatus[stat]) return;
-  if (player.maxReachedFloor < UNLOCK_FLOO) return;
-  player.status[stat] -= 5;
+  if (player.maxReachedFloor < UNLOCK_FLOOR) return;
+  player.status[stat] -= 2;
   player.statPoints++;
 
   refresh();

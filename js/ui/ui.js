@@ -13,9 +13,11 @@ function hideRareEnemyPopup() {
   rareEnemyPopupEl.classList.remove("is-visible");
   rareEnemyPopupEl.setAttribute("aria-hidden", "true");
 }
-
-function showRareEnemyPopup(enemyName) {
+function showRareEnemyPopup(enemyName, titleText = "レアモンスター出現！") {
   if (!rareEnemyPopupEl || !rareEnemyPopupNameEl) return;
+  if (rareEnemyPopupTitleEl) {
+    rareEnemyPopupTitleEl.textContent = titleText;
+  }
   rareEnemyPopupNameEl.textContent = enemyName;
   rareEnemyPopupEl.classList.add("is-visible");
   rareEnemyPopupEl.setAttribute("aria-hidden", "false");

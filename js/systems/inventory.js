@@ -33,7 +33,7 @@ function grantHerbs(count, shouldLog = true) {
 function setHerbCount(count, shouldLog = true) {
   const cappedCount = Math.min(count, getHerbMaxCount());
   const herbCount = inventory.filter(
-    (item) => item && item.id === HERB_ITEM_TEMPLATE.id
+    (item) => item && item.id === HERB_ITEM_TEMPLATE.id,
   ).length;
   const needed = cappedCount - herbCount;
   if (needed > 0) {
@@ -356,7 +356,7 @@ function useItem(index) {
     const herbHealBoost = Math.max(0, skillEffects.herbHealBoost || 0);
     const healAmount = Math.max(
       1,
-      Math.floor(maxHp * (item.healRatio + herbHealBoost))
+      Math.floor(maxHp * (item.healRatio + herbHealBoost)),
     );
     player.hp = Math.min(maxHp, player.hp + healAmount);
     log(`🌿 ${item.name} を使用してHPを回復した`);
@@ -372,7 +372,7 @@ function useHerbInBattle() {
   if (gameState !== "BATTLE") return;
 
   const herbIndex = inventory.findIndex(
-    (item) => item && item.id === HERB_ITEM_TEMPLATE.id
+    (item) => item && item.id === HERB_ITEM_TEMPLATE.id,
   );
   if (herbIndex === -1) {
     log("💤 やくそうがない");
@@ -381,29 +381,90 @@ function useHerbInBattle() {
   const used = useItem(herbIndex);
   if (used) return;
 }
+function scaleItemBonuses(item, multiplier) {
+  const scaleValue = (value) =>
+    value > 0 ? Math.max(1, Math.floor(value * multiplier)) : 0;
+  if (item.baseBonus) {
+    item.baseBonus = {
+      power: scaleValue(item.baseBonus.power || 0),
+      vitality: scaleValue(item.baseBonus.vitality || 0),
+      agility: scaleValue(item.baseBonus.agility || 0),
+    };
+  }
+  if (item.optionBonus) {
+    item.optionBonus = {
+      power: scaleValue(item.optionBonus.power || 0),
+      vitality: scaleValue(item.optionBonus.vitality || 0),
+      agility: scaleValue(item.optionBonus.agility || 0),
+    };
+  }
+  if (item.bonus) {
+    item.bonus = {
+      power: scaleValue(item.bonus.power || 0),
+      vitality: scaleValue(item.bonus.vitality || 0),
+      agility: scaleValue(item.bonus.agility || 0),
+    };
+  }
+}
 
-/* =====================
-   ゲームオーバー時：未装備アイテムをロスト
-   （装備中のアイテムだけ残す）
-===================== */
-// function loseUnequippedItems() {
-//   if (!player.weapon) {
-//     inventory.length = 0;
-//     return;
-//   }
-
-//   const equipped = player.weapon;
-
-//   inventory.length = 0;
-//   inventory.push(equipped);
-// }
+function applyBrokenItemStat(item) {
+  const total =
+    (item.bonus?.power || 0) +
+    (item.bonus?.vitality || 0) +
+    (item.bonus?.agility || 0);
+  const stats = ["power", "vitality", "agility"];
+  const chosenStat = stats[Math.floor(Math.random() * stats.length)];
+  const singleBonus = {
+    power: 0,
+    vitality: 0,
+    agility: 0,
+    [chosenStat]: total,
+  };
+  item.baseBonus = { ...singleBonus };
+  item.optionBonus = { power: 0, vitality: 0, agility: 0 };
+  item.bonus = { ...singleBonus };
+}
 
 /* =====================
    ドロップ（敵ごとの drops から抽選）
 ===================== */
 function dropItem() {
   if (!enemy) return;
-
+  if (enemy.isBroken) {
+    const roll = Math.random();
+    if (roll < 0.1) {
+      const item = window.ItemGen.createLootItemForDrop(
+        enemy.tier || 1,
+        floor,
+        false,
+        enemy.titleMul,
+        3,
+      );
+      item.name = `★壊れた${item.name}`;
+      applyBrokenItemStat(item);
+      inventory.push(item);
+      log(`🎁 ${item.name}を手に入れた`);
+      return;
+    }
+    if (roll < 0.2) {
+      const item = window.ItemGen.createLootItemForDrop(
+        enemy.tier || 1,
+        floor,
+        false,
+        enemy.titleMul,
+        3,
+      );
+      item.name = `★神の${item.name}`;
+      scaleItemBonuses(item, 1.5);
+      inventory.push(item);
+      log(`🎁 ${item.name}を手に入れた`);
+      return;
+    }
+    // const item = window.ItemGen.createAccessoryForDrop(floor);
+    // inventory.push(item);
+    // log(`🎁 ${item.name}を手に入れた`);
+    return;
+  }
   if (enemy.isRare) {
     const item = window.ItemGen.createAccessoryForDrop(floor);
     item.isRareDrop = true;
@@ -417,8 +478,8 @@ function dropItem() {
     1,
     Math.min(
       10,
-      t + (Math.random() < 0.2 ? 1 : 0) - (Math.random() < 0.1 ? 1 : 0)
-    )
+      t + (Math.random() < 0.2 ? 1 : 0) - (Math.random() < 0.1 ? 1 : 0),
+    ),
   );
 
   // ドロップ率（好みで）
@@ -431,7 +492,7 @@ function dropItem() {
     floor,
     !!enemy.isRare,
     enemy.titleMul,
-    desiredBaseStatCount
+    desiredBaseStatCount,
   );
 
   item.isRareDrop = !!enemy.isRare;
@@ -455,6 +516,6 @@ function countNonZeroBaseStats(baseBonus) {
   if (!baseBonus) return 0;
   return ["power", "vitality", "agility"].reduce(
     (count, key) => count + (baseBonus[key] ? 1 : 0),
-    0
+    0,
   );
 }

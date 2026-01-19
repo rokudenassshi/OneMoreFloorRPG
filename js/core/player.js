@@ -9,13 +9,8 @@ const player = {
 
   status: {
     power: 10,
-    vitality: 5,
-    agility: 5,
-  },
-  baseStatus: {
-    power: 5,
-    vitality: 5,
-    agility: 5,
+    vitality: 10,
+    agility: 10,
   },
   unassignedPoints: 0,
   statPoints: 0,
@@ -37,7 +32,6 @@ function calcAttack() {
   const totalAgility = player.status.agility + bonus.agility;
   const totalVitality = player.status.vitality + bonus.vitality;
   const skillEffects = getSkillEffects();
-  console.log("skillEffects", skillEffects);
   let attackSource = basePower;
 
   const agiRate = Number(skillEffects.agilityAttackRate) || 0;

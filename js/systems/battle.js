@@ -5,17 +5,26 @@ function startBattle() {
   // ★ floor 以上で出現する敵だけ抽選
   const base = EnemyGen.createEnemyForFloor(floor);
 
+  // ★壊れたエネミー（1001階層以降）
+  const brokenEnemyRate = 0.02;
+  const isBroken = floor >= UNLOCK_FLOOR && Math.random() < brokenEnemyRate;
   // レアモンスター
   const specialEffects = getEquipmentSpecialEffects();
   const baseRareRate = 0.03;
   const bonusRareRate = (specialEffects.rareEncounterBoost || 0) / 100;
-  const isRare = Math.random() < Math.min(0.5, baseRareRate + bonusRareRate);
-  const rate = isRare ? 2 : 1;
+  const isRare =
+    !isBroken && Math.random() < Math.min(0.5, baseRareRate + bonusRareRate);
+  const rate = isBroken ? 2.5 : isRare ? 1.8 : 1;
 
   enemy = {
     id: base.id,
-    name: isRare ? `＊レア ${base.name}` : base.name,
+    name: isBroken
+      ? `★壊れた ${base.name}`
+      : isRare
+        ? `＊レア ${base.name}`
+        : base.name,
     isRare,
+    isBroken,
     tier: base.tier,
     titleMul: base.titleMul,
     // 上位ほど強い：baseがtierで強い + floor補正を少し
@@ -32,7 +41,9 @@ function startBattle() {
   battleButtons.style.display = "block";
 
   log(`⚔ ${enemy.name} があらわれた！`);
-  if (isRare) {
+  if (isBroken) {
+    showRareEnemyPopup(base.name, "★壊れたエネミーが出現した。");
+  } else if (isRare) {
     showRareEnemyPopup(base.name);
   }
   updateUI();
@@ -52,11 +63,11 @@ function attack() {
   const hitDamages = [];
   const hitComboBonusDamages = [];
   for (let i = 0; i < hits; i++) {
-    const decayMultiplier = Math.pow(0.5, i);
+    const decayMultiplier = Math.pow(0.6, i);
     const baseHitAtk = Math.max(1, Math.floor(atk * decayMultiplier));
     const hitAtk = Math.max(
       1,
-      Math.floor(baseHitAtk * (1 + comboBoostRate * i))
+      Math.floor(baseHitAtk * (1 + comboBoostRate * i)),
     );
     const damageRoll = Math.random();
     const damage = rollDamageWithRoll(hitAtk, 0.3, damageRoll);

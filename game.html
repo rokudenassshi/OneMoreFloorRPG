@@ -30,7 +30,7 @@
 
   <div id="rareEnemyPopup" class="rare-popup" aria-live="assertive" aria-hidden="true">
       <div class="rare-popup-content" role="alert">
-        <div class="rare-popup-title">レアモンスター出現！</div>
+        <div class="rare-popup-title" id="rareEnemyPopupTitle">レアモンスター出現！</div>
         <div class="rare-popup-name" id="rareEnemyPopupName"></div>
         <div class="rare-popup-hint">タップで閉じる</div>
       </div>
@@ -123,8 +123,8 @@
        JavaScript 読み込み
   ===================== -->
   <!-- エントリーポイント -->
-  <script src="js/core/version.js?v=1.1.2"></script>
-  <script src="js/core/loader.js?v=1.1.2"></script>
+  <script src="js/core/version.js?v=1.1.11"></script>
+  <script src="js/core/loader.js?v=1.1.11"></script>
   <script>
     const REQUIRED_PASSWORD = "rokudemonai";
     const enteredPassword = window.prompt("パスワードを入力してください");

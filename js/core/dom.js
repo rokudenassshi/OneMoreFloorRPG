@@ -7,6 +7,7 @@ const logEl = document.getElementById("log");
 const rareEnemyPopupEl = document.getElementById("rareEnemyPopup");
 const rareEnemyPopupNameEl = document.getElementById("rareEnemyPopupName");
 
+const rareEnemyPopupTitleEl = document.getElementById("rareEnemyPopupTitle");
 const exploreButtons = document.getElementById("exploreButtons");
 const battleButtons = document.getElementById("battleButtons");
 const inventoryEl = document.getElementById("inventory");

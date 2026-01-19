@@ -43,11 +43,6 @@ function autoSave() {
         vitality: player.status.vitality,
         agility: player.status.agility,
       },
-      baseStatus: {
-        power: player.baseStatus.power,
-        vitality: player.baseStatus.vitality,
-        agility: player.baseStatus.agility,
-      },
       statPoints: player.statPoints,
       statPointUnlockGranted: player.statPointUnlockGranted,
       unassignedPoints: player.unassignedPoints,
@@ -76,7 +71,6 @@ function loadAutoSave() {
   const wasInBattle = data.gameState === "BATTLE";
   const savedPlayer = data.player || {};
   const savedStatus = savedPlayer.status || {};
-  const savedBaseStatus = savedPlayer.baseStatus || {};
 
   floor = Math.max(0, Number(data.floor) || 0);
   gameState = "EXPLORE";
@@ -92,12 +86,6 @@ function loadAutoSave() {
   player.status.power = Number(savedStatus.power) || 0;
   player.status.vitality = Number(savedStatus.vitality) || 0;
   player.status.agility = Number(savedStatus.agility) || 0;
-  player.baseStatus.power =
-    Number(savedBaseStatus.power) || player.status.power;
-  player.baseStatus.vitality =
-    Number(savedBaseStatus.vitality) || player.status.vitality;
-  player.baseStatus.agility =
-    Number(savedBaseStatus.agility) || player.status.agility;
   player.statPoints = Math.max(0, Number(savedPlayer.statPoints) || 0);
   player.statPointUnlockGranted = Boolean(savedPlayer.statPointUnlockGranted);
   player.unassignedPoints = Math.max(
