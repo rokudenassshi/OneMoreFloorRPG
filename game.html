@@ -15,7 +15,7 @@
         <div>Lv：<span id="playerLevel"></span></div>
          <div class="floor-info">
           階層：<span id="floor"></span>
-          <button class="teleport-button" type="button" onclick="teleportToFloor()">転移</button>
+          <button class="teleport-button" type="button" onclick="openTeleportModal()">転移</button>
         </div>
       </div><div class="exp-bar">
   <div class="exp-bar-fill" id="expBarFill"></div>
@@ -142,13 +142,23 @@
     <button onclick="closeStatUnlockModal()">OK</button>
   </div>
 </div>
-
+<div id="teleportModal" class="modal hidden" aria-hidden="true">
+  <div class="modal-content teleport-modal-content">
+    <h2>転移</h2>
+    <p>転移するボス階層を選択してください。</p>
+    <select id="teleportFloorSelect" aria-label="転移するボス階層"></select>
+    <div class="teleport-modal-actions">
+      <button type="button" onclick="teleportToFloor()">転移</button>
+      <button type="button" onclick="closeTeleportModal()">キャンセル</button>
+    </div>
+  </div>
+</div>
   <!-- =====================
        JavaScript 読み込み
   ===================== -->
   <!-- エントリーポイント -->
-  <script src="js/core/version.js?v=1.1.11"></script>
-  <script src="js/core/loader.js?v=1.1.11"></script>
+  <script src="js/core/version.js?v=1.0.0"></script>
+  <script src="js/core/loader.js?v=1.0.0"></script>
   <script>
     const REQUIRED_PASSWORD = "rokudemonai";
     const enteredPassword = window.prompt("パスワードを入力してください");
@@ -168,8 +178,8 @@
           document.body.appendChild(script);
         });
 
-      appendScript("js/core/version.js?v=1.0.2")
-        .then(() => appendScript("js/core/loader.js?v=1.0.2"))
+      appendScript("js/core/version.js?v=1.0.0")
+        .then(() => appendScript("js/core/loader.js?v=1.0.0"))
         .catch((error) => {
           console.error(error);
           window.alert("初期化に失敗しました。再読み込みしてください。");

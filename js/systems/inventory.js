@@ -681,7 +681,7 @@ function dropItem() {
     return;
   }
   inventory.push(item);
-  log(`🎁 ${rareDropMark}${item.name}を手に入れた`);
+  log(`🎁 ${item.name}を手に入れた`);
 }
 
 function countNonZeroBaseStats(baseBonus) {

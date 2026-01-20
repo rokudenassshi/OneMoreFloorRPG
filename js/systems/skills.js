@@ -27,6 +27,7 @@ function getSkillEffects() {
     powerRate: 0,
     vitalityRate: 0,
     agilityRate: 0,
+    guts: 0,
   };
 
   SKILLS.forEach((skill) => {
@@ -115,6 +116,9 @@ function renderSkillScreen() {
   }
   if (total.herbBattleReward > 0) {
     summaryItems.push("<div>戦闘終了のやくそう増加</div>");
+  }
+  if (total.guts > 0) {
+    summaryItems.push("<div>ガッツ</div>");
   }
   if (total.lifeSteal > 0) {
     summaryItems.push(`<div>吸血：+${Math.floor(total.lifeSteal)}%</div>`);

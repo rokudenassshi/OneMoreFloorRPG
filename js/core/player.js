@@ -157,8 +157,23 @@ function damagePlayer(amount) {
     return { evaded: true, damage: 0 };
   }
 
-  player.hp -= amount;
-  if (player.hp < 0) player.hp = 0;
+  const skillEffects =
+    typeof getSkillEffects === "function" ? getSkillEffects() : {};
+  const nextHp = player.hp - amount;
+  if (
+    gameState === "BATTLE" &&
+    nextHp <= 0 &&
+    !battleGutsUsed &&
+    (skillEffects.guts || 0) > 0
+  ) {
+    player.hp = 1;
+    battleGutsUsed = true;
+    log("🧡 ガッツでHP1で耐えた！");
+    refresh();
+    return { evaded: false, damage: amount };
+  }
+
+  player.hp = Math.max(0, nextHp);
 
   refresh();
 

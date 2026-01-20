@@ -440,7 +440,14 @@
     }
     return Math.floor(Math.random() * (max - min + 1)) + min;
   }
-
+  function capAccessoryOptionValue(option, value, floor = 0) {
+    if (floor >= UNLOCK_FLOOR) return value;
+    const min = Number(option.min) || 0;
+    const max = Number(option.max);
+    if (!Number.isFinite(max)) return value;
+    const cap = Math.max(min, Math.floor(max * 0.8));
+    return Math.min(value, cap);
+  }
   function getAccessoryName(option, floor = 0) {
     const suffixes = option.accessoryTypes;
     const baseName = `${option.name}の${pick(Math.random, suffixes)}`;
@@ -450,7 +457,7 @@
       floor >= UNLOCK_FLOOR &&
       Number.isFinite(maxValue) &&
       Number.isFinite(currentValue) &&
-      currentValue >= Math.ceil(maxValue * 0.9)
+      currentValue >= Math.ceil(maxValue * 0.8)
     ) {
       return `輝く${baseName}`;
     }
@@ -459,6 +466,9 @@
   function createAccessoryForDrop(floor = 0) {
     const specialOptions = pickSpecialOptions(1);
     const option = specialOptions[0];
+    if (option) {
+      option.value = capAccessoryOptionValue(option, option.value, floor);
+    }
     return {
       id: `acc_${option?.id || "unknown"}`,
       kind: "accessory",

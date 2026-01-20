@@ -1,6 +1,7 @@
 function startBattle() {
   gameState = "BATTLE";
   clearLog();
+  battleGutsUsed = false;
 
   // ★ floor 以上で出現する敵だけ抽選
   const base = EnemyGen.createEnemyForFloor(floor);
@@ -207,6 +208,7 @@ function endBattle() {
   pendingBossRestLog = false;
   gameState = "EXPLORE";
   enemy = null;
+  battleGutsUsed = false;
 
   if (hasBattle) {
     player.hp = calcMaxHp();

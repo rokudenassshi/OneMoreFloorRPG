@@ -2,6 +2,7 @@ let gameState = "EXPLORE";
 let floor = 0;
 let enemy = null;
 const autosaveKey = "roguelike_autosave";
+let battleGutsUsed = false;
 
 function isBossFloor(currentFloor) {
   return BOSS_FLOORS.includes(currentFloor);

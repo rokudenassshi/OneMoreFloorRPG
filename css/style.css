@@ -625,4 +625,29 @@ status-actions {
   margin-top: 16px;
   padding: 6px 16px;
   font-size: 16px;
+}.teleport-modal-content select {
+  width: 100%;
+  margin-top: 12px;
+  padding: 8px;
+  font-size: 18px;
+  border-radius: 6px;
+  background: #1a1a1a;
+  color: #fff;
+  border: 1px solid #444;
+}
+@media (max-width: 480px) {
+  .teleport-modal-content select {
+    font-size: 22px;
+    padding: 12px;
+  }
+}
+
+.teleport-modal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.teleport-modal-actions button {
+  margin-top: 16px;
 }

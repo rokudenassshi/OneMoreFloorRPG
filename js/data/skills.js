@@ -41,6 +41,14 @@ const SKILLS = [
     effects: { herbBattleReward: 1 },
   },
   {
+    id: "guts",
+    name: "ガッツ",
+    maxLevel: 1,
+    requiredPoints: 20,
+    description: "戦闘中1回だけHP1で耐える",
+    effects: { guts: 1 },
+  },
+  {
     id: "life_steal",
     name: "吸血",
     maxLevel: 10,

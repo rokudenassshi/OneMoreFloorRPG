@@ -52,7 +52,7 @@
     },
     {
       id: "min_hits",
-      name: "連続攻撃の",
+      name: "連続攻撃",
       accessoryTypes: ACCESSORY_TYPES,
       min: 1,
       max: 2,

@@ -61,26 +61,59 @@ function move(dir) {
   refresh();
   autoSave();
 }
+function getAvailableBossFloors() {
+  const maxFloor = player.maxReachedFloor - 1;
+  return BOSS_FLOORS.filter((bossFloor) => bossFloor <= maxFloor);
+}
 
-function teleportToFloor() {
+function openTeleportModal() {
   if (gameState !== "EXPLORE") return;
-  const maxFloor = player.maxReachedFloor;
-  const input = prompt(`転移する階層を入力してください (0〜${maxFloor})`);
-  if (input === null) return;
+  const availableBossFloors = getAvailableBossFloors();
+  if (availableBossFloors.length === 0) {
+    log("まだ転移できるボス階層がありません。");
+    return;
+  }
 
-  const target = Number(input);
+  const selectEl = document.getElementById("teleportFloorSelect");
+  if (!selectEl) return;
+  selectEl.innerHTML = "";
+  availableBossFloors.forEach((bossFloor) => {
+    const option = document.createElement("option");
+    option.value = String(bossFloor);
+    option.textContent = `${bossFloor}階`;
+    selectEl.appendChild(option);
+  });
+  selectEl.value = String(availableBossFloors[availableBossFloors.length - 1]);
+
+  const modal = document.getElementById("teleportModal");
+  if (!modal) return;
+  modal.classList.remove("hidden");
+  modal.setAttribute("aria-hidden", "false");
+}
+
+function closeTeleportModal() {
+  const modal = document.getElementById("teleportModal");
+  if (!modal) return;
+  modal.classList.add("hidden");
+  modal.setAttribute("aria-hidden", "true");
+}
+function teleportToFloor() {
+  const selectEl = document.getElementById("teleportFloorSelect");
+  if (!selectEl) return;
+  const target = Number(selectEl.value);
   if (!Number.isInteger(target)) {
-    log("転移する階層は整数で入力してください。");
+    log("転移するボス階層を選択してください。");
     return;
   }
-  if (target < 0 || target > maxFloor) {
-    log(`転移できるのは0〜${maxFloor}階です。`);
+  const availableBossFloors = getAvailableBossFloors();
+  if (!availableBossFloors.includes(target)) {
+    log("転移できるのは到達済みのボス階層のみです。");
     return;
   }
-
   floor = target;
   log(`✨ ${target}階層へ転移した。`);
   refresh();
+  closeTeleportModal();
 }
 
 function handleFloorArrival() {}
