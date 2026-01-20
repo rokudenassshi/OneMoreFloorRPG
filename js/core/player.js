@@ -259,12 +259,15 @@ function getSpecialEffects() {
   const equipmentEffects = getEquipmentSpecialEffects();
   const skillEffects =
     typeof getSkillEffects === "function" ? getSkillEffects() : {};
+  const reflectBoost = skillEffects.reflectBoost || 0;
 
   return {
     ...equipmentEffects,
     lifeSteal: equipmentEffects.lifeSteal + (skillEffects.lifeSteal || 0),
-    reflect: equipmentEffects.reflect + (skillEffects.reflect || 0),
+    reflect:
+      equipmentEffects.reflect + (skillEffects.reflect || 0) + reflectBoost,
     evadeBoost: equipmentEffects.evadeBoost + (skillEffects.evadeBoost || 0),
+    evadeCounter: skillEffects.evadeCounter || 0,
     minHits: equipmentEffects.minHits + (skillEffects.minHits || 0),
     expBoost: equipmentEffects.expBoost + (skillEffects.expBoost || 0),
     agilityAttackRate: skillEffects.agilityAttackRate || 0,

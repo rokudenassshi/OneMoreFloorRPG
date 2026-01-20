@@ -147,7 +147,10 @@ function enemyAttack() {
   log(`◀ ${enemy.name} の攻撃！ ${damage}ダメージ`);
 
   const result = damagePlayer(damage);
-  if (result?.evaded) return;
+  if (result?.evaded) {
+    if (triggerEvadeCounter()) return;
+    return;
+  }
 
   const specialEffects = getSpecialEffects();
   const reflectRate = (specialEffects.reflect || 0) / 100;
@@ -164,7 +167,22 @@ function enemyAttack() {
     }
   }
 }
+function triggerEvadeCounter() {
+  if (!enemy) return false;
+  const specialEffects = getSpecialEffects();
+  if ((specialEffects.evadeCounter || 0) <= 0) return false;
 
+  const attackPower = calcAttack();
+  const damage = rollDamage(attackPower, 0.3);
+  enemy.hp -= damage;
+  log(`⚡ 回避反撃！ ${enemy.name} に${damage}ダメージ`);
+  if (enemy.hp <= 0) {
+    handleEnemyDefeat();
+    return true;
+  }
+  refresh();
+  return true;
+}
 function rollDamageWithRoll(base, variance, roll) {
   const min = Math.floor(base * (1 - variance));
   const max = Math.ceil(base * (1 + variance));

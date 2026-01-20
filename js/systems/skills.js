@@ -3,7 +3,12 @@ let skillReturnState = "EXPLORE";
 function getSkillLevel(skillId) {
   return Number(player.skills?.[skillId]) || 0;
 }
-
+function hasRequiredSkills(skill) {
+  const requirements = Array.isArray(skill?.requires) ? skill.requires : [];
+  return requirements.every(
+    (requirement) => getSkillLevel(requirement.id) >= (requirement.level || 1),
+  );
+}
 function getSkillEffects() {
   const total = {
     herbHealBoost: 0,
@@ -11,7 +16,9 @@ function getSkillEffects() {
     herbBattleReward: 0,
     lifeSteal: 0,
     reflect: 0,
+    reflectBoost: 0,
     evadeBoost: 0,
+    evadeCounter: 0,
     minHits: 0,
     agilityAttackRate: 0,
     vitalityAttackRate: 0,
@@ -87,14 +94,19 @@ function renderSkillScreen() {
     <div class="skill-summary">
       <div class="skill-summary-title">合計効果</div>
       <div class="skill-summary-grid">
+        <div>獲得経験値：+${Math.floor(total.expBoost)}%</div>
         <div>やくそう回復量：+${Math.round(total.herbHealBoost * 100)}%</div>
         <div>やくそう所持上限：+${Math.floor(total.herbCapacityBoost)}</div>
         <div>戦闘終了のやくそう：${
           total.herbBattleReward > 0 ? "習得済み" : "未習得"
         }</div>
         <div>吸血：+${Math.floor(total.lifeSteal)}%</div>
-        <div>ダメージ反射：+${Math.floor(total.reflect)}%</div>
+        <div>ダメージ反射：+${Math.floor(total.reflect)}%</div>    
+        <div>反射強化：${total.reflectBoost > 0 ? "習得済み" : "未習得"}</div>
         <div>回避率：+${Math.floor(total.evadeBoost)}%</div>
+        <div>回避カウンター：${
+          total.evadeCounter > 0 ? "習得済み" : "未習得"
+        }</div>
         <div>連続攻撃の最低ヒット数：+${Math.floor(total.minHits)}</div>
         <div>シールドバッシュ：${
           total.vitalityAttackRate > 0 ? "習得済み" : "未習得"
@@ -102,7 +114,6 @@ function renderSkillScreen() {
         <div>スピードアタック：${
           total.agilityAttackRate > 0 ? "習得済み" : "未習得"
         }</div>
-        <div>獲得経験値：+${Math.floor(total.expBoost)}%</div>
     </div>
   `;
 
@@ -112,8 +123,11 @@ function renderSkillScreen() {
       ? level >= skill.maxLevel
       : false;
     const requiredPoints = Number(skill.requiredPoints) || 1;
+    const requirements = Array.isArray(skill.requires) ? skill.requires : [];
+    const hasRequirements = hasRequiredSkills(skill);
 
-    const canLearn = player.unassignedPoints >= requiredPoints && !isMax;
+    const canLearn =
+      player.unassignedPoints >= requiredPoints && !isMax && hasRequirements;
     const canDecrease = level > 0;
     const progressPct = Number.isFinite(skill.maxLevel)
       ? Math.round((level / skill.maxLevel) * 100)
@@ -121,11 +135,20 @@ function renderSkillScreen() {
     const maxLevelLabel = Number.isFinite(skill.maxLevel)
       ? skill.maxLevel
       : "∞";
-
+    const requirementLabel = requirements.length
+      ? `前提：${requirements
+          .map((requirement) => {
+            const requiredSkill = SKILLS.find(
+              (entry) => entry.id === requirement.id,
+            );
+            return requiredSkill ? requiredSkill.name : requirement.id;
+          })
+          .join(" / ")}`
+      : "";
     return `
       <div class="skill-card ${canLearn ? "is-affordable" : ""} ${
-      isMax ? "is-max" : ""
-    }">
+        isMax ? "is-max" : ""
+      }">
         <div class="skill-header">
           <div class="skill-title">${skill.name}</div>
 
@@ -136,19 +159,29 @@ function renderSkillScreen() {
         </div>
 
         <div class="skill-description">${skill.description}</div>
-
+  ${
+    requirementLabel
+      ? `<div class="skill-requirement">${requirementLabel}</div>`
+      : ""
+  }
         <div class="skill-footer">
           <div class="skill-hint">${
-            isMax ? "MAX" : canLearn ? "習得可能" : "ポイント不足"
+            isMax
+              ? "MAX"
+              : !hasRequirements
+                ? "前提スキル不足"
+                : canLearn
+                  ? "習得可能"
+                  : "ポイント不足"
           }</div>
 
           <div class="skill-actions">
             <button class="skill-btn" onclick="learnSkill('${skill.id}')" ${
-      canLearn ? "" : "disabled"
-    }>＋</button>
+              canLearn ? "" : "disabled"
+            }>＋</button>
             <button class="skill-btn" onclick="unlearnSkill('${skill.id}')" ${
-      canDecrease ? "" : "disabled"
-    }>−</button>
+              canDecrease ? "" : "disabled"
+            }>−</button>
           </div>
         </div>
       </div>
@@ -170,6 +203,7 @@ function learnSkill(skillId) {
   const current = getSkillLevel(skillId);
   if (current >= skill.maxLevel) return;
   const requiredPoints = Number(skill.requiredPoints) || 1;
+  if (!hasRequiredSkills(skill)) return;
   if (player.unassignedPoints < requiredPoints) return;
 
   player.skills[skillId] = current + 1;
