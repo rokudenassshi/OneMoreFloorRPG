@@ -17,7 +17,6 @@ function move(dir) {
   floor = Math.max(0, floor + dir);
   player.maxReachedFloor = Math.max(player.maxReachedFloor, floor);
   awardStatPointUnlock();
-
   // 拠点（0階層）
   if (floor === 0) {
     goToBase();
@@ -62,3 +61,25 @@ function move(dir) {
   refresh();
   autoSave();
 }
+
+function teleportToFloor() {
+  if (gameState !== "EXPLORE") return;
+  const maxFloor = player.maxReachedFloor;
+  const input = prompt(`転移する階層を入力してください (0〜${maxFloor})`);
+  if (input === null) return;
+
+  const target = Number(input);
+  if (!Number.isInteger(target)) {
+    log("転移する階層は整数で入力してください。");
+    return;
+  }
+  if (target < 0 || target > maxFloor) {
+    log(`転移できるのは0〜${maxFloor}階です。`);
+    return;
+  }
+
+  floor = target;
+  log(`✨ ${target}階層へ転移した。`);
+}
+
+function handleFloorArrival() {}

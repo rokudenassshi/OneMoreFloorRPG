@@ -68,7 +68,6 @@ function loadAutoSave() {
   }
 
   if (!data || data.version !== 1) return false;
-  const wasInBattle = data.gameState === "BATTLE";
   const savedPlayer = data.player || {};
   const savedStatus = savedPlayer.status || {};
 
@@ -81,7 +80,7 @@ function loadAutoSave() {
   player.baseHp = Math.max(1, Number(savedPlayer.baseHp) || player.baseHp);
   player.maxReachedFloor = Math.max(
     0,
-    Number(savedPlayer.maxReachedFloor) || 0
+    Number(savedPlayer.maxReachedFloor) || 0,
   );
   player.status.power = Number(savedStatus.power) || 0;
   player.status.vitality = Number(savedStatus.vitality) || 0;
@@ -90,7 +89,7 @@ function loadAutoSave() {
   player.statPointUnlockGranted = Boolean(savedPlayer.statPointUnlockGranted);
   player.unassignedPoints = Math.max(
     0,
-    Number(savedPlayer.unassignedPoints) || 0
+    Number(savedPlayer.unassignedPoints) || 0,
   );
 
   player.skills =

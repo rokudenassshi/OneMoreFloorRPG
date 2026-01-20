@@ -31,7 +31,7 @@
       name: "回避率up",
       accessoryTypes: ACCESSORY_TYPES,
       min: 5,
-      max: 30,
+      max: 40,
       describe: (value) => `回避率+${value}%`,
     },
     {

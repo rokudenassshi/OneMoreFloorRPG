@@ -18,7 +18,7 @@ const SKILLS = [
   {
     id: "herb_battle_reward",
     name: "戦闘終了時にやくそう増加",
-    maxLevel: 2,
+    maxLevel: 3,
     requiredPoints: 5,
     description:
       "戦闘終了時にやくそうをスキルレベルと同数手に入れる※所持上限より増えない",
@@ -69,8 +69,8 @@ const SKILLS = [
     name: "シールドバッシュ",
     maxLevel: 1,
     requiredPoints: 20,
-    description: "ダメージ計算にたいりょくを適用（ステータス値の50%で計算）",
-    effects: { vitalityAttackRate: 0.5 },
+    description: "ダメージ計算にたいりょくを適用（ステータス値の70%で計算）",
+    effects: { vitalityAttackRate: 0.7 },
   },
   {
     id: "exp_gain_boost",

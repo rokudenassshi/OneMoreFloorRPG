@@ -59,7 +59,7 @@ function calcAttackCount() {
   );
   // 1hitは常に保証、2hit以降の要求値を「段階的に増加」させる
   const base = 50; // 最初の増分（2hitに必要な追加量）
-  const stepInc = 200; // 段階が1上がるごとに増分を+30
+  const stepInc = 200; // 段階が1上がるごとに増分
 
   let maxHits = 1;
   let required = 0;
@@ -73,7 +73,7 @@ function calcAttackCount() {
   }
 
   // ★ 6ヒット以降の要求値（変数化）
-  const OVER_HIT_BASE_AGI = 10000;
+  const OVER_HIT_BASE_AGI = 1000;
   if (totalAgility >= OVER_HIT_BASE_AGI) {
     const extraHits =
       Math.floor((totalAgility - OVER_HIT_BASE_AGI) / OVER_HIT_BASE_AGI) + 1;

@@ -69,6 +69,10 @@ body {
   position: relative;
 }
 
+#inventory {
+  font-size: 14px;
+}
+
 .rare-popup {
   position: absolute;
   inset: 0;
@@ -375,7 +379,19 @@ status-actions {
   flex: 1;
   min-width: 0;
 }
+.floor-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
 
+.teleport-button {
+  flex: 0 0 auto;
+  min-height: 28px;
+  padding: 4px 10px;
+  font-size: 12px;
+  border-radius: 8px;
+}
 #enemyName,
 #enemyHp {
   display: block;

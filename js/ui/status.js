@@ -21,11 +21,11 @@ function renderStatus() {
   const unlockFloor = UNLOCK_FLOOR;
   const isStatPointUnlocked = player.maxReachedFloor >= unlockFloor;
   const statPointLabel = isStatPointUnlocked
-    ? `未割り振りステータスポイント：${player.statPoints}`
-    : "未割り振りステータスポイント：0";
+    ? `未使用ステータスポイント：${player.statPoints}`
+    : "";
   const statPointNote = isStatPointUnlocked
     ? ""
-    : `<div class="status-note">${unlockFloor}階層突破で開放</div>`;
+    : `<div class="status-note"></div>`;
   const powerBase = player.status.power;
   const vitalityBase = player.status.vitality;
   const agilityBase = player.status.agility;
@@ -110,16 +110,16 @@ function addStat(stat) {
   if (player.maxReachedFloor < UNLOCK_FLOOR) return;
   if (player.statPoints <= 0) return;
 
-  player.status[stat] += 2;
+  player.status[stat] += 5;
   player.statPoints--;
 
   refresh();
   renderStatus();
 }
 function subStat(stat) {
-  if (player.status[stat] <= player.status[stat]) return;
+  if (player.status[stat] <= 10) return;
   if (player.maxReachedFloor < UNLOCK_FLOOR) return;
-  player.status[stat] -= 2;
+  player.status[stat] -= 5;
   player.statPoints++;
 
   refresh();

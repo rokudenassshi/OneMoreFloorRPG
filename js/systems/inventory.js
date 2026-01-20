@@ -597,7 +597,7 @@ function dropItem() {
         3,
       );
       item.name = `★神の${item.name}`;
-      scaleItemBonuses(item, 1.5);
+      scaleItemBonuses(item, 1.3);
       inventory.push(item);
       log(`🎁 ${item.name}を手に入れた`);
       return;
