@@ -6,7 +6,7 @@ function startBattle() {
   const base = EnemyGen.createEnemyForFloor(floor);
   const equipmentSpecialEffects = getEquipmentSpecialEffects();
   const specialEffects = getSpecialEffects();
-  const bonusRareRate = (equipmentSpecialEffects.rareEncounterBoost || 0) / 100;
+  let bonusRareRate = (equipmentSpecialEffects.rareEncounterBoost || 0) / 100;
   bonusRareRate += (specialEffects.rareEncounterBoost || 0) / 100;
 
   // ★壊れたエネミー（1001階層以降）
