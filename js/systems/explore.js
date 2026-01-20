@@ -80,6 +80,7 @@ function teleportToFloor() {
 
   floor = target;
   log(`✨ ${target}階層へ転移した。`);
+  refresh();
 }
 
 function handleFloorArrival() {}

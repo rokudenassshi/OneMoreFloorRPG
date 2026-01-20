@@ -184,7 +184,6 @@ function endBattle() {
 
   if (hasBattle) {
     player.hp = calcMaxHp();
-    log("✨ 戦闘終了でHPが全回復した");
   }
   const skillEffects = getSkillEffects();
   const herbBattleRewardCount = Math.floor(skillEffects.herbBattleReward || 0);

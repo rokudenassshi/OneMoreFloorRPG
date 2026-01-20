@@ -7,11 +7,11 @@ function clearGameCacheOnce() {
   const storedResetVersion = Number(localStorage.getItem(resetVersionKey));
   if (storedResetVersion === GAME_RESET_VERSION) return;
 
+  localStorage.setItem(resetVersionKey, String(GAME_RESET_VERSION));
+  localStorage.setItem(cacheClearOnceKey, String(Date.now()));
   localStorage.removeItem(autosaveKey);
   localStorage.removeItem(discardThresholdsKey);
   localStorage.removeItem(cacheClearOnceKey);
-  localStorage.setItem(cacheClearOnceKey, String(Date.now()));
-  localStorage.setItem(resetVersionKey, String(GAME_RESET_VERSION));
 }
 
 clearGameCacheOnce();

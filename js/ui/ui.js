@@ -63,3 +63,11 @@ function updateUI() {
 function refresh() {
   updateUI();
 }
+function showStatUnlockModal(points) {
+  document.getElementById("unlockPointAmount").textContent = points;
+  document.getElementById("statUnlockModal").classList.remove("hidden");
+}
+
+function closeStatUnlockModal() {
+  document.getElementById("statUnlockModal").classList.add("hidden");
+}

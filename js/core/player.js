@@ -147,6 +147,8 @@ function awardStatPointUnlock() {
   player.statPoints += player.level;
   player.statPointUnlockGranted = true;
   log(`✨ ステータスポイント +${player.level}`);
+
+  showStatUnlockModal(player.level);
   refresh();
 }
 function damagePlayer(amount) {
