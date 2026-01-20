@@ -573,7 +573,39 @@ function dropItem() {
   if (!enemy) return;
   if (enemy.isBroken) {
     const roll = Math.random();
-    if (roll < 0.1) {
+    //   if (roll < 0.1) {
+    //     // 壊れた 10%
+    //     const item = window.ItemGen.createLootItemForDrop(
+    //       enemy.tier,
+    //       floor,
+    //       false,
+    //       enemy.titleMul,
+    //       3,
+    //     );
+    //     item.name = `★壊れた${item.name}`;
+    //     applyBrokenItemStat(item);
+    //     inventory.push(item);
+    //     log(`🎁 ${item.name}を手に入れた`);
+    //     return;
+    //   } else if (roll < 0.11) {
+    //     // 神の 1%（0.10～0.11）
+    //     const item = window.ItemGen.createLootItemForDrop(
+    //       enemy.tier,
+    //       floor,
+    //       false,
+    //       enemy.titleMul,
+    //       3,
+    //     );
+    //     item.name = `★神の${item.name}`;
+    //     scaleItemBonuses(item, 1.5);
+    //     inventory.push(item);
+    //     log(`🎁 ${item.name}を手に入れた`);
+    //     return;
+    //   }
+    //   return;
+    // }
+    // テストプレイ用
+    if (roll < 0.5) {
       // 壊れた 10%
       const item = window.ItemGen.createLootItemForDrop(
         enemy.tier,
@@ -587,7 +619,8 @@ function dropItem() {
       inventory.push(item);
       log(`🎁 ${item.name}を手に入れた`);
       return;
-    } else if (roll < 0.11) {
+    }
+    if (roll < 1) {
       // 神の 1%（0.10～0.11）
       const item = window.ItemGen.createLootItemForDrop(
         enemy.tier,

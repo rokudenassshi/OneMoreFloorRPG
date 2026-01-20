@@ -21,16 +21,15 @@ const player = {
 };
 
 function calcMaxHp() {
-  const bonus = getEquipmentBonus();
-  const totalVitality = player.status.vitality + bonus.vitality;
+  const totalVitality = getTotalStatus().vitality;
   return player.baseHp + totalVitality * 10;
 }
 
 function calcAttack() {
-  const bonus = getEquipmentBonus();
-  const basePower = player.status.power + bonus.power;
-  const totalAgility = player.status.agility + bonus.agility;
-  const totalVitality = player.status.vitality + bonus.vitality;
+  const totalStatus = getTotalStatus();
+  const basePower = totalStatus.power;
+  const totalAgility = totalStatus.agility;
+  const totalVitality = totalStatus.vitality;
   const skillEffects = getSkillEffects();
   let attackSource = basePower;
 
@@ -48,8 +47,7 @@ function calcAttack() {
 }
 
 function calcAttackCount() {
-  const bonus = getEquipmentBonus();
-  const totalAgility = Number(player.status.agility) + bonus.agility;
+  const totalAgility = getTotalStatus().agility;
   const equipmentEffects = getEquipmentSpecialEffects();
   const skillEffects =
     typeof getSkillEffects === "function" ? getSkillEffects() : {};
@@ -168,6 +166,35 @@ function damagePlayer(amount) {
     gameOver();
   }
   return { evaded: false, damage: amount };
+}
+function getSkillStatusRates() {
+  const skillEffects =
+    typeof getSkillEffects === "function" ? getSkillEffects() : {};
+  return {
+    power: Number(skillEffects.powerRate) || 0,
+    vitality: Number(skillEffects.vitalityRate) || 0,
+    agility: Number(skillEffects.agilityRate) || 0,
+  };
+}
+
+function getTotalStatus() {
+  const bonus = getEquipmentBonus();
+  const rates = getSkillStatusRates();
+  const power = Math.floor(
+    (player.status.power + bonus.power) * (1 + rates.power),
+  );
+  const vitality = Math.floor(
+    (player.status.vitality + bonus.vitality) * (1 + rates.vitality),
+  );
+  const agility = Math.floor(
+    (player.status.agility + bonus.agility) * (1 + rates.agility),
+  );
+
+  return {
+    power: power,
+    vitality: vitality,
+    agility: agility,
+  };
 }
 function getBaseStatus() {
   return {

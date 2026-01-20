@@ -10,13 +10,19 @@ function startBattle() {
   bonusRareRate += (specialEffects.rareEncounterBoost || 0) / 100;
 
   // ★壊れたエネミー（1001階層以降）
-  const brokenEnemyRate = 0.02;
+  // テストプレイ用
+  const brokenEnemyRate = 0.12;
+  // const brokenEnemyRate = 0.02;
   const isBroken =
     floor >= UNLOCK_FLOOR && Math.random() < brokenEnemyRate + bonusRareRate;
   // レアモンスター
-  const baseRareRate = 0.03;
+  // テストプレイ用
+  const baseRareRate = 0.13;
+  // const baseRareRate = 0.03;
   const isRare = !isBroken && Math.random() < baseRareRate + bonusRareRate;
-  const rate = isBroken ? 2.5 : isRare ? 1.8 : 1;
+  // テストプレイ用
+  const rate = isBroken ? 2 : isRare ? 1.8 : 1;
+  // const rate = isBroken ? 2.5 : isRare ? 1.8 : 1;
 
   enemy = {
     id: base.id,
@@ -121,7 +127,7 @@ function escape() {
     return;
   }
 
-  const rate = Math.min(30 + Math.floor(player.status.agility / 2), 90);
+  const rate = Math.min(30 + Math.floor(getTotalStatus().agility / 2), 90);
 
   if (Math.random() * 100 < rate) {
     log("💨 逃走成功！");

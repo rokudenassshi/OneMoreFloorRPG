@@ -106,4 +106,12 @@ const SKILLS = [
     requires: [{ id: "vitality_attack", level: 1 }],
     effects: { reflectBoost: 10 },
   },
+  {
+    id: "dual_wield",
+    name: "二刀流",
+    maxLevel: 1,
+    requiredPoints: 30,
+    description: "ちからが1.3倍になるがたいりょく、すばやさが半分になる",
+    effects: { powerRate: 0.3, vitalityRate: -0.5, agilityRate: -0.5 },
+  },
 ];

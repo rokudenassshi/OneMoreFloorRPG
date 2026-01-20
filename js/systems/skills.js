@@ -24,6 +24,9 @@ function getSkillEffects() {
     vitalityAttackRate: 0,
     expBoost: 0,
     rareEncounterBoost: 0,
+    powerRate: 0,
+    vitalityRate: 0,
+    agilityRate: 0,
   };
 
   SKILLS.forEach((skill) => {
@@ -111,7 +114,7 @@ function renderSkillScreen() {
     );
   }
   if (total.herbBattleReward > 0) {
-    summaryItems.push("<div>戦闘終了のやくそう：習得済み</div>");
+    summaryItems.push("<div>戦闘終了のやくそう増加</div>");
   }
   if (total.lifeSteal > 0) {
     summaryItems.push(`<div>吸血：+${Math.floor(total.lifeSteal)}%</div>`);
@@ -122,13 +125,13 @@ function renderSkillScreen() {
     );
   }
   if (total.reflectBoost > 0) {
-    summaryItems.push("<div>反射強化：習得済み</div>");
+    summaryItems.push("<div>反射強化</div>");
   }
   if (total.evadeBoost > 0) {
     summaryItems.push(`<div>回避率：+${Math.floor(total.evadeBoost)}%</div>`);
   }
   if (total.evadeCounter > 0) {
-    summaryItems.push("<div>回避カウンター：習得済み</div>");
+    summaryItems.push("<div>回避カウンター</div>");
   }
   if (total.minHits > 0) {
     summaryItems.push(
@@ -136,12 +139,14 @@ function renderSkillScreen() {
     );
   }
   if (total.vitalityAttackRate > 0) {
-    summaryItems.push("<div>シールドバッシュ：習得済み</div>");
+    summaryItems.push("<div>シールドバッシュ</div>");
   }
   if (total.agilityAttackRate > 0) {
-    summaryItems.push("<div>スピードアタック：習得済み</div>");
+    summaryItems.push("<div>スピードアタック</div>");
   }
-
+  if (total.powerRate !== 0) {
+    summaryItems.push("<div>二刀流</div>");
+  }
   const summaryBody = summaryItems.length
     ? summaryItems.join("")
     : "<div>獲得済みの効果はありません</div>";
@@ -245,10 +250,34 @@ function learnSkill(skillId) {
 
   player.skills[skillId] = current + 1;
   player.unassignedPoints -= requiredPoints;
+  const maxHp = calcMaxHp();
+  if (player.hp > maxHp) {
+    player.hp = maxHp;
+  }
   refresh();
   renderSkillScreen();
 }
+function removeInvalidDependentSkills() {
+  let didRemove = false;
+  let removedThisPass = false;
 
+  do {
+    removedThisPass = false;
+    SKILLS.forEach((skill) => {
+      const currentLevel = getSkillLevel(skill.id);
+      if (currentLevel <= 0) return;
+      if (hasRequiredSkills(skill)) return;
+
+      const requiredPoints = Number(skill.requiredPoints) || 1;
+      delete player.skills[skill.id];
+      player.unassignedPoints += requiredPoints * currentLevel;
+      removedThisPass = true;
+    });
+    didRemove = didRemove || removedThisPass;
+  } while (removedThisPass);
+
+  return didRemove;
+}
 function unlearnSkill(skillId) {
   const skill = SKILLS.find((entry) => entry.id === skillId);
   if (!skill) return;
@@ -260,6 +289,11 @@ function unlearnSkill(skillId) {
     delete player.skills[skillId];
   }
   player.unassignedPoints += requiredPoints;
+  const maxHp = calcMaxHp();
+  if (player.hp > maxHp) {
+    player.hp = maxHp;
+  }
+  removeInvalidDependentSkills();
   refresh();
   renderSkillScreen();
 }
