@@ -4,8 +4,10 @@ function startBattle() {
 
   // ★ floor 以上で出現する敵だけ抽選
   const base = EnemyGen.createEnemyForFloor(floor);
-  const specialEffects = getEquipmentSpecialEffects();
-  const bonusRareRate = (specialEffects.rareEncounterBoost || 0) / 100;
+  const equipmentSpecialEffects = getEquipmentSpecialEffects();
+  const specialEffects = getSpecialEffects();
+  const bonusRareRate = (equipmentSpecialEffects.rareEncounterBoost || 0) / 100;
+  bonusRareRate += (specialEffects.rareEncounterBoost || 0) / 100;
 
   // ★壊れたエネミー（1001階層以降）
   const brokenEnemyRate = 0.02;

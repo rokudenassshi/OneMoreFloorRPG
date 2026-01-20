@@ -47,7 +47,7 @@
       name: "レアモンスター遭遇率UP",
       accessoryTypes: ACCESSORY_TYPES,
       min: 1,
-      max: 5,
+      max: 10,
       describe: (value) => `レアモンスター遭遇率+${value}%`,
     },
     {

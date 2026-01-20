@@ -4,15 +4,23 @@ const SKILLS = [
     name: "獲得経験値アップ",
     maxLevel: Number.POSITIVE_INFINITY,
     requiredPoints: 1,
-    description: "獲得経験値 +1%/Lv",
+    description: "獲得経験値+1%",
     effects: { expBoost: 1 },
+  },
+  {
+    id: "rare_encounter_boost",
+    name: "レアモンスターとの遭遇率up",
+    maxLevel: 10,
+    requiredPoints: 5,
+    description: "レアモンスターの遭遇率+1%",
+    effects: { rareEncounterBoost: 1 },
   },
   {
     id: "herb_mastery",
     name: "やくそう強化",
     maxLevel: 50,
     requiredPoints: 1,
-    description: "やくそうの回復量 +1%",
+    description: "やくそうの回復量+1%",
     effects: { herbHealBoost: 0.01 },
   },
   {
@@ -37,7 +45,7 @@ const SKILLS = [
     name: "吸血",
     maxLevel: 10,
     requiredPoints: 5,
-    description: "攻撃時に与えたダメージの1%をHP回復/Lv",
+    description: "攻撃時に与えたダメージの1%をHP回復",
     effects: { lifeSteal: 1 },
   },
   {
@@ -45,7 +53,7 @@ const SKILLS = [
     name: "ダメージ反射",
     maxLevel: 10,
     requiredPoints: 5,
-    description: "被ダメージの1%を相手に反射/Lv",
+    description: "被ダメージの1%を相手に反射",
     effects: { reflect: 1 },
   },
   {
@@ -53,7 +61,7 @@ const SKILLS = [
     name: "回避率up",
     maxLevel: 10,
     requiredPoints: 5,
-    description: "回避率+1%/Lv",
+    description: "回避率+1%",
     effects: { evadeBoost: 1 },
   },
   {

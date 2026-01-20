@@ -23,6 +23,7 @@ function getSkillEffects() {
     agilityAttackRate: 0,
     vitalityAttackRate: 0,
     expBoost: 0,
+    rareEncounterBoost: 0,
   };
 
   SKILLS.forEach((skill) => {
@@ -90,30 +91,66 @@ function renderSkillScreen() {
 
   // （任意）合計効果を上に出す：すでに getSkillEffects() があるので活用
   const total = getSkillEffects();
+  const summaryItems = [];
+  if (total.expBoost > 0) {
+    summaryItems.push(`<div>獲得経験値：+${Math.floor(total.expBoost)}%</div>`);
+  }
+  if (total.rareEncounterBoost > 0) {
+    summaryItems.push(
+      `<div>レアモンスター遭遇率：+${Math.floor(total.rareEncounterBoost)}%</div>`,
+    );
+  }
+  if (total.herbHealBoost > 0) {
+    summaryItems.push(
+      `<div>やくそう回復量：+${Math.round(total.herbHealBoost * 100)}%</div>`,
+    );
+  }
+  if (total.herbCapacityBoost > 0) {
+    summaryItems.push(
+      `<div>やくそう所持上限：+${Math.floor(total.herbCapacityBoost)}</div>`,
+    );
+  }
+  if (total.herbBattleReward > 0) {
+    summaryItems.push("<div>戦闘終了のやくそう：習得済み</div>");
+  }
+  if (total.lifeSteal > 0) {
+    summaryItems.push(`<div>吸血：+${Math.floor(total.lifeSteal)}%</div>`);
+  }
+  if (total.reflect > 0) {
+    summaryItems.push(
+      `<div>ダメージ反射：+${Math.floor(total.reflect)}%</div>`,
+    );
+  }
+  if (total.reflectBoost > 0) {
+    summaryItems.push("<div>反射強化：習得済み</div>");
+  }
+  if (total.evadeBoost > 0) {
+    summaryItems.push(`<div>回避率：+${Math.floor(total.evadeBoost)}%</div>`);
+  }
+  if (total.evadeCounter > 0) {
+    summaryItems.push("<div>回避カウンター：習得済み</div>");
+  }
+  if (total.minHits > 0) {
+    summaryItems.push(
+      `<div>連続攻撃の最低ヒット数：+${Math.floor(total.minHits)}</div>`,
+    );
+  }
+  if (total.vitalityAttackRate > 0) {
+    summaryItems.push("<div>シールドバッシュ：習得済み</div>");
+  }
+  if (total.agilityAttackRate > 0) {
+    summaryItems.push("<div>スピードアタック：習得済み</div>");
+  }
+
+  const summaryBody = summaryItems.length
+    ? summaryItems.join("")
+    : "<div>獲得済みの効果はありません</div>";
   const summaryHtml = `
     <div class="skill-summary">
       <div class="skill-summary-title">合計効果</div>
       <div class="skill-summary-grid">
-        <div>獲得経験値：+${Math.floor(total.expBoost)}%</div>
-        <div>やくそう回復量：+${Math.round(total.herbHealBoost * 100)}%</div>
-        <div>やくそう所持上限：+${Math.floor(total.herbCapacityBoost)}</div>
-        <div>戦闘終了のやくそう：${
-          total.herbBattleReward > 0 ? "習得済み" : "未習得"
-        }</div>
-        <div>吸血：+${Math.floor(total.lifeSteal)}%</div>
-        <div>ダメージ反射：+${Math.floor(total.reflect)}%</div>    
-        <div>反射強化：${total.reflectBoost > 0 ? "習得済み" : "未習得"}</div>
-        <div>回避率：+${Math.floor(total.evadeBoost)}%</div>
-        <div>回避カウンター：${
-          total.evadeCounter > 0 ? "習得済み" : "未習得"
-        }</div>
-        <div>連続攻撃の最低ヒット数：+${Math.floor(total.minHits)}</div>
-        <div>シールドバッシュ：${
-          total.vitalityAttackRate > 0 ? "習得済み" : "未習得"
-        }</div>
-        <div>スピードアタック：${
-          total.agilityAttackRate > 0 ? "習得済み" : "未習得"
-        }</div>
+        ${summaryBody}
+      </div>
     </div>
   `;
 
