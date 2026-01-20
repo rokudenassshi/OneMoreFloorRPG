@@ -1,6 +1,7 @@
 /* DOM */
 const floorEl = document.getElementById("floor");
 const playerHpEl = document.getElementById("playerHp");
+const expBarFillEl = document.getElementById("expBarFill");
 const enemyNameEl = document.getElementById("enemyName");
 const enemyHpEl = document.getElementById("enemyHp");
 const logEl = document.getElementById("log");

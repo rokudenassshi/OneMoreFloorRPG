@@ -45,7 +45,11 @@ function updateUI() {
   floorEl.textContent = floor;
   playerHpEl.textContent = `${player.hp}/${calcMaxHp()}`;
   playerLevelEl.textContent = player.level;
-
+  // ★ 経験値バー更新（数値表示なし）
+  if (expBarFillEl) {
+    const rate = Math.min(1, player.exp / calcNextExp());
+    expBarFillEl.style.width = `${rate * 100}%`;
+  }
   const isBattleView =
     gameState === "BATTLE" ||
     (gameState === "INVENTORY" && inventoryReturnState === "BATTLE") ||
