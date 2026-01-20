@@ -26,7 +26,7 @@ const SKILLS = [
   {
     id: "herb_capacity",
     name: "やくそうの所持数増加",
-    maxLevel: 20,
+    maxLevel: 5,
     requiredPoints: 5,
     description: "やくそうの所持上限 +1",
     effects: { herbCapacityBoost: 1 },
@@ -34,7 +34,7 @@ const SKILLS = [
   {
     id: "herb_battle_reward",
     name: "戦闘終了時にやくそう増加",
-    maxLevel: 3,
+    maxLevel: 1,
     requiredPoints: 5,
     description:
       "戦闘終了時にやくそうをスキルレベルと同数手に入れる※所持上限より増えない",
@@ -44,7 +44,7 @@ const SKILLS = [
     id: "guts",
     name: "ガッツ",
     maxLevel: 1,
-    requiredPoints: 20,
+    requiredPoints: 50,
     description: "戦闘中1回だけHP1で耐える",
     effects: { guts: 1 },
   },
@@ -102,8 +102,8 @@ const SKILLS = [
     name: "シールドバッシュ",
     maxLevel: 1,
     requiredPoints: 10,
-    description: "ダメージ計算にたいりょくを適用（ステータス値の70%で計算）",
-    effects: { vitalityAttackRate: 0.7 },
+    description: "ダメージ計算にたいりょくを適用（ステータス値の40%で計算）",
+    effects: { vitalityAttackRate: 0.4 },
   },
   {
     id: "reflect_amplify",

@@ -1,2 +1,2 @@
-const GAME_VERSION = "1.0.0";
+const GAME_VERSION = "1.0.5";
 const GAME_RESET_VERSION = 4;

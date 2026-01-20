@@ -49,17 +49,20 @@ function renderStatus() {
     <div>次のLvまで：${nextExp}</div>
     <hr>
 
+    <div class="status-actions">
+      <button class="status-action-button" onclick="openSkillAllocation()">スキル割り振りへ</button>
+    </div>
 <div class="status-row">
       ちから　　：${powerBase}${powerBonusText}
       ${
         isStatPointUnlocked
           ? `<span class="status-controls">
-              <button onclick="addStat('power')" ${
-                addDisabled ? "disabled" : ""
-              }>+</button>
               <button onclick="subStat('power')" ${
                 powerDecreaseDisabled ? "disabled" : ""
               }>-</button>
+              <button onclick="addStat('power')" ${
+                addDisabled ? "disabled" : ""
+              }>+</button>
             </span>`
           : ""
       }
@@ -70,12 +73,12 @@ function renderStatus() {
       ${
         isStatPointUnlocked
           ? `<span class="status-controls">
-              <button onclick="addStat('vitality')" ${
-                addDisabled ? "disabled" : ""
-              }>+</button>
               <button onclick="subStat('vitality')" ${
                 vitalityDecreaseDisabled ? "disabled" : ""
               }>-</button>
+              <button onclick="addStat('vitality')" ${
+                addDisabled ? "disabled" : ""
+              }>+</button>
             </span>`
           : ""
       }
@@ -86,12 +89,12 @@ function renderStatus() {
       ${
         isStatPointUnlocked
           ? `<span class="status-controls">
-              <button onclick="addStat('agility')" ${
-                addDisabled ? "disabled" : ""
-              }>+</button>
               <button onclick="subStat('agility')" ${
                 agilityDecreaseDisabled ? "disabled" : ""
               }>-</button>
+              <button onclick="addStat('agility')" ${
+                addDisabled ? "disabled" : ""
+              }>+</button>
             </span>`
           : ""
       }
@@ -100,9 +103,6 @@ function renderStatus() {
     <hr>
     <div>装備：${weaponName}</div>
     <div>装飾品：${accessoryName}</div>
-    <div class="status-actions">
-      <button class="status-action-button" onclick="openSkillAllocation()">スキル割り振りへ</button>
-    </div>
   `;
 }
 

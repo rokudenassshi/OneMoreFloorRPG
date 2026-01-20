@@ -222,12 +222,12 @@ function renderSkillScreen() {
           }</div>
 
           <div class="skill-actions">
-            <button class="skill-btn" onclick="learnSkill('${skill.id}')" ${
-              canLearn ? "" : "disabled"
-            }>＋</button>
             <button class="skill-btn" onclick="unlearnSkill('${skill.id}')" ${
               canDecrease ? "" : "disabled"
             }>−</button>
+            <button class="skill-btn" onclick="learnSkill('${skill.id}')" ${
+              canLearn ? "" : "disabled"
+            }>＋</button>
           </div>
         </div>
       </div>

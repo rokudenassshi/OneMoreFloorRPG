@@ -565,7 +565,17 @@ function applyBrokenItemStat(item) {
   item.optionBonus = { power: 0, vitality: 0, agility: 0 };
   item.bonus = { ...singleBonus };
 }
+// アイテムフィルター
+function shouldPickupItem(item) {
+  const thresholds = loadDiscardThresholds();
+  const itemBonus = getItemTotalBonus(item);
 
+  return !(
+    itemBonus.power <= thresholds.power &&
+    itemBonus.vitality <= thresholds.vitality &&
+    itemBonus.agility <= thresholds.agility
+  );
+}
 /* =====================
    ドロップ（敵ごとの drops から抽選）
 ===================== */
@@ -573,39 +583,7 @@ function dropItem() {
   if (!enemy) return;
   if (enemy.isBroken) {
     const roll = Math.random();
-    //   if (roll < 0.1) {
-    //     // 壊れた 10%
-    //     const item = window.ItemGen.createLootItemForDrop(
-    //       enemy.tier,
-    //       floor,
-    //       false,
-    //       enemy.titleMul,
-    //       3,
-    //     );
-    //     item.name = `★壊れた${item.name}`;
-    //     applyBrokenItemStat(item);
-    //     inventory.push(item);
-    //     log(`🎁 ${item.name}を手に入れた`);
-    //     return;
-    //   } else if (roll < 0.11) {
-    //     // 神の 1%（0.10～0.11）
-    //     const item = window.ItemGen.createLootItemForDrop(
-    //       enemy.tier,
-    //       floor,
-    //       false,
-    //       enemy.titleMul,
-    //       3,
-    //     );
-    //     item.name = `★神の${item.name}`;
-    //     scaleItemBonuses(item, 1.5);
-    //     inventory.push(item);
-    //     log(`🎁 ${item.name}を手に入れた`);
-    //     return;
-    //   }
-    //   return;
-    // }
-    // テストプレイ用
-    if (roll < 0.5) {
+    if (roll < 0.1) {
       // 壊れた 10%
       const item = window.ItemGen.createLootItemForDrop(
         enemy.tier,
@@ -616,11 +594,14 @@ function dropItem() {
       );
       item.name = `★壊れた${item.name}`;
       applyBrokenItemStat(item);
+      if (!shouldPickupItem(item)) {
+        log(`⏭ ${item.name} は拾わなかった`);
+        return;
+      }
       inventory.push(item);
       log(`🎁 ${item.name}を手に入れた`);
       return;
-    }
-    if (roll < 1) {
+    } else if (roll < 0.11) {
       // 神の 1%（0.10～0.11）
       const item = window.ItemGen.createLootItemForDrop(
         enemy.tier,
@@ -631,17 +612,22 @@ function dropItem() {
       );
       item.name = `★神の${item.name}`;
       scaleItemBonuses(item, 1.5);
+      if (!shouldPickupItem(item)) {
+        log(`⏭ ${item.name} は拾わなかった`);
+        return;
+      }
       inventory.push(item);
       log(`🎁 ${item.name}を手に入れた`);
       return;
     }
     return;
   }
+
   if (enemy.isRare) {
     const item = window.ItemGen.createAccessoryForDrop(floor);
     item.isRareDrop = true;
     inventory.push(item);
-    log(`🎁 ★${item.name}を手に入れた`);
+    log(`🎁 ${item.name}を手に入れた`);
     return;
   }
   // 敵tierに合わせてアイテムtierを決める（±1くらい揺らす）

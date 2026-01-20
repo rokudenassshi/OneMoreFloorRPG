@@ -11,19 +11,13 @@ function startBattle() {
   bonusRareRate += (specialEffects.rareEncounterBoost || 0) / 100;
 
   // ★壊れたエネミー（1001階層以降）
-  // テストプレイ用
-  const brokenEnemyRate = 0.12;
-  // const brokenEnemyRate = 0.02;
+  const brokenEnemyRate = 0.01;
   const isBroken =
     floor >= UNLOCK_FLOOR && Math.random() < brokenEnemyRate + bonusRareRate;
   // レアモンスター
-  // テストプレイ用
-  const baseRareRate = 0.13;
-  // const baseRareRate = 0.03;
+  const baseRareRate = 0.03;
   const isRare = !isBroken && Math.random() < baseRareRate + bonusRareRate;
-  // テストプレイ用
-  const rate = isBroken ? 2 : isRare ? 1.8 : 1;
-  // const rate = isBroken ? 2.5 : isRare ? 1.8 : 1;
+  const rate = isBroken ? 2.5 : isRare ? 1.8 : 1;
 
   enemy = {
     id: base.id,

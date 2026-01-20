@@ -392,7 +392,7 @@
     return Math.min(scaled, 1.4);
   }
 
-  function pickSpecialOptions(count) {
+  function pickSpecialOptions(count, { floor = 0, forAccessory = false } = {}) {
     if (count <= 0) return [];
     const pool = (window.SpecialOptionPool || []).slice();
     const shuffled = pool.sort(() => Math.random() - 0.5);
@@ -400,7 +400,7 @@
     const pickCount = Math.min(count, shuffled.length);
     for (let i = 0; i < pickCount; i += 1) {
       const option = shuffled[i];
-      const value = rollSpecialOptionValue(option);
+      const value = rollSpecialOptionValue(option, { floor, forAccessory });
       result.push({
         id: option.id,
         name: option.name,
@@ -413,39 +413,65 @@
     return result;
   }
 
-  function rollSpecialOptionValue(option) {
-    if (Number.isFinite(option.fixed)) {
-      return option.fixed;
-    }
+  function getAccessoryValueCap(option, floor = 0) {
+    const max = Number(option.max);
+    if (!Number.isFinite(max)) return null;
+    if (floor >= UNLOCK_FLOOR) return max;
     const min = Number(option.min) || 0;
-    const max = Number(option.max) || min;
-    if (option?.id === "min_hits" && max > min) {
-      const maxRollChance = 0.05;
-      if (Math.random() < maxRollChance) {
-        return max;
+    return Math.max(min, Math.floor(max * 0.7));
+  }
+
+  function rollSpecialOptionValue(
+    option,
+    { floor = 0, forAccessory = false } = {},
+  ) {
+    let value;
+    if (Number.isFinite(option.fixed)) {
+      value = option.fixed;
+    } else {
+      const min = Number(option.min) || 0;
+      const max = Number(option.max) || min;
+      if (option?.id === "min_hits" && max > min) {
+        const maxRollChance = 0.05;
+        if (Math.random() < maxRollChance) {
+          value = max;
+        } else {
+          value = Math.floor(Math.random() * (max - min)) + min;
+        }
+      } else if (max > min) {
+        const highRollChance = 0.1;
+        const highThreshold = Math.max(min, Math.ceil(max * 0.9));
+        if (Math.random() < highRollChance && highThreshold <= max) {
+          value =
+            Math.floor(Math.random() * (max - highThreshold + 1)) +
+            highThreshold;
+        } else if (highThreshold > min) {
+          value = Math.floor(Math.random() * (highThreshold - min)) + min;
+        } else {
+          value = Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+      } else {
+        value = Math.floor(Math.random() * (max - min + 1)) + min;
       }
-      return Math.floor(Math.random() * (max - min)) + min;
+      if (forAccessory) {
+        const cap = getAccessoryValueCap(option, floor);
+        if (Number.isFinite(cap)) {
+          value = Math.min(value, cap);
+        }
+      }
     }
-    if (max > min) {
-      const highRollChance = 0.1;
-      const highThreshold = Math.max(min, Math.ceil(max * 0.9));
-      if (Math.random() < highRollChance && highThreshold <= max) {
-        return (
-          Math.floor(Math.random() * (max - highThreshold + 1)) + highThreshold
-        );
-      }
-      if (highThreshold > min) {
-        return Math.floor(Math.random() * (highThreshold - min)) + min;
-      }
-    }
-    return Math.floor(Math.random() * (max - min + 1)) + min;
+    return value;
   }
   function capAccessoryOptionValue(option, value, floor = 0) {
+    // UNLOCK_FLOOR 到達後は制限なし（ランダム生成のまま）
     if (floor >= UNLOCK_FLOOR) return value;
+
     const min = Number(option.min) || 0;
     const max = Number(option.max);
     if (!Number.isFinite(max)) return value;
-    const cap = Math.max(min, Math.floor(max * 0.8));
+
+    // 到達前は「最大値の7割」まで
+    const cap = Math.max(min, Math.floor(max * 0.7));
     return Math.min(value, cap);
   }
   function getAccessoryName(option, floor = 0) {
@@ -454,7 +480,6 @@
     const maxValue = Number(option.max);
     const currentValue = Number(option.value);
     if (
-      floor >= UNLOCK_FLOOR &&
       Number.isFinite(maxValue) &&
       Number.isFinite(currentValue) &&
       currentValue >= Math.ceil(maxValue * 0.8)
@@ -464,7 +489,7 @@
     return baseName;
   }
   function createAccessoryForDrop(floor = 0) {
-    const specialOptions = pickSpecialOptions(1);
+    const specialOptions = pickSpecialOptions(1, { floor, forAccessory: true });
     const option = specialOptions[0];
     if (option) {
       option.value = capAccessoryOptionValue(option, option.value, floor);

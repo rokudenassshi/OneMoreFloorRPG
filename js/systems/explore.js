@@ -61,29 +61,34 @@ function move(dir) {
   refresh();
   autoSave();
 }
-function getAvailableBossFloors() {
-  const maxFloor = player.maxReachedFloor - 1;
-  return BOSS_FLOORS.filter((bossFloor) => bossFloor <= maxFloor);
+function getAvailableTeleportFloors() {
+  const max = player.maxReachedFloor;
+  const floors = [];
+
+  for (let f = 0; f <= max; f += 50) {
+    floors.push(f);
+  }
+
+  return floors;
 }
 
 function openTeleportModal() {
-  if (gameState !== "EXPLORE") return;
-  const availableBossFloors = getAvailableBossFloors();
-  if (availableBossFloors.length === 0) {
-    log("まだ転移できるボス階層がありません。");
+  const availableFloors = getAvailableTeleportFloors();
+  if (availableFloors.length === 0) {
+    log("まだ転移できる階層がありません。");
     return;
   }
 
   const selectEl = document.getElementById("teleportFloorSelect");
   if (!selectEl) return;
   selectEl.innerHTML = "";
-  availableBossFloors.forEach((bossFloor) => {
+  availableFloors.forEach((floor) => {
     const option = document.createElement("option");
-    option.value = String(bossFloor);
-    option.textContent = `${bossFloor}階`;
+    option.value = String(floor);
+    option.textContent = `${floor}階`;
     selectEl.appendChild(option);
   });
-  selectEl.value = String(availableBossFloors[availableBossFloors.length - 1]);
+  selectEl.value = String(availableFloors[availableFloors.length - 1]);
 
   const modal = document.getElementById("teleportModal");
   if (!modal) return;
@@ -102,12 +107,12 @@ function teleportToFloor() {
   if (!selectEl) return;
   const target = Number(selectEl.value);
   if (!Number.isInteger(target)) {
-    log("転移するボス階層を選択してください。");
+    log("転移する階層を選択してください。");
     return;
   }
-  const availableBossFloors = getAvailableBossFloors();
-  if (!availableBossFloors.includes(target)) {
-    log("転移できるのは到達済みのボス階層のみです。");
+  const availableFloors = getAvailableTeleportFloors();
+  if (!availableFloors.includes(target)) {
+    log("転移できるのは到達済みの階層のみです。");
     return;
   }
   floor = target;
