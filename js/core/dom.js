@@ -17,9 +17,7 @@ const discardWeakScreenEl = document.getElementById("discardWeakScreen");
 const inventoryTabButtons = Array.from(
   document.querySelectorAll(".inventory-tab"),
 );
-const discardPowerInputEl = document.getElementById("discardPowerInput");
-const discardVitalityInputEl = document.getElementById("discardVitalityInput");
-const discardAgilityInputEl = document.getElementById("discardAgilityInput");
+const discardCommonInputEl = document.getElementById("discardCommonInput");
 const statusScreenEl = document.getElementById("statusScreen");
 const statusContentEl = document.getElementById("statusContent");
 const statusVersionEl = document.getElementById("statusVersion");

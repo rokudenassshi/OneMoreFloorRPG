@@ -16,7 +16,7 @@ const HERB_ITEM_TEMPLATE = {
 const HERB_BASE_MAX = 10;
 
 const discardThresholdsKey = "roguelike_discard_thresholds";
-const discardThresholdDefaults = { power: 0, vitality: 0, agility: 0 };
+const discardThresholdDefaults = { value: 0 };
 let discardThresholds = { ...discardThresholdDefaults };
 let currentInventoryTab = "equipment";
 function grantHerbs(count, shouldLog = true) {
@@ -359,11 +359,24 @@ function loadDiscardThresholds() {
 
   try {
     const data = JSON.parse(raw);
-    discardThresholds = {
-      power: normalizeDiscardThreshold(data?.power),
-      vitality: normalizeDiscardThreshold(data?.vitality),
-      agility: normalizeDiscardThreshold(data?.agility),
-    };
+    if (typeof data === "number") {
+      discardThresholds = {
+        value: normalizeDiscardThreshold(data),
+      };
+    } else if (typeof data?.value !== "undefined") {
+      discardThresholds = {
+        value: normalizeDiscardThreshold(data.value),
+      };
+    } else {
+      const legacyValues = [
+        normalizeDiscardThreshold(data?.power),
+        normalizeDiscardThreshold(data?.vitality),
+        normalizeDiscardThreshold(data?.agility),
+      ];
+      discardThresholds = {
+        value: Math.max(...legacyValues),
+      };
+    }
   } catch (error) {
     discardThresholds = { ...discardThresholdDefaults };
   }
@@ -375,16 +388,12 @@ function saveDiscardThresholds() {
   localStorage.setItem(discardThresholdsKey, JSON.stringify(discardThresholds));
 }
 function syncDiscardThresholdInputs() {
-  discardPowerInputEl.value = discardThresholds.power;
-  discardVitalityInputEl.value = discardThresholds.vitality;
-  discardAgilityInputEl.value = discardThresholds.agility;
+  discardCommonInputEl.value = discardThresholds.value;
 }
 
 function storeDiscardThresholdInputs() {
   discardThresholds = {
-    power: normalizeDiscardThreshold(discardPowerInputEl.value),
-    vitality: normalizeDiscardThreshold(discardVitalityInputEl.value),
-    agility: normalizeDiscardThreshold(discardAgilityInputEl.value),
+    value: normalizeDiscardThreshold(discardCommonInputEl.value),
   };
   syncDiscardThresholdInputs();
   saveDiscardThresholds();
@@ -451,7 +460,6 @@ function equip(index) {
   if (item.kind === "accessory") {
     player.accessory = item;
     log(`💍 ${item.name}を装備した`);
-    closeInventory();
     refresh();
     return;
   }
@@ -463,7 +471,6 @@ function equip(index) {
   adjustHpForMaxChange(prevMaxHp, nextMaxHp);
 
   log(`🗡 ${item.name}を装備した`);
-  closeInventory();
   refresh();
 }
 
@@ -587,9 +594,9 @@ function shouldPickupItem(item) {
   const itemBonus = getItemTotalBonus(item);
 
   return !(
-    itemBonus.power <= thresholds.power &&
-    itemBonus.vitality <= thresholds.vitality &&
-    itemBonus.agility <= thresholds.agility
+    itemBonus.power <= thresholds.value &&
+    itemBonus.vitality <= thresholds.value &&
+    itemBonus.agility <= thresholds.value
   );
 }
 /* =====================
@@ -598,46 +605,46 @@ function shouldPickupItem(item) {
 ===================== */
 function dropItem() {
   if (!enemy) return;
+  const roll = Math.random();
   if (enemy.isBroken) {
-    // const roll = Math.random();
-    // if (roll < 0.1) {
-    //   // 壊れた 10%
-    //   const item = window.ItemGen.createLootItemForDrop(
-    //     enemy.tier,
-    //     floor,
-    //     false,
-    //     enemy.titleMul,
-    //     3,
-    //   );
-    //   item.name = `★壊れた${item.name}`;
-    //   applyBrokenItemStat(item);
-    //   if (!shouldPickupItem(item)) {
-    //     log(`⏭ ${item.name} は拾わなかった`);
-    //     return;
-    //   }
-    //   inventory.push(item);
-    //   log(`🎁 ${item.name}を手に入れた`);
-    //   return;
-    // } else if (roll < 0.11) {
-    // 神の 1%（0.10～0.11）
-    const item = window.ItemGen.createLootItemForDrop(
-      enemy.tier,
-      floor,
-      false,
-      enemy.titleMul,
-      3,
-    );
-    item.name = `★神の${item.name}`;
-    scaleItemBonuses(item, 1.5);
-    if (!shouldPickupItem(item)) {
-      log(`⏭ ${item.name} は拾わなかった`);
+    if (roll < 0.1) {
+      // 壊れた 10%
+      const item = window.ItemGen.createLootItemForDrop(
+        enemy.tier,
+        floor,
+        false,
+        enemy.titleMul,
+        3,
+      );
+      item.name = `★壊れた${item.name}`;
+      applyBrokenItemStat(item);
+      if (!shouldPickupItem(item)) {
+        log(`⏭ ${item.name} は拾わなかった`);
+        return;
+      }
+      inventory.push(item);
+      log(`🎁 ${item.name}を手に入れた`);
+      return;
+    } else if (roll < 0.11) {
+      // 神の 1%（0.10～0.11）
+      const item = window.ItemGen.createLootItemForDrop(
+        enemy.tier,
+        floor,
+        false,
+        enemy.titleMul,
+        3,
+      );
+      item.name = `★神の${item.name}`;
+      scaleItemBonuses(item, 1.5);
+      if (!shouldPickupItem(item)) {
+        log(`⏭ ${item.name} は拾わなかった`);
+        return;
+      }
+      inventory.push(item);
+      log(`🎁 ${item.name}を手に入れた`);
       return;
     }
-    inventory.push(item);
-    log(`🎁 ${item.name}を手に入れた`);
     return;
-    // }
-    // return;
   }
 
   if (enemy.isRare) {
@@ -658,7 +665,6 @@ function dropItem() {
   );
 
   // ドロップ率（好みで）
-  const roll = Math.random();
   if (roll >= 0.5) return;
 
   const desiredBaseStatCount = 3;

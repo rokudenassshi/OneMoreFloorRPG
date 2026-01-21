@@ -117,7 +117,7 @@ function escape() {
   if (enemy && enemy.isRare) {
     log("💨 逃走成功！");
     floor = Math.max(0, floor - 1);
-    endBattle();
+    endBattle({ grantHerbReward: false });
     refresh();
     return;
   }
@@ -127,7 +127,7 @@ function escape() {
   if (Math.random() * 100 < rate) {
     log("💨 逃走成功！");
     floor = Math.max(0, floor - 1);
-    endBattle();
+    endBattle({ grantHerbReward: false });
   } else {
     log("❌ 逃走失敗…");
     enemyAttack();
@@ -196,7 +196,7 @@ function rollDamage(base, variance = 0.2) {
   return rollDamageWithRoll(base, variance, Math.random());
 }
 
-function endBattle() {
+function endBattle({ grantHerbReward = true } = {}) {
   const hasBattle = !!enemy;
   const shouldLogBossRest = pendingBossRestLog && isBossFloor(floor);
   pendingBossRestLog = false;
@@ -207,14 +207,18 @@ function endBattle() {
   if (hasBattle) {
     player.hp = calcMaxHp();
   }
-  const skillEffects = getSkillEffects();
-  const herbBattleRewardCount = Math.floor(skillEffects.herbBattleReward || 0);
-  if (herbBattleRewardCount > 0) {
-    const herbCountBefore = getHerbCount();
-    grantHerbs(herbBattleRewardCount, false);
-    const addedHerbCount = getHerbCount() - herbCountBefore;
-    if (addedHerbCount > 0) {
-      log(`🌿 戦闘終了でやくそうを${addedHerbCount}つ手に入れた`);
+  if (grantHerbReward) {
+    const skillEffects = getSkillEffects();
+    const herbBattleRewardCount = Math.floor(
+      skillEffects.herbBattleReward || 0,
+    );
+    if (herbBattleRewardCount > 0) {
+      const herbCountBefore = getHerbCount();
+      grantHerbs(herbBattleRewardCount, false);
+      const addedHerbCount = getHerbCount() - herbCountBefore;
+      if (addedHerbCount > 0) {
+        log(`🌿 戦闘終了でやくそうを${addedHerbCount}つ手に入れた`);
+      }
     }
   }
   if (shouldLogBossRest) {

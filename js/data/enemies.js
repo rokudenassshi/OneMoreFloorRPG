@@ -381,7 +381,7 @@
     const isBossFloor = tier > 1 && normalizedFloor === tierToMinFloor(tier);
 
     const baseName = isBossFloor
-      ? BOSS_BASE_BY_TIER[tier] ?? BASE_BY_TIER[tier][0]
+      ? (BOSS_BASE_BY_TIER[tier] ?? BASE_BY_TIER[tier][0])
       : pick(rng, BASE_BY_TIER[tier]);
     const title = isBossFloor ? null : pickTitle(rng, tier); // {t, mul}
 
@@ -402,12 +402,12 @@
       2: { hp: [214, 302], atk: [55, 75], exp: [40, 70] },
       3: { hp: [596, 868], atk: [151, 238], exp: [108, 184] },
       4: { hp: [1537, 2152], atk: [348, 574], exp: [266, 430] },
-      5: { hp: [3200, 4000], atk: [600, 800], exp: [564, 881] },
-      6: { hp: [5000, 9000], atk: [1325, 1800], exp: [1060, 1590] },
-      7: { hp: [12960, 17820], atk: [2349, 3888], exp: [1944, 2916] },
-      8: { hp: [24170, 33466], atk: [4090, 6941], exp: [3470, 5081] },
-      9: { hp: [43181, 59718], atk: [6798, 11760], exp: [5880, 8636] },
-      10: { hp: [75264, 104832], atk: [11289, 19488], exp: [9676, 14515] },
+      5: { hp: [3200, 4000], atk: [600, 800], exp: [500, 700] },
+      6: { hp: [5000, 9000], atk: [1325, 1800], exp: [750, 950] },
+      7: { hp: [12960, 17820], atk: [2349, 3888], exp: [1000, 1300] },
+      8: { hp: [24170, 33466], atk: [4090, 6941], exp: [1350, 1500] },
+      9: { hp: [43181, 59718], atk: [6798, 11760], exp: [2000, 2500] },
+      10: { hp: [75264, 104832], atk: [11289, 19488], exp: [3000, 3500] },
     };
     const bossBaseTier = isBossFloor ? Math.min(tier + 1, 10) : tier;
     const baseStats =
