@@ -15,7 +15,7 @@ function startBattle() {
   const isBroken =
     floor >= UNLOCK_FLOOR && Math.random() < brokenEnemyRate + bonusRareRate;
   // レアモンスター
-  const baseRareRate = 3.03;
+  const baseRareRate = 0.02;
   const isRare = !isBroken && Math.random() < baseRareRate + bonusRareRate;
   const rate = isBroken ? 2.5 : isRare ? 1.8 : 1;
 

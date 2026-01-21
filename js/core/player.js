@@ -8,11 +8,11 @@ const player = {
   maxReachedFloor: 0,
 
   status: {
-    power: 100000,
+    power: 10,
     vitality: 10,
     agility: 10,
   },
-  unassignedPoints: 1000,
+  unassignedPoints: 0,
   statPoints: 0,
   statPointUnlockGranted: false,
   skills: {},
