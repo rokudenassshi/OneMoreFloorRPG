@@ -514,7 +514,6 @@ status-actions {
   font-size: 13px;
   border-radius: 8px;
 }
-
 .skill-reset-button:disabled {
   opacity: 0.4;
   cursor: not-allowed;
@@ -568,19 +567,6 @@ status-actions {
   opacity: 0.9;
 }
 
-/* .skill-progress {
-  height: 6px;
-  background: #1e1e1e;
-  border: 1px solid #444;
-  border-radius: 999px;
-  overflow: hidden;
-  margin: 10px 0 8px;
-}
-
-.skill-progress-bar {
-  height: 100%;
-  background: #6c87ff;
-} */
 
 /* 下段：左に状態、右に + / - */
 .skill-footer {
@@ -608,7 +594,7 @@ status-actions {
   min-height: 34px !important;     /* button { min-height:80px } を潰す */
   padding: 0 !important;
   flex: 0 0 auto !important;        /* button { flex:1 } を潰す */
-  font-size: 18px;
+  font-size: 14px;
   border-radius: 8px;
 }
 

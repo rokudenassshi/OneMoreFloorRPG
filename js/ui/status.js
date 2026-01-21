@@ -21,7 +21,7 @@ function renderStatus() {
   const unlockFloor = UNLOCK_FLOOR;
   const isStatPointUnlocked = player.maxReachedFloor >= unlockFloor;
   const statPointLabel = isStatPointUnlocked
-    ? `未使用ステータスポイント：${player.statPoints}`
+    ? `ステータスポイント：${player.statPoints}`
     : "";
   const statPointNote = isStatPointUnlocked
     ? ""
@@ -42,7 +42,7 @@ function renderStatus() {
   statusContentEl.innerHTML = `
     <div>記録：${player.maxReachedFloor}階</div>
     <div>Lv：${player.level}</div>    
-    <div>未使用スキルポイント：${player.unassignedPoints}</div>
+    <div>スキルポイント：${player.unassignedPoints}</div>
     <div>${statPointLabel}</div>
     ${statPointNote}
     <div>EXP：${player.exp} / ${calcNextExp()}</div>

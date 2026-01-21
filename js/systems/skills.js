@@ -91,7 +91,7 @@ function closeSkillAllocation() {
 function renderSkillScreen() {
   if (!skillScreenContentEl) return;
 
-  const pointsLabel = `未使用スキルポイント：${player.unassignedPoints}`;
+  const pointsLabel = `スキルポイント：${player.unassignedPoints}`;
   const hasAssignedSkills =
     player.skills && Object.keys(player.skills).length > 0;
 
@@ -176,10 +176,10 @@ function renderSkillScreen() {
 
     const canLearn =
       player.unassignedPoints >= requiredPoints && !isMax && hasRequirements;
+    const canMax =
+      player.unassignedPoints >= requiredPoints && !isMax && hasRequirements;
+    const canMin = level > 0;
     const canDecrease = level > 0;
-    const progressPct = Number.isFinite(skill.maxLevel)
-      ? Math.round((level / skill.maxLevel) * 100)
-      : 0;
     const maxLevelLabel = Number.isFinite(skill.maxLevel)
       ? skill.maxLevel
       : "∞";
@@ -224,12 +224,18 @@ function renderSkillScreen() {
           }</div>
 
           <div class="skill-actions">
+            <button class="skill-btn" onclick="minUnlearnSkill('${skill.id}')" ${
+              canMin ? "" : "disabled"
+            }>MIN</button>
             <button class="skill-btn" onclick="unlearnSkill('${skill.id}')" ${
               canDecrease ? "" : "disabled"
             }>−</button>
             <button class="skill-btn" onclick="learnSkill('${skill.id}')" ${
               canLearn ? "" : "disabled"
             }>＋</button>
+            <button class="skill-btn" onclick="maxLearnSkill('${skill.id}')" ${
+              canMax ? "" : "disabled"
+            }>MAX</button>
           </div>
         </div>
       </div>
@@ -329,6 +335,51 @@ function resetAllSkills() {
   if (player.hp > maxHp) {
     player.hp = maxHp;
   }
+  refresh();
+  renderSkillScreen();
+}
+function maxLearnSkill(skillId) {
+  const skill = SKILLS.find((entry) => entry.id === skillId);
+  if (!skill) return;
+  if (!hasRequiredSkills(skill)) return;
+
+  const current = getSkillLevel(skillId);
+  const maxLevel = Number.isFinite(skill.maxLevel) ? skill.maxLevel : Infinity;
+  if (current >= maxLevel) return;
+
+  const requiredPoints = Number(skill.requiredPoints) || 1;
+  if (player.unassignedPoints < requiredPoints) return;
+
+  const affordableLevels = Math.floor(player.unassignedPoints / requiredPoints);
+  const remainingLevels = Number.isFinite(maxLevel)
+    ? Math.max(0, maxLevel - current)
+    : affordableLevels;
+  const levelsToAdd = Math.min(affordableLevels, remainingLevels);
+  if (levelsToAdd <= 0) return;
+
+  player.skills[skillId] = current + levelsToAdd;
+  player.unassignedPoints -= levelsToAdd * requiredPoints;
+  const maxHp = calcMaxHp();
+  if (player.hp > maxHp) {
+    player.hp = maxHp;
+  }
+  refresh();
+  renderSkillScreen();
+}
+function minUnlearnSkill(skillId) {
+  const skill = SKILLS.find((entry) => entry.id === skillId);
+  if (!skill) return;
+  const current = getSkillLevel(skillId);
+  if (current <= 0) return;
+
+  const requiredPoints = Number(skill.requiredPoints) || 1;
+  delete player.skills[skillId];
+  player.unassignedPoints += requiredPoints * current;
+  const maxHp = calcMaxHp();
+  if (player.hp > maxHp) {
+    player.hp = maxHp;
+  }
+  removeInvalidDependentSkills();
   refresh();
   renderSkillScreen();
 }
