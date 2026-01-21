@@ -8,11 +8,11 @@ const player = {
   maxReachedFloor: 0,
 
   status: {
-    power: 10,
+    power: 100000,
     vitality: 10,
     agility: 10,
   },
-  unassignedPoints: 0,
+  unassignedPoints: 1000,
   statPoints: 0,
   statPointUnlockGranted: false,
   skills: {},
@@ -49,12 +49,14 @@ function calcAttack() {
 function calcAttackCount() {
   const totalAgility = getTotalStatus().agility;
   const equipmentEffects = getEquipmentSpecialEffects();
+  console.log(equipmentEffects.minHits);
   const skillEffects =
     typeof getSkillEffects === "function" ? getSkillEffects() : {};
   const minHitBonus = Math.max(
     0,
     Math.floor((equipmentEffects.minHits || 0) + (skillEffects.minHits || 0)),
   );
+  console.log(equipmentEffects);
   // 1hitは常に保証、2hit以降の要求値を「段階的に増加」させる
   const base = 50; // 最初の増分（2hitに必要な追加量）
   const stepInc = 200; // 段階が1上がるごとに増分
@@ -318,7 +320,6 @@ function getEquipmentSpecialEffects() {
         break;
     }
   });
-
   return effects;
 }
 function getSpecialEffects() {
