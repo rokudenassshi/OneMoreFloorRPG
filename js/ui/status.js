@@ -1,3 +1,6 @@
+const STAT_STEP_SMALL = 5;
+const STAT_STEP_LARGE = 100;
+let statStep = STAT_STEP_SMALL;
 function openStatus() {
   if (gameState !== "EXPLORE") return;
 
@@ -26,16 +29,20 @@ function renderStatus() {
   const statPointNote = isStatPointUnlocked
     ? ""
     : `<div class="status-note"></div>`;
+  const statStepCost = statStep / STAT_STEP_SMALL;
   const powerBase = player.status.power;
   const vitalityBase = player.status.vitality;
   const agilityBase = player.status.agility;
   const powerBonusText = bonus.power ? `（+${bonus.power}）` : "";
   const vitalityBonusText = bonus.vitality ? `（+${bonus.vitality}）` : "";
   const agilityBonusText = bonus.agility ? `（+${bonus.agility}）` : "";
-  const powerDecreaseDisabled = !isStatPointUnlocked;
-  const vitalityDecreaseDisabled = !isStatPointUnlocked;
-  const agilityDecreaseDisabled = !isStatPointUnlocked;
-  const addDisabled = !isStatPointUnlocked || player.statPoints <= 0;
+  const powerDecreaseDisabled =
+    !isStatPointUnlocked || powerBase - statStep < 10;
+  const vitalityDecreaseDisabled =
+    !isStatPointUnlocked || vitalityBase - statStep < 10;
+  const agilityDecreaseDisabled =
+    !isStatPointUnlocked || agilityBase - statStep < 10;
+  const addDisabled = !isStatPointUnlocked || player.statPoints < statStepCost;
   const nextExp = calcNextExp() - player.exp;
   const weaponName = player.weapon ? `${player.weapon.name}` : "なし";
   const accessoryName = player.accessory ? `${player.accessory.name}` : "なし";
@@ -47,11 +54,21 @@ function renderStatus() {
     ${statPointNote}
     <div>EXP：${player.exp} / ${calcNextExp()}</div>
     <div>次のLvまで：${nextExp}</div>
-    <hr>
 
+        
     <div class="status-actions">
       <button class="status-action-button" onclick="openSkillAllocation()">スキル割り振りへ</button>
     </div>
+    <hr>
+  ${
+    isStatPointUnlocked
+      ? `<div class="status-actions">
+            <button class="status-action-button" onclick="toggleStatStep()">
+              増減単位：${statStep}
+            </button>
+          </div>`
+      : ""
+  }
 <div class="status-row">
       ちから　　：${powerBase}${powerBonusText}
       ${
@@ -108,20 +125,28 @@ function renderStatus() {
 
 function addStat(stat) {
   if (player.maxReachedFloor < UNLOCK_FLOOR) return;
-  if (player.statPoints <= 0) return;
 
-  player.status[stat] += 5;
-  player.statPoints--;
+  const cost = statStep / STAT_STEP_SMALL;
+  if (player.statPoints < cost) return;
+
+  player.status[stat] += statStep * 5;
+  player.statPoints -= cost;
 
   refresh();
   renderStatus();
 }
 function subStat(stat) {
-  if (player.status[stat] <= 10) return;
   if (player.maxReachedFloor < UNLOCK_FLOOR) return;
-  player.status[stat] -= 5;
-  player.statPoints++;
 
+  if (player.status[stat] - statStep < 10) return;
+  const refund = statStep / STAT_STEP_SMALL;
+  player.status[stat] -= statStep * 5;
+  player.statPoints += refund;
   refresh();
+  renderStatus();
+}
+
+function toggleStatStep() {
+  statStep = statStep === STAT_STEP_SMALL ? STAT_STEP_LARGE : STAT_STEP_SMALL;
   renderStatus();
 }

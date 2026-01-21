@@ -23,7 +23,7 @@
       name: "連撃強化",
       accessoryTypes: ACCESSORY_TYPES,
       min: 1,
-      max: 30,
+      max: 40,
       describe: (value) => `連続攻撃でダメージが${value}%ずつ増加`,
     },
     {

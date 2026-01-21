@@ -3,6 +3,7 @@ let floor = 0;
 let enemy = null;
 const autosaveKey = "roguelike_autosave";
 let battleGutsUsed = false;
+let isGameReady = false;
 
 function isBossFloor(currentFloor) {
   return BOSS_FLOORS.includes(currentFloor);
@@ -24,6 +25,7 @@ function clearEnemy() {
 }
 
 function autoSave() {
+  if (!isGameReady) return;
   const weaponIndex =
     player && player.weapon ? inventory.indexOf(player.weapon) : -1;
   const accessoryIndex =
@@ -56,7 +58,9 @@ function autoSave() {
 
   localStorage.setItem(autosaveKey, JSON.stringify(data));
 }
-
+function setGameReady(value) {
+  isGameReady = Boolean(value);
+}
 function loadAutoSave() {
   const raw = localStorage.getItem(autosaveKey);
   if (!raw) return false;

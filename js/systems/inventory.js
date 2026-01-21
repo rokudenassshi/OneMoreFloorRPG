@@ -460,6 +460,7 @@ function equip(index) {
   if (item.kind === "accessory") {
     player.accessory = item;
     log(`💍 ${item.name}を装備した`);
+    renderInventory();
     refresh();
     return;
   }
@@ -471,6 +472,7 @@ function equip(index) {
   adjustHpForMaxChange(prevMaxHp, nextMaxHp);
 
   log(`🗡 ${item.name}を装備した`);
+  renderInventory();
   refresh();
 }
 

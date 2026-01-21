@@ -52,3 +52,4 @@ if (!hasAutoSave) {
 claimUrlGiftItem();
 awardStatPointUnlock();
 refresh();
+setGameReady(true);

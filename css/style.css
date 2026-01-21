@@ -269,7 +269,32 @@ button {
 status-actions {
   margin-top: 12px;
 }
+.status-step-label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: bold;
+}
 
+.status-step-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.status-step-input {
+  flex: 1;
+  min-width: 0;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #555;
+  background: #1e1e1e;
+  color: #fff;
+}
+
+.status-step-note {
+  margin-top: 6px;
+  font-size: 12px;
+  opacity: 0.8;
+}
 .status-action-button {
   width: 100%;
   min-height: 48px;
