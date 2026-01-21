@@ -8,7 +8,7 @@ const player = {
   maxReachedFloor: 0,
 
   status: {
-    power: 10,
+    power: 10000,
     vitality: 10,
     agility: 10,
   },

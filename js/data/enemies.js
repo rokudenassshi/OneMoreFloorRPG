@@ -373,12 +373,36 @@
 
   /* ========= 敵生成 ========= */
   function createEnemyForFloor(floor) {
+    // ★ ろく氏（15000階 固定ボス）
+    const finalBossFloor = window.getFinalBossFloor?.();
+
+    // ★ 最終ボス（ろく氏）
+    if (finalBossFloor && floor === finalBossFloor) {
+      return {
+        id: "boss_rokushi",
+        name: "ろく氏",
+        tier: 11,
+        minFloor: finalBossFloor,
+
+        title: "創造神",
+        titleMul: 1,
+
+        maxHp: 99999999,
+        hp: 99999999,
+        atk: 99999999,
+        exp: 1,
+
+        isBoss: true,
+        drops: ["acc_proof_of_slaying"],
+      };
+    }
+
     const seed = hashSeed(`ENEMY|F${floor}|${Date.now()}|${Math.random()}`);
     const rng = normalizeRng(mulberry32(seed));
     const normalizedFloor = Math.max(1, floor);
     const tier = resolveTierForFloor(normalizedFloor);
     const minFloor = tierToMinFloor(tier);
-    const isBossFloor = tier > 1 && normalizedFloor === tierToMinFloor(tier);
+    const isBossFloor = BOSS_FLOORS.includes(normalizedFloor);
 
     const baseName = isBossFloor
       ? (BOSS_BASE_BY_TIER[tier] ?? BASE_BY_TIER[tier][0])
@@ -408,8 +432,9 @@
       8: { hp: [24170, 33466], atk: [4090, 6941], exp: [1350, 1500] },
       9: { hp: [43181, 59718], atk: [6798, 11760], exp: [2000, 2500] },
       10: { hp: [75264, 104832], atk: [11289, 19488], exp: [3000, 3500] },
+      11: { hp: [75264, 104832], atk: [11289, 19488], exp: [3000, 3500] },
     };
-    const bossBaseTier = isBossFloor ? Math.min(tier + 1, 10) : tier;
+    const bossBaseTier = isBossFloor ? Math.min(tier + 1, 11) : tier;
     const baseStats =
       BASE_STATS_BY_TITLE_TIER[bossBaseTier] ?? BASE_STATS_BY_TITLE_TIER[1];
     const hpBase = isBossFloor

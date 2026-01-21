@@ -9,7 +9,7 @@ function isBossFloor(currentFloor) {
 }
 
 function setFloor(value) {
-  floor = Math.max(0, value);
+  floor = Math.max(0, Math.min(MAX_FLOOR, value));
   refresh();
 }
 
@@ -72,7 +72,7 @@ function loadAutoSave() {
   const savedPlayer = data.player || {};
   const savedStatus = savedPlayer.status || {};
 
-  floor = Math.max(0, Number(data.floor) || 0);
+  floor = Math.max(0, Math.min(MAX_FLOOR, Number(data.floor) || 0));
   gameState = "EXPLORE";
   enemy = null;
 
@@ -81,7 +81,7 @@ function loadAutoSave() {
   player.baseHp = Math.max(1, Number(savedPlayer.baseHp) || player.baseHp);
   player.maxReachedFloor = Math.max(
     0,
-    Number(savedPlayer.maxReachedFloor) || 0,
+    Math.min(MAX_FLOOR, Number(savedPlayer.maxReachedFloor) || 0),
   );
   player.status.power = Number(savedStatus.power) || 0;
   player.status.vitality = Number(savedStatus.vitality) || 0;

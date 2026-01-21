@@ -535,7 +535,7 @@ function calcGodItemMinValueByFloor(floor) {
 }
 function scaleItemBonuses(item, multiplier) {
   // ★神アイテムのみ階層依存の下限を適用
-  const isGodItem = item?.name?.startsWith("★神の");
+  const isGodItem = item?.name?.startsWith("★六神★");
   const minFloor = isGodItem ? calcGodItemMinValueByFloor(floor) : 0;
 
   const scaleValue = (value) => {
@@ -605,6 +605,17 @@ function shouldPickupItem(item) {
 ===================== */
 function dropItem() {
   if (!enemy) return;
+  const finalBossFloor = window.getFinalBossFloor?.();
+
+  if (finalBossFloor && enemy.minFloor === finalBossFloor) {
+    const proof = window.ItemGen?.PROOF_OF_SLAYING;
+    if (!proof) return;
+
+    inventory.push({ ...proof });
+    log("🏆 最終ボスを討伐した！");
+    log(`🎁 ${proof.name}を手に入れた`);
+    return;
+  }
   const roll = Math.random();
   if (enemy.isBroken) {
     if (roll < 0.1) {
@@ -625,7 +636,7 @@ function dropItem() {
       inventory.push(item);
       log(`🎁 ${item.name}を手に入れた`);
       return;
-    } else if (roll < 0.11) {
+    } else if (roll < 1.11) {
       // 神の 1%（0.10～0.11）
       const item = window.ItemGen.createLootItemForDrop(
         enemy.tier,
@@ -634,7 +645,7 @@ function dropItem() {
         enemy.titleMul,
         3,
       );
-      item.name = `★神の${item.name}`;
+      item.name = `★六神★${item.name}`;
       scaleItemBonuses(item, 1.5);
       if (!shouldPickupItem(item)) {
         log(`⏭ ${item.name} は拾わなかった`);

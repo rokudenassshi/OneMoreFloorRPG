@@ -14,8 +14,11 @@ function goToBase() {
 
 function move(dir) {
   if (gameState !== "EXPLORE") return;
-  floor = Math.max(0, floor + dir);
-  player.maxReachedFloor = Math.max(player.maxReachedFloor, floor);
+  floor = Math.max(0, Math.min(MAX_FLOOR, floor + dir));
+  player.maxReachedFloor = Math.max(
+    player.maxReachedFloor,
+    Math.min(MAX_FLOOR, floor),
+  );
   awardStatPointUnlock();
   // 拠点（0階層）
   if (floor === 0) {
@@ -64,7 +67,7 @@ function move(dir) {
 function getAvailableTeleportFloors() {
   // const max = player.maxReachedFloor;
   // デバッグ
-  const max = 1000;
+  const max = 15000;
   const floors = [];
 
   for (let f = 0; f <= max; f += 50) {
@@ -75,6 +78,14 @@ function getAvailableTeleportFloors() {
 }
 
 function openTeleportModal() {
+  const isBattleView =
+    gameState === "BATTLE" ||
+    (gameState === "INVENTORY" && inventoryReturnState === "BATTLE") ||
+    (gameState === "SKILL" && skillReturnState === "BATTLE");
+  if (isBattleView) {
+    log("⚠️ 戦闘中は転移できない。");
+    return;
+  }
   const availableFloors = getAvailableTeleportFloors();
   if (availableFloors.length === 0) {
     log("まだ転移できる階層がありません。");

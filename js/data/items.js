@@ -25,7 +25,21 @@
   function pick(rng, arr) {
     return arr[rInt(rng, 0, arr.length - 1)];
   }
-
+  const PROOF_OF_SLAYING = {
+    id: "acc_proof_of_slaying",
+    kind: "accessory",
+    name: "討伐の証",
+    bonus: { power: 0, vitality: 0, agility: 0 },
+    specialOptions: [
+      {
+        id: "exp_boost",
+        name: "経験値上昇",
+        value: 100,
+        description: "獲得経験値 +100%",
+      },
+    ],
+    isLocked: true,
+  };
   // ★あなたの「二つ名の量」は減らさない：ここは今のTITLE_BY_TIERをそのまま貼る
   /* ========= 二つ名（tier別・倍率付き） ========= */
   const TITLE_BY_TIER = {
@@ -567,5 +581,6 @@
     createBaseItemForDrop,
     createLootItemForDrop,
     createAccessoryForDrop,
+    PROOF_OF_SLAYING,
   };
 })();

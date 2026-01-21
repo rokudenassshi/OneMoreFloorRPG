@@ -11,7 +11,7 @@ function startBattle() {
   bonusRareRate += (specialEffects.rareEncounterBoost || 0) / 100;
 
   // ★壊れたエネミー（1001階層以降）
-  const brokenEnemyRate = 0.01;
+  const brokenEnemyRate = 3.01;
   const isBroken =
     floor >= UNLOCK_FLOOR && Math.random() < brokenEnemyRate + bonusRareRate;
   // レアモンスター
@@ -19,6 +19,9 @@ function startBattle() {
   const isRare = !isBroken && Math.random() < baseRareRate + bonusRareRate;
   const rate = isBroken ? 2.5 : isRare ? 1.8 : 1;
 
+  const highFloorStep =
+    floor >= UNLOCK_FLOOR ? Math.floor((floor - UNLOCK_FLOOR) / 50) + 1 : 0;
+  const highFloorMultiplier = highFloorStep > 0 ? 1 + highFloorStep * 0.2 : 1;
   enemy = {
     id: base.id,
     name: isBroken
@@ -31,9 +34,11 @@ function startBattle() {
     tier: base.tier,
     titleMul: base.titleMul,
     // 上位ほど強い：baseがtierで強い + floor補正を少し
-    maxHp: Math.floor((base.hp + floor * 2) * rate),
-    hp: Math.floor((base.hp + floor * 2) * rate),
-    atk: Math.floor((base.atk + Math.floor(floor / 3)) * rate),
+    maxHp: Math.floor((base.hp + floor * 2) * rate * highFloorMultiplier),
+    hp: Math.floor((base.hp + floor * 2) * rate * highFloorMultiplier),
+    atk: Math.floor(
+      (base.atk + Math.floor(floor / 3)) * rate * highFloorMultiplier,
+    ),
     exp: Math.floor((base.exp + Math.floor(floor / 2)) * rate),
 
     // ★ ドロップ候補を保持
