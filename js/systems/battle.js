@@ -64,10 +64,21 @@ function attack() {
   const hits = calcAttackCount();
   const specialEffects = getSpecialEffects();
   const comboBoostRate = (specialEffects.comboBoost || 0) / 100;
+  const selfDamageBoostRate = (specialEffects.selfDamageBoost || 0) / 100;
 
   let total = 0;
   const enemyHpBefore = enemy.hp;
-
+  if (selfDamageBoostRate > 0) {
+    const maxHp = calcMaxHp();
+    const selfDamage = Math.max(1, Math.floor(maxHp * 0.4));
+    player.hp = Math.max(0, player.hp - selfDamage);
+    log(`💥 HPを${selfDamage}消費`);
+    if (player.hp === 0) {
+      refresh();
+      gameOver();
+      return;
+    }
+  }
   const hitDamages = [];
   const hitComboBonusDamages = [];
   for (let i = 0; i < hits; i++) {
@@ -77,9 +88,18 @@ function attack() {
       1,
       Math.floor(baseHitAtk * (1 + comboBoostRate * i)),
     );
+    const boostedBaseHitAtk = Math.max(
+      1,
+      Math.floor(baseHitAtk * (1 + selfDamageBoostRate)),
+    );
+    const boostedHitAtk = Math.max(
+      1,
+      Math.floor(hitAtk * (1 + selfDamageBoostRate)),
+    );
     const damageRoll = Math.random();
-    const damage = rollDamageWithRoll(hitAtk, 0.3, damageRoll);
-    const baseDamage = rollDamageWithRoll(baseHitAtk, 0.3, damageRoll);
+
+    const damage = rollDamageWithRoll(boostedHitAtk, 0.3, damageRoll);
+    const baseDamage = rollDamageWithRoll(boostedBaseHitAtk, 0.3, damageRoll);
     const comboBonusDamage = Math.max(0, damage - baseDamage);
     enemy.hp -= damage;
     total += damage;

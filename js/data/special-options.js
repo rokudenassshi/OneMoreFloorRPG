@@ -58,6 +58,38 @@
       max: 2,
       describe: (value) => `ヒット数を+${value}`,
     },
+    {
+      id: "self_damage_boost",
+      name: "自傷強化",
+      accessoryTypes: ACCESSORY_TYPES,
+      min: 1,
+      max: 50,
+      describe: (value) => `攻撃時HPを40%消費し、ダメージ+${value}%`,
+    },
+    {
+      id: "power_rate",
+      name: "ちから強化",
+      accessoryTypes: ACCESSORY_TYPES,
+      min: 1,
+      max: 30,
+      describe: (value) => `ちから+${value}%`,
+    },
+    {
+      id: "vitality_rate",
+      name: "たいりょく強化",
+      accessoryTypes: ACCESSORY_TYPES,
+      min: 1,
+      max: 30,
+      describe: (value) => `たいりょく+${value}%`,
+    },
+    {
+      id: "agility_rate",
+      name: "すばやさ強化",
+      accessoryTypes: ACCESSORY_TYPES,
+      min: 1,
+      max: 30,
+      describe: (value) => `すばやさ+${value}%`,
+    },
   ];
 
   window.SpecialOptionPool = SPECIAL_OPTION_POOL;

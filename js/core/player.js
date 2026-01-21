@@ -199,14 +199,18 @@ function getSkillStatusRates() {
 function getTotalStatus() {
   const bonus = getEquipmentBonus();
   const rates = getSkillStatusRates();
+  const equipmentRates = getEquipmentSpecialEffects();
   const power = Math.floor(
-    (player.status.power + bonus.power) * (1 + rates.power),
+    (player.status.power + bonus.power) *
+      (1 + rates.power + (equipmentRates.powerRate || 0)),
   );
   const vitality = Math.floor(
-    (player.status.vitality + bonus.vitality) * (1 + rates.vitality),
+    (player.status.vitality + bonus.vitality) *
+      (1 + rates.vitality + (equipmentRates.vitalityRate || 0)),
   );
   const agility = Math.floor(
-    (player.status.agility + bonus.agility) * (1 + rates.agility),
+    (player.status.agility + bonus.agility) *
+      (1 + rates.agility + (equipmentRates.agilityRate || 0)),
   );
 
   return {
@@ -268,6 +272,10 @@ function getEquipmentSpecialEffects() {
     expBoost: 0,
     rareEncounterBoost: 0,
     minHits: 0,
+    minHits: 0,
+    powerRate: 0,
+    vitalityRate: 0,
+    agilityRate: 0,
   };
 
   getEquipmentSpecialOptions().forEach((option) => {
@@ -293,6 +301,15 @@ function getEquipmentSpecialEffects() {
         break;
       case "min_hits":
         effects.minHits += value;
+        break;
+      case "power_rate":
+        effects.powerRate += value / 100;
+        break;
+      case "vitality_rate":
+        effects.vitalityRate += value / 100;
+        break;
+      case "agility_rate":
+        effects.agilityRate += value / 100;
         break;
       default:
         break;
