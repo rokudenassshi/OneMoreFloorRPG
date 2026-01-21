@@ -8,7 +8,7 @@ const player = {
   maxReachedFloor: 0,
 
   status: {
-    power: 10000,
+    power: 10,
     vitality: 10,
     agility: 10,
   },
@@ -87,6 +87,10 @@ function calcAttackCount() {
 
 // すばやさ：回避（上限20%）
 function rollEvade() {
+  // ★ ろく氏の攻撃は回避率1%固定
+  if (typeof enemy !== "undefined" && enemy?.id === "boss_rokushi") {
+    return Math.random() < 0.01;
+  }
   const baseRate = 0.05; // 固定5%
   const specialEffects = getSpecialEffects();
   const extraRate = (specialEffects.evadeBoost || 0) / 100;

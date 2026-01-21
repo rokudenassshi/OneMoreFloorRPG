@@ -11,7 +11,7 @@ function startBattle() {
   bonusRareRate += (specialEffects.rareEncounterBoost || 0) / 100;
 
   // ★壊れたエネミー（1001階層以降）
-  const brokenEnemyRate = 3.01;
+  const brokenEnemyRate = 0.01;
   const isBroken =
     floor >= UNLOCK_FLOOR && Math.random() < brokenEnemyRate + bonusRareRate;
   // レアモンスター
@@ -163,7 +163,12 @@ function enemyAttack() {
   const specialEffects = getSpecialEffects();
   const reflectRate = (specialEffects.reflect || 0) / 100;
   if (reflectRate > 0 && enemy) {
-    const reflectDamage = Math.floor((result?.damage || 0) * reflectRate);
+    let reflectDamage = Math.floor((result?.damage || 0) * reflectRate);
+    // ★ ろく氏は反射ダメージ80%軽減
+    if (enemy.id === "boss_rokushi") {
+      reflectDamage = Math.floor(reflectDamage * 0.2);
+      log("ろく氏「キカヌ」");
+    }
     if (reflectDamage > 0) {
       enemy.hp -= reflectDamage;
       log(`🛡️ ${enemy.name} に${reflectDamage}ダメージ反射`);

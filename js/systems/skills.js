@@ -92,6 +92,8 @@ function renderSkillScreen() {
   if (!skillScreenContentEl) return;
 
   const pointsLabel = `未使用スキルポイント：${player.unassignedPoints}`;
+  const hasAssignedSkills =
+    player.skills && Object.keys(player.skills).length > 0;
 
   // （任意）合計効果を上に出す：すでに getSkillEffects() があるので活用
   const total = getSkillEffects();
@@ -236,7 +238,12 @@ function renderSkillScreen() {
 
   skillScreenContentEl.innerHTML = `
     <div class="skill-top">
-      <div class="skill-points">${pointsLabel}</div>
+      <div class="skill-top-row">
+        <div class="skill-points">${pointsLabel}</div>
+        <button class="skill-reset-button" onclick="resetAllSkills()" ${
+          hasAssignedSkills ? "" : "disabled"
+        }>スキル一括リセット</button>
+      </div>
       ${summaryHtml}
     </div>
     <div class="skill-list">${skillListHtml}</div>
@@ -298,6 +305,30 @@ function unlearnSkill(skillId) {
     player.hp = maxHp;
   }
   removeInvalidDependentSkills();
+  refresh();
+  renderSkillScreen();
+}
+function resetAllSkills() {
+  if (!player.skills || Object.keys(player.skills).length === 0) return;
+  const shouldReset = confirm(
+    "習得済みのスキルをすべてリセットします。よろしいですか？",
+  );
+  if (!shouldReset) return;
+
+  let refundedPoints = 0;
+  Object.entries(player.skills).forEach(([skillId, level]) => {
+    const skill = SKILLS.find((entry) => entry.id === skillId);
+    if (!skill) return;
+    const requiredPoints = Number(skill.requiredPoints) || 1;
+    refundedPoints += requiredPoints * Number(level || 0);
+  });
+
+  player.skills = {};
+  player.unassignedPoints += refundedPoints;
+  const maxHp = calcMaxHp();
+  if (player.hp > maxHp) {
+    player.hp = maxHp;
+  }
   refresh();
   renderSkillScreen();
 }

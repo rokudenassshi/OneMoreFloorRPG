@@ -3,7 +3,7 @@ const SKILLS = [
     id: "exp_gain_boost",
     name: "獲得経験値アップ",
     maxLevel: Number.POSITIVE_INFINITY,
-    requiredPoints: 1,
+    requiredPoints: 2,
     description: "獲得経験値+1%",
     effects: { expBoost: 1 },
   },
@@ -119,7 +119,7 @@ const SKILLS = [
     name: "二刀流",
     maxLevel: 1,
     requiredPoints: 30,
-    description: "ちからが1.3倍になるがたいりょく、すばやさが半分になる",
-    effects: { powerRate: 0.3, vitalityRate: -0.5, agilityRate: -0.5 },
+    description: "ちからが1.5倍になるがたいりょく、すばやさが半分になる",
+    effects: { powerRate: 0.5, vitalityRate: -0.5, agilityRate: -0.5 },
   },
 ];
