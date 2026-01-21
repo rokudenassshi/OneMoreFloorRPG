@@ -62,7 +62,9 @@ function move(dir) {
   autoSave();
 }
 function getAvailableTeleportFloors() {
-  const max = player.maxReachedFloor;
+  // const max = player.maxReachedFloor;
+  // デバッグ
+  const max = 1000;
   const floors = [];
 
   for (let f = 0; f <= max; f += 50) {

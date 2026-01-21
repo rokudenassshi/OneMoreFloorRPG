@@ -416,9 +416,17 @@
   function getAccessoryValueCap(option, floor = 0) {
     const max = Number(option.max);
     if (!Number.isFinite(max)) return null;
+
+    // UNLOCK_FLOOR 到達後は制限なし
     if (floor >= UNLOCK_FLOOR) return max;
+
     const min = Number(option.min) || 0;
-    return Math.max(min, Math.floor(max * 0.7));
+
+    // 200階層ごとに上限比率を伸ばす（最大70%まで）
+    const step = Math.floor((floor || 0) / 200); // 0,1,2,3...
+    const ratio = Math.min(0.7, 0.3 + 0.1 * step); // 0.3→0.4→…→0.7
+
+    return Math.max(min, Math.floor(max * ratio));
   }
 
   function rollSpecialOptionValue(
@@ -463,15 +471,8 @@
     return value;
   }
   function capAccessoryOptionValue(option, value, floor = 0) {
-    // UNLOCK_FLOOR 到達後は制限なし（ランダム生成のまま）
-    if (floor >= UNLOCK_FLOOR) return value;
-
-    const min = Number(option.min) || 0;
-    const max = Number(option.max);
-    if (!Number.isFinite(max)) return value;
-
-    // 到達前は「最大値の7割」まで
-    const cap = Math.max(min, Math.floor(max * 0.7));
+    const cap = getAccessoryValueCap(option, floor);
+    if (!Number.isFinite(cap)) return value;
     return Math.min(value, cap);
   }
   function getAccessoryName(option, floor = 0) {

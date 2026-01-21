@@ -522,9 +522,21 @@ function useHerbInBattle() {
   const used = useItem(herbIndex);
   if (used) return;
 }
+function calcGodItemMinValueByFloor(floor) {
+  const rate = 1.8; // 調整用
+  return Math.max(0, Math.floor(floor * rate));
+}
 function scaleItemBonuses(item, multiplier) {
-  const scaleValue = (value) =>
-    value > 0 ? Math.max(1, Math.floor(value * multiplier)) : 0;
+  // ★神アイテムのみ階層依存の下限を適用
+  const isGodItem = item?.name?.startsWith("★神の");
+  const minFloor = isGodItem ? calcGodItemMinValueByFloor(floor) : 0;
+
+  const scaleValue = (value) => {
+    if (value <= 0) return 0;
+    const scaled = Math.max(1, Math.floor(value * multiplier));
+    return Math.max(scaled, minFloor);
+  };
+
   if (item.baseBonus) {
     item.baseBonus = {
       power: scaleValue(item.baseBonus.power || 0),
@@ -532,6 +544,7 @@ function scaleItemBonuses(item, multiplier) {
       agility: scaleValue(item.baseBonus.agility || 0),
     };
   }
+
   if (item.optionBonus) {
     item.optionBonus = {
       power: scaleValue(item.optionBonus.power || 0),
@@ -539,11 +552,14 @@ function scaleItemBonuses(item, multiplier) {
       agility: scaleValue(item.optionBonus.agility || 0),
     };
   }
+
   if (item.bonus) {
     item.bonus = {
-      power: scaleValue(item.bonus.power || 0),
-      vitality: scaleValue(item.bonus.vitality || 0),
-      agility: scaleValue(item.bonus.agility || 0),
+      power: (item.baseBonus?.power || 0) + (item.optionBonus?.power || 0),
+      vitality:
+        (item.baseBonus?.vitality || 0) + (item.optionBonus?.vitality || 0),
+      agility:
+        (item.baseBonus?.agility || 0) + (item.optionBonus?.agility || 0),
     };
   }
 }
@@ -578,49 +594,50 @@ function shouldPickupItem(item) {
 }
 /* =====================
    ドロップ（敵ごとの drops から抽選）
+   
 ===================== */
 function dropItem() {
   if (!enemy) return;
   if (enemy.isBroken) {
-    const roll = Math.random();
-    if (roll < 0.1) {
-      // 壊れた 10%
-      const item = window.ItemGen.createLootItemForDrop(
-        enemy.tier,
-        floor,
-        false,
-        enemy.titleMul,
-        3,
-      );
-      item.name = `★壊れた${item.name}`;
-      applyBrokenItemStat(item);
-      if (!shouldPickupItem(item)) {
-        log(`⏭ ${item.name} は拾わなかった`);
-        return;
-      }
-      inventory.push(item);
-      log(`🎁 ${item.name}を手に入れた`);
-      return;
-    } else if (roll < 0.11) {
-      // 神の 1%（0.10～0.11）
-      const item = window.ItemGen.createLootItemForDrop(
-        enemy.tier,
-        floor,
-        false,
-        enemy.titleMul,
-        3,
-      );
-      item.name = `★神の${item.name}`;
-      scaleItemBonuses(item, 1.5);
-      if (!shouldPickupItem(item)) {
-        log(`⏭ ${item.name} は拾わなかった`);
-        return;
-      }
-      inventory.push(item);
-      log(`🎁 ${item.name}を手に入れた`);
+    // const roll = Math.random();
+    // if (roll < 0.1) {
+    //   // 壊れた 10%
+    //   const item = window.ItemGen.createLootItemForDrop(
+    //     enemy.tier,
+    //     floor,
+    //     false,
+    //     enemy.titleMul,
+    //     3,
+    //   );
+    //   item.name = `★壊れた${item.name}`;
+    //   applyBrokenItemStat(item);
+    //   if (!shouldPickupItem(item)) {
+    //     log(`⏭ ${item.name} は拾わなかった`);
+    //     return;
+    //   }
+    //   inventory.push(item);
+    //   log(`🎁 ${item.name}を手に入れた`);
+    //   return;
+    // } else if (roll < 0.11) {
+    // 神の 1%（0.10～0.11）
+    const item = window.ItemGen.createLootItemForDrop(
+      enemy.tier,
+      floor,
+      false,
+      enemy.titleMul,
+      3,
+    );
+    item.name = `★神の${item.name}`;
+    scaleItemBonuses(item, 1.5);
+    if (!shouldPickupItem(item)) {
+      log(`⏭ ${item.name} は拾わなかった`);
       return;
     }
+    inventory.push(item);
+    log(`🎁 ${item.name}を手に入れた`);
     return;
+    // }
+    // return;
   }
 
   if (enemy.isRare) {
@@ -655,14 +672,7 @@ function dropItem() {
 
   item.isRareDrop = !!enemy.isRare;
   const rareDropMark = item.isRareDrop ? "★" : "";
-  const thresholds = loadDiscardThresholds();
-  const itemBonus = getItemTotalBonus(item);
-
-  if (
-    itemBonus.power <= thresholds.power &&
-    itemBonus.vitality <= thresholds.vitality &&
-    itemBonus.agility <= thresholds.agility
-  ) {
+  if (!shouldPickupItem(item)) {
     log(`⏭ ${rareDropMark}${item.name} は拾わなかった`);
     return;
   }
