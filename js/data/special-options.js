@@ -2,14 +2,14 @@
 (() => {
   const ACCESSORY_TYPES = ["指輪", "護符", "首飾り", "耳飾り", "腕輪"];
   const SPECIAL_OPTION_POOL = [
-    // {
-    //   id: "life_steal",
-    //   name: "吸血",
-    //   accessoryTypes: ACCESSORY_TYPES,
-    //   min: 1,
-    //   max: 30,
-    //   describe: (value) => `攻撃時に与えたダメージの${value}%をHP回復`,
-    // },
+    {
+      id: "life_steal",
+      name: "吸血",
+      accessoryTypes: ACCESSORY_TYPES,
+      min: 1,
+      max: 30,
+      describe: (value) => `攻撃時に与えたダメージの${value}%をHP回復`,
+    },
     {
       id: "damage_reflect",
       name: "ダメージ反射",
