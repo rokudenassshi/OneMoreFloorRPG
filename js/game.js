@@ -1,7 +1,7 @@
 const hasAutoSave = loadAutoSave();
 const URL_ITEM_GIFT_PARAM = "gift";
 const URL_ITEM_GIFT_CODE = "rokudemonai";
-const URL_ITEM_GIFT_STORAGE_KEY = "roguelike_url_gift_omf80";
+const URL_ITEM_GIFT_STORAGE_KEY = "1";
 
 function createUrlGiftItem() {
   return {

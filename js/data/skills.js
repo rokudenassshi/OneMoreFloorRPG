@@ -3,7 +3,7 @@ const SKILLS = [
     id: "exp_gain_boost",
     name: "獲得経験値アップ",
     maxLevel: Number.POSITIVE_INFINITY,
-    requiredPoints: 2,
+    requiredPoints: 1,
     description: "獲得経験値+1%",
     effects: { expBoost: 1 },
   },
