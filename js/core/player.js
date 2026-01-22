@@ -272,10 +272,10 @@ function getEquipmentSpecialEffects() {
     expBoost: 0,
     rareEncounterBoost: 0,
     minHits: 0,
-    minHits: 0,
     powerRate: 0,
     vitalityRate: 0,
     agilityRate: 0,
+    selfDamageBoost: 0,
   };
 
   getEquipmentSpecialOptions().forEach((option) => {
@@ -311,11 +311,13 @@ function getEquipmentSpecialEffects() {
       case "agility_rate":
         effects.agilityRate += value / 100;
         break;
+      case "self_damage_boost":
+        effects.selfDamageBoost += value;
+        break;
       default:
         break;
     }
   });
-
   return effects;
 }
 function getSpecialEffects() {
@@ -333,6 +335,9 @@ function getSpecialEffects() {
     evadeCounter: skillEffects.evadeCounter || 0,
     minHits: equipmentEffects.minHits + (skillEffects.minHits || 0),
     expBoost: equipmentEffects.expBoost + (skillEffects.expBoost || 0),
+    rareEncounterBoost:
+      equipmentEffects.rareEncounterBoost +
+      (skillEffects.rareEncounterBoost || 0),
     agilityAttackRate: skillEffects.agilityAttackRate || 0,
     vitalityAttackRate: skillEffects.vitalityAttackRate || 0,
   };

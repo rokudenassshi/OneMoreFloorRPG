@@ -1,7 +1,7 @@
 let gameState = "EXPLORE";
 let floor = 0;
 let enemy = null;
-const autosaveKey = "roguelike_autosave";
+const autosaveKey = "release3";
 let battleGutsUsed = false;
 let isGameReady = false;
 
@@ -58,6 +58,7 @@ function autoSave() {
 
   localStorage.setItem(autosaveKey, JSON.stringify(data));
 }
+
 function setGameReady(value) {
   isGameReady = Boolean(value);
 }
