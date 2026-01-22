@@ -318,7 +318,6 @@ function getEquipmentSpecialEffects() {
         break;
     }
   });
-
   return effects;
 }
 function getSpecialEffects() {
@@ -336,6 +335,9 @@ function getSpecialEffects() {
     evadeCounter: skillEffects.evadeCounter || 0,
     minHits: equipmentEffects.minHits + (skillEffects.minHits || 0),
     expBoost: equipmentEffects.expBoost + (skillEffects.expBoost || 0),
+    rareEncounterBoost:
+      equipmentEffects.rareEncounterBoost +
+      (skillEffects.rareEncounterBoost || 0),
     agilityAttackRate: skillEffects.agilityAttackRate || 0,
     vitalityAttackRate: skillEffects.vitalityAttackRate || 0,
   };

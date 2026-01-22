@@ -1,8 +1,18 @@
 {
   "projects": {
     "default": "one-more-floor-rpg",
-    "test": "one-more-floor-rpg-test"
+    "test": "one-more-floor-rpg-test",
+    "w": "one-more-floor-rpg",
+    "r": "one-more-floor-rpg-6"
   },
-  "targets": {},
+  "targets": {
+    "one-more-floor-rpg": {
+      "hosting": {
+        "main": [
+          "one-more-floor-rpg"
+        ]
+      }
+    }
+  },
   "etags": {}
 }

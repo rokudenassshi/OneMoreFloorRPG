@@ -420,6 +420,7 @@
         name: option.name,
         accessoryTypes: option.accessoryTypes,
         max: option.max,
+        min: option.min,
         value,
         description: option.describe(value),
       });

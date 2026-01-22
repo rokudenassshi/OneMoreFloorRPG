@@ -1,7 +1,11 @@
 const hasAutoSave = loadAutoSave();
 const URL_ITEM_GIFT_PARAM = "gift";
 const URL_ITEM_GIFT_CODE = "rokudemonai";
-const URL_ITEM_GIFT_STORAGE_KEY = "1";
+const URL_ITEM_GIFT_STORAGE_KEY = "11";
+
+const URL_ITEM_GIFT_PARAM2 = "gift";
+const URL_ITEM_GIFT_CODE2 = "owabi";
+const URL_ITEM_GIFT_STORAGE_KEY2 = "11";
 
 function createUrlGiftItem() {
   return {
@@ -17,7 +21,20 @@ function createUrlGiftItem() {
     isLocked: true,
   };
 }
-
+function createUrlGiftItem2() {
+  return {
+    id: "url_gift_omf",
+    name: "ろくでもないお詫び",
+    type: "sword",
+    tier: 10,
+    minFloor: 0,
+    atk: 0,
+    baseBonus: { power: 50, vitality: 50, agility: 50 },
+    optionBonus: { power: 0, vitality: 0, agility: 0 },
+    specialOptions: [],
+    isLocked: true,
+  };
+}
 function removeGiftParamFromUrl() {
   const url = new URL(window.location.href);
   if (!url.searchParams.has(URL_ITEM_GIFT_PARAM)) return;
@@ -48,8 +65,31 @@ if (!hasAutoSave) {
 } else {
   log("💾 オートセーブをロード");
 }
+function removeGiftParamFromUrl2() {
+  const url = new URL(window.location.href);
+  if (!url.searchParams.has(URL_ITEM_GIFT_PARAM2)) return;
+  url.searchParams.delete(URL_ITEM_GIFT_PARAM2);
+  window.history.replaceState({}, document.title, url.toString());
+}
 
+function claimUrlGiftItem2() {
+  const params = new URLSearchParams(window.location.search);
+  const giftCode = params.get(URL_ITEM_GIFT_PARAM2);
+  if (giftCode !== URL_ITEM_GIFT_CODE2) return;
+  if (localStorage.getItem(URL_ITEM_GIFT_STORAGE_KEY2)) {
+    removeGiftParamFromUrl2();
+    return;
+  }
+
+  const giftItem = createUrlGiftItem2();
+  inventory.push(giftItem);
+  localStorage.setItem(URL_ITEM_GIFT_STORAGE_KEY2, "claimed");
+  log("🎁 URL特典で神器を手に入れた！");
+  autoSave();
+  removeGiftParamFromUrl2();
+}
 claimUrlGiftItem();
+claimUrlGiftItem2();
 awardStatPointUnlock();
 refresh();
 setGameReady(true);
