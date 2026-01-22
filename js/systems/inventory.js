@@ -638,7 +638,7 @@ function dropItem() {
       inventory.push(item);
       log(`🎁 ${item.name}を手に入れた`);
       return;
-    } else if (roll < 1.11) {
+    } else if (roll < 0.11) {
       // 神の 1%（0.10～0.11）
       const item = window.ItemGen.createLootItemForDrop(
         enemy.tier,

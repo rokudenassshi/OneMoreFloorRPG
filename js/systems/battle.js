@@ -7,9 +7,8 @@ function startBattle() {
   const base = EnemyGen.createEnemyForFloor(floor);
   const equipmentSpecialEffects = getEquipmentSpecialEffects();
   const specialEffects = getSpecialEffects();
-  let bonusRareRate = (equipmentSpecialEffects.rareEncounterBoost || 0) / 100;
-  bonusRareRate += (specialEffects.rareEncounterBoost || 0) / 100;
-
+  bonusRareRate = (specialEffects.rareEncounterBoost || 0) / 100;
+  console.log(bonusRareRate);
   // ★壊れたエネミー（1001階層以降）
   const brokenEnemyRate = 0.01;
   const isBroken =
@@ -106,10 +105,6 @@ function attack() {
     hitDamages.push(damage);
     hitComboBonusDamages.push(comboBonusDamage);
   }
-  console.log("accessory=", player.accessory);
-  console.log("accessory.specialOptions=", player.accessory?.specialOptions);
-  console.log("equipmentSpecialOptions=", getEquipmentSpecialOptions());
-  console.log("equipmentSpecialEffects=", getEquipmentSpecialEffects());
   if (hits > 1) {
     log(`▶ ${hits}回の連続攻撃。`);
     hitDamages.forEach((damage, index) => {
