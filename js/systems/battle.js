@@ -8,7 +8,6 @@ function startBattle() {
   const equipmentSpecialEffects = getEquipmentSpecialEffects();
   const specialEffects = getSpecialEffects();
   bonusRareRate = (specialEffects.rareEncounterBoost || 0) / 100;
-  console.log(bonusRareRate);
   // ★壊れたエネミー（1001階層以降）
   const brokenEnemyRate = 0.01;
   const isBroken =
