@@ -115,6 +115,7 @@ function attack() {
           : "";
       log(`${index + 1}回目 ${damage}ダメージ${comboLog}`);
     });
+    log(`▶ 合計 ${total}ダメージ`);
   } else {
     log(`▶ 攻撃！ ${hits}回ヒット（${total}ダメージ）`);
   }
