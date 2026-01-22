@@ -71,7 +71,9 @@
     <div class="screen-header">
       <h3>アイテム</h3>
               <div class="screen-header-actions">
-                <button class="discard-button" onclick="openDiscardWeakScreen()">アイテムフィルター</button><button class="back-button" onclick="closeInventory()">戻る</button>
+                <button class="discard-button" onclick="openDiscardWeakScreen()">フィルター</button>
+                <button class="discard-button" onclick="discardUnprotectedItems()">一括破棄</button>
+                <button class="back-button" onclick="closeInventory()">戻る</button>
       </div></div>
        <div class="inventory-tabs" role="tablist" aria-label="アイテム分類">
       <button class="inventory-tab is-active" data-tab="equipment" role="tab" aria-selected="true" onclick="setInventoryTab('equipment')">装備</button>

@@ -424,6 +424,31 @@ function discardEquipment(index) {
   renderInventory();
   refresh();
 }
+
+function discardUnprotectedItems() {
+  const shouldDiscard = confirm(
+    "装備中/ロック以外のアイテム,装飾品をすべて捨てます。よろしいですか？",
+  );
+  if (!shouldDiscard) {
+    log("🧹 一括破棄をキャンセルした");
+    return;
+  }
+
+  let discardedCount = 0;
+
+  for (let i = inventory.length - 1; i >= 0; i -= 1) {
+    const item = inventory[i];
+    if (!item) continue;
+    const isEquipped = player.weapon === item || player.accessory === item;
+    const isLocked = !!item.isLocked;
+    if (isEquipped || isLocked) continue;
+
+    inventory.splice(i, 1);
+    discardedCount += 1;
+  }
+  renderInventory();
+  refresh();
+}
 function toggleItemLock(index) {
   const item = inventory[index];
   if (!item || item.kind === "consumable") return;

@@ -1,7 +1,7 @@
 const SKILLS = [
   {
     id: "exp_gain_boost",
-    name: "獲得経験値アップ",
+    name: "経験値up",
     maxLevel: Number.POSITIVE_INFINITY,
     requiredPoints: 1,
     description: "獲得経験値+1%",
@@ -9,7 +9,7 @@ const SKILLS = [
   },
   {
     id: "rare_encounter_boost",
-    name: "レアモンスターとの遭遇率up",
+    name: "レアモンスターの遭遇率up",
     maxLevel: 10,
     requiredPoints: 5,
     description: "レアモンスターの遭遇率+1%",
