@@ -63,7 +63,10 @@ function attack() {
   const specialEffects = getSpecialEffects();
   const comboBoostRate = (specialEffects.comboBoost || 0) / 100;
   const selfDamageBoostRate = (specialEffects.selfDamageBoost || 0) / 100;
-
+  const singleHitBoostRate = specialEffects.singleHitBoost || 0;
+  const attackMultiplier =
+    hits === 1 && singleHitBoostRate > 0 ? 1 + singleHitBoostRate : 1;
+  const effectiveAtk = Math.max(1, Math.floor(atk * attackMultiplier));
   let total = 0;
   const enemyHpBefore = enemy.hp;
   if (selfDamageBoostRate > 0) {
@@ -81,7 +84,7 @@ function attack() {
   const hitComboBonusDamages = [];
   for (let i = 0; i < hits; i++) {
     const decayMultiplier = Math.pow(0.6, i);
-    const baseHitAtk = Math.max(1, Math.floor(atk * decayMultiplier));
+    const baseHitAtk = Math.max(1, Math.floor(effectiveAtk * decayMultiplier));
     const hitAtk = Math.max(
       1,
       Math.floor(baseHitAtk * (1 + comboBoostRate * i)),

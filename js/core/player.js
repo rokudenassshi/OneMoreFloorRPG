@@ -352,5 +352,6 @@ function getSpecialEffects() {
       (skillEffects.rareEncounterBoost || 0),
     agilityAttackRate: skillEffects.agilityAttackRate || 0,
     vitalityAttackRate: skillEffects.vitalityAttackRate || 0,
+    singleHitBoost: skillEffects.singleHitBoost || 0,
   };
 }

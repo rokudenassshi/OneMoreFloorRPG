@@ -53,6 +53,7 @@ function getSkillEffects() {
     vitalityRate: 0,
     agilityRate: 0,
     guts: 0,
+    singleHitBoost: 0,
   };
 
   SKILLS.forEach((skill) => {
@@ -177,6 +178,9 @@ function renderSkillScreen() {
   }
   if (total.powerRate !== 0) {
     summaryItems.push("<div>二刀流</div>");
+  }
+  if (total.singleHitBoost > 0) {
+    summaryItems.push("<div>居合切り</div>");
   }
   const summaryBody = summaryItems.length
     ? summaryItems.join("")

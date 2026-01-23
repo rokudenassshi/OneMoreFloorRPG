@@ -98,6 +98,15 @@ const SKILLS = [
     effects: { evadeCounter: 1 },
   },
   {
+    id: "swift_evade",
+    name: "疾風回避",
+    maxLevel: 1,
+    requiredPoints: 30,
+    description: "回避率+15%",
+    requires: [{ id: "evade_counter", level: 1 }],
+    effects: { evadeBoost: 15 },
+  },
+  {
     id: "vitality_attack",
     name: "シールドバッシュ",
     maxLevel: 1,
@@ -121,5 +130,13 @@ const SKILLS = [
     requiredPoints: 30,
     description: "ちからが1.5倍になるがたいりょく、すばやさが半分になる",
     effects: { powerRate: 0.5, vitalityRate: -0.5, agilityRate: -0.5 },
+  },
+  {
+    id: "iai_slash",
+    name: "居合切り",
+    maxLevel: 1,
+    requiredPoints: 50,
+    description: "ヒット数が1のとき攻撃が2倍になる",
+    effects: { singleHitBoost: 1 },
   },
 ];
