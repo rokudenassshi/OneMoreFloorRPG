@@ -60,6 +60,7 @@ function getSkillEffects() {
     agilityRate: 0,
     guts: 0,
     singleHitBoost: 0,
+    lastStandAttackBoost: 0,
   };
 
   SKILLS.forEach((skill) => {
@@ -187,6 +188,9 @@ function renderSkillScreen() {
   }
   if (total.singleHitBoost > 0) {
     summaryItems.push("<div>居合切り</div>");
+  }
+  if (total.lastStandAttackBoost > 0) {
+    summaryItems.push("<div>背水の一撃</div>");
   }
   const summaryBody = summaryItems.length
     ? summaryItems.join("")

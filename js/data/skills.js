@@ -86,7 +86,7 @@ const SKILLS = [
     maxLevel: 1,
     requiredPoints: 10,
     description: "ダメージ計算にすばやさを適用（ステータス値の70%で計算）",
-    exclusiveWith: ["vitality_attack"],
+    exclusiveWith: ["vitality_attack", "last_stand"],
     effects: { agilityAttackRate: 0.7 },
   },
   {
@@ -113,7 +113,7 @@ const SKILLS = [
     maxLevel: 1,
     requiredPoints: 10,
     description: "ダメージ計算にたいりょくを適用（ステータス値の40%で計算）",
-    exclusiveWith: ["agility_attack"],
+    exclusiveWith: ["agility_attack", "last_stand"],
     effects: { vitalityAttackRate: 0.4 },
   },
   {
@@ -140,5 +140,14 @@ const SKILLS = [
     requiredPoints: 50,
     description: "ヒット数が1のとき攻撃が2倍になる",
     effects: { singleHitBoost: 1 },
+  },
+  {
+    id: "last_stand",
+    name: "背水の一撃",
+    maxLevel: 1,
+    requiredPoints: 30,
+    description: "HPが1の時、攻撃力2倍",
+    exclusiveWith: ["agility_attack", "vitality_attack"],
+    effects: { lastStandAttackBoost: 1 },
   },
 ];

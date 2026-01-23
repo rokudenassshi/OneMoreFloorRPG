@@ -64,8 +64,12 @@ function attack() {
   const comboBoostRate = (specialEffects.comboBoost || 0) / 100;
   const selfDamageBoostRate = (specialEffects.selfDamageBoost || 0) / 100;
   const singleHitBoostRate = specialEffects.singleHitBoost || 0;
-  const attackMultiplier =
+  const lastStandBoostRate = specialEffects.lastStandAttackBoost || 0;
+  const singleHitMultiplier =
     hits === 1 && singleHitBoostRate > 0 ? 1 + singleHitBoostRate : 1;
+  const lastStandMultiplier =
+    player.hp === 1 && lastStandBoostRate > 0 ? 1 + lastStandBoostRate : 1;
+  const attackMultiplier = singleHitMultiplier * lastStandMultiplier;
   const effectiveAtk = Math.max(1, Math.floor(atk * attackMultiplier));
   let total = 0;
   const enemyHpBefore = enemy.hp;
@@ -207,7 +211,14 @@ function triggerEvadeCounter() {
   if ((specialEffects.evadeCounter || 0) <= 0) return false;
 
   const attackPower = calcAttack();
-  const damage = rollDamage(attackPower, 0.3);
+  const lastStandBoostRate = specialEffects.lastStandAttackBoost || 0;
+  const lastStandMultiplier =
+    player.hp === 1 && lastStandBoostRate > 0 ? 1 + lastStandBoostRate : 1;
+  const effectiveAtk = Math.max(
+    1,
+    Math.floor(attackPower * lastStandMultiplier),
+  );
+  const damage = rollDamage(effectiveAtk, 0.3);
   enemy.hp -= damage;
   log(`⚡ 回避反撃！ ${enemy.name} に${damage}ダメージ`);
   if (enemy.hp <= 0) {

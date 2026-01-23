@@ -353,5 +353,6 @@ function getSpecialEffects() {
     agilityAttackRate: skillEffects.agilityAttackRate || 0,
     vitalityAttackRate: skillEffects.vitalityAttackRate || 0,
     singleHitBoost: skillEffects.singleHitBoost || 0,
+    lastStandAttackBoost: skillEffects.lastStandAttackBoost || 0,
   };
 }
