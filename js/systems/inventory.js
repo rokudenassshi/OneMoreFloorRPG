@@ -276,28 +276,45 @@ function renderAccessoryItems() {
     itemListEl.textContent = "アイテムなし";
     return;
   }
+  function getAccessoryPrimaryOption(item) {
+    // 基本：先頭の特殊効果を基準にする（今の設計に合う）
+    return item?.specialOptions?.[0] || null;
+  }
+
+  function getAccessorySortKey(item) {
+    const opt = getAccessoryPrimaryOption(item);
+    const id = opt?.id;
+    const map = window.SpecialOptionSortKeyMap || {};
+    return Number(map[id]) || 9999; // 未登録は最後へ
+  }
+
+  function getAccessoryAbilityValue(item) {
+    const opt = getAccessoryPrimaryOption(item);
+    // ここが「能力」：specialOption.value を優先
+    // value が無い形式でも壊れないように保険を掛ける
+    if (Number.isFinite(Number(opt?.value))) return Number(opt.value);
+    if (Number.isFinite(Number(opt?.fixed))) return Number(opt.fixed);
+    // それでも無ければ 0
+    return 0;
+  }
+
   if (inventorySortEnabled) {
     accessoryItems.sort((a, b) => {
-      // 1) ID順（昇順）
-      const keyA = getAccessorySortKey(a.item);
-      const keyB = getAccessorySortKey(b.item);
-      const keyCmp = keyA.localeCompare(keyB);
-      if (keyCmp !== 0) return keyCmp;
+      // 1) sortKey 昇順
+      const skA = getAccessorySortKey(a.item);
+      const skB = getAccessorySortKey(b.item);
+      if (skA !== skB) return skA - skB;
 
-      // 2) 同じID内：そのIDの能力値（specialOption.value）降順
-      const valA = getAccessoryOptionValueByKey(a.item, keyA);
-      const valB = getAccessoryOptionValueByKey(b.item, keyB);
-      if (valA !== valB) return valB - valA;
+      // 2) 能力（value）降順
+      const vA = getAccessoryAbilityValue(a.item);
+      const vB = getAccessoryAbilityValue(b.item);
+      if (vA !== vB) return vB - vA;
 
-      // 3) 同値なら（任意）ちから等の合計で降順（0が多いなら意味薄い）
-      const scoreA = getItemScore(a.item);
-      const scoreB = getItemScore(b.item);
-      if (scoreA !== scoreB) return scoreB - scoreA;
-
-      // 4) 最後に安定化
+      // 3) 最後に安定化（元の並び）
       return a.index - b.index;
     });
   }
+
   accessoryItems.forEach(({ item, index, isAccessory }) => {
     const isEquipped = player.weapon === item || player.accessory === item;
     const isLocked = !!item.isLocked;
