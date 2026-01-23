@@ -23,7 +23,7 @@ let inventorySortEnabled = false;
 
 function toggleInventorySort() {
   inventorySortEnabled = !inventorySortEnabled;
-  log(inventorySortEnabled ? "📊 ソートON" : "📊 ソートOFF");
+  log(inventorySortEnabled ? "📊 能力値でソート" : "📊 入手順でソート");
   renderInventory();
 }
 function grantHerbs(count, shouldLog = true) {

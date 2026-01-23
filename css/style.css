@@ -447,6 +447,11 @@ status-actions {
   gap: 6px;          /* 要素間の余白 */
   margin: 4px 0;
 }
+.skill-toggle-button.is-active {
+  background: #6c87ff;
+  color: #fff;
+  border-color: #6c87ff;
+}
 /* 経験値バー */
 .exp-bar {
   width: 100%;

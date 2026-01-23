@@ -50,6 +50,7 @@ function autoSave() {
       statPointUnlockGranted: player.statPointUnlockGranted,
       unassignedPoints: player.unassignedPoints,
       skills: { ...player.skills },
+      autoAssignExpSkillPoints: player.autoAssignExpSkillPoints,
       weaponIndex,
       accessoryIndex,
     },
@@ -96,6 +97,9 @@ function loadAutoSave() {
   player.unassignedPoints = Math.max(
     0,
     Number(savedPlayer.unassignedPoints) || 0,
+  );
+  player.autoAssignExpSkillPoints = Boolean(
+    savedPlayer.autoAssignExpSkillPoints,
   );
 
   player.skills =

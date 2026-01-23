@@ -18,6 +18,7 @@ const player = {
   skills: {},
   weapon: null,
   accessory: null,
+  autoAssignExpSkillPoints: false,
 };
 
 function calcMaxHp() {
@@ -139,6 +140,12 @@ function levelUp() {
   }
   player.unassignedPoints += 1;
   log(`🎉 レベルアップ！ Lv.${player.level}`);
+  if (
+    player.autoAssignExpSkillPoints &&
+    typeof autoAssignExpSkillPoints === "function"
+  ) {
+    autoAssignExpSkillPoints();
+  }
   refresh();
 }
 

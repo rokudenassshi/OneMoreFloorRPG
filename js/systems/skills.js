@@ -3,6 +3,31 @@ let skillReturnState = "EXPLORE";
 function getSkillLevel(skillId) {
   return Number(player.skills?.[skillId]) || 0;
 }
+function autoAssignExpSkillPoints() {
+  if (!player.autoAssignExpSkillPoints) return 0;
+  const expSkill = SKILLS.find((skill) => skill.id === "exp_gain_boost");
+  if (!expSkill) return 0;
+
+  const requiredPoints = Number(expSkill.requiredPoints) || 1;
+  if (requiredPoints <= 0) return 0;
+
+  const availablePoints = Math.floor(player.unassignedPoints / requiredPoints);
+  if (availablePoints <= 0) return 0;
+
+  const currentLevel = getSkillLevel(expSkill.id);
+  player.skills[expSkill.id] = currentLevel + availablePoints;
+  player.unassignedPoints -= availablePoints * requiredPoints;
+
+  if (typeof log === "function") {
+    log(`✨ 経験値upにスキルポイントを自動割り振り +${availablePoints}`);
+  }
+
+  if (gameState === "SKILL") {
+    renderSkillScreen();
+  }
+
+  return availablePoints;
+}
 function hasRequiredSkills(skill) {
   const requirements = Array.isArray(skill?.requires) ? skill.requires : [];
   return requirements.every(
@@ -91,10 +116,10 @@ function closeSkillAllocation() {
 function renderSkillScreen() {
   if (!skillScreenContentEl) return;
 
+  const autoAssignLabel = player.autoAssignExpSkillPoints ? "ON" : "OFF";
   const pointsLabel = `スキルポイント：${player.unassignedPoints}`;
   const hasAssignedSkills =
     player.skills && Object.keys(player.skills).length > 0;
-
   // （任意）合計効果を上に出す：すでに getSkillEffects() があるので活用
   const total = getSkillEffects();
   const summaryItems = [];
@@ -163,7 +188,7 @@ function renderSkillScreen() {
         ${summaryBody}
       </div>
     </div>
-  `;
+`;
 
   const skillListHtml = SKILLS.map((skill) => {
     const level = getSkillLevel(skill.id);
@@ -249,6 +274,12 @@ function renderSkillScreen() {
         <button class="skill-reset-button" onclick="resetAllSkills()" ${
           hasAssignedSkills ? "" : "disabled"
         }>スキル一括リセット</button>
+      </div>
+      <div class="skill-top-row">
+        <div>経験値upへ自動割り振り</div>
+        <button class="skill-reset-button skill-toggle-button ${
+          player.autoAssignExpSkillPoints ? "is-active" : ""
+        }" onclick="toggleAutoAssignExpSkillPoints()">${autoAssignLabel}</button>
       </div>
       ${summaryHtml}
     </div>
@@ -380,6 +411,18 @@ function minUnlearnSkill(skillId) {
     player.hp = maxHp;
   }
   removeInvalidDependentSkills();
+  refresh();
+  renderSkillScreen();
+}
+
+function toggleAutoAssignExpSkillPoints() {
+  player.autoAssignExpSkillPoints = !player.autoAssignExpSkillPoints;
+  if (
+    player.autoAssignExpSkillPoints &&
+    typeof autoAssignExpSkillPoints === "function"
+  ) {
+    autoAssignExpSkillPoints();
+  }
   refresh();
   renderSkillScreen();
 }
