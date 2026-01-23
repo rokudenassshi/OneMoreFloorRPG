@@ -74,6 +74,10 @@ function closeInventory() {
   exploreButtons.style.display = gameState === "EXPLORE" ? "block" : "none";
   battleButtons.style.display = gameState === "BATTLE" ? "block" : "none";
 
+  //ページ上部へスクロール
+  window.scroll({
+    top: 0,
+  });
   refresh();
 }
 
