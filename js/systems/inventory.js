@@ -197,7 +197,6 @@ function renderEquipmentItems() {
   equipmentItems.forEach(({ item, index, isAccessory }) => {
     const isEquipped = player.weapon === item || player.accessory === item;
     const isLocked = !!item.isLocked;
-    // const rareDropMark = item.isRareDrop ? "★" : "";
     const lockMark = isLocked ? "🔒" : "";
     const specialOptions = Array.isArray(item.specialOptions)
       ? item.specialOptions
