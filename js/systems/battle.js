@@ -73,17 +73,6 @@ function attack() {
   const effectiveAtk = Math.max(1, Math.floor(atk * attackMultiplier));
   let total = 0;
   const enemyHpBefore = enemy.hp;
-  if (selfDamageBoostRate > 0) {
-    const maxHp = calcMaxHp();
-    const selfDamage = Math.max(1, Math.floor(maxHp * 0.4));
-    player.hp = Math.max(0, player.hp - selfDamage);
-    log(`💥 HPを${selfDamage}消費`);
-    if (player.hp === 0) {
-      refresh();
-      gameOver();
-      return;
-    }
-  }
   const hitDamages = [];
   const hitComboBonusDamages = [];
   for (let i = 0; i < hits; i++) {
@@ -170,6 +159,19 @@ function afterPlayerAction() {
   if (enemy.hp <= 0) {
     handleEnemyDefeat();
   } else {
+    const specialEffects = getSpecialEffects();
+    const selfDamageBoostRate = (specialEffects.selfDamageBoost || 0) / 100;
+    if (selfDamageBoostRate > 0) {
+      const maxHp = calcMaxHp();
+      const selfDamage = Math.max(1, Math.floor(maxHp * 0.4));
+      player.hp = Math.max(0, player.hp - selfDamage);
+      log(`💥 HPを${selfDamage}消費`);
+      if (player.hp === 0) {
+        refresh();
+        gameOver();
+        return;
+      }
+    }
     enemyAttack();
   }
 }
@@ -211,13 +213,14 @@ function triggerEvadeCounter() {
   if ((specialEffects.evadeCounter || 0) <= 0) return false;
 
   const attackPower = calcAttack();
+  const singleHitBoostRate = specialEffects.singleHitBoost || 0;
   const lastStandBoostRate = specialEffects.lastStandAttackBoost || 0;
+  const singleHitMultiplier =
+    singleHitBoostRate > 0 ? 1 + singleHitBoostRate : 1;
   const lastStandMultiplier =
     player.hp === 1 && lastStandBoostRate > 0 ? 1 + lastStandBoostRate : 1;
-  const effectiveAtk = Math.max(
-    1,
-    Math.floor(attackPower * lastStandMultiplier),
-  );
+  const attackMultiplier = singleHitMultiplier * lastStandMultiplier;
+  const effectiveAtk = Math.max(1, Math.floor(attackPower * attackMultiplier));
   const damage = rollDamage(effectiveAtk, 0.3);
   enemy.hp -= damage;
   log(`⚡ 回避反撃！ ${enemy.name} に${damage}ダメージ`);
@@ -259,7 +262,7 @@ function endBattle({ grantHerbReward = true } = {}) {
       grantHerbs(herbBattleRewardCount, false);
       const addedHerbCount = getHerbCount() - herbCountBefore;
       if (addedHerbCount > 0) {
-        log(`🌿 戦闘終了でやくそうを${addedHerbCount}つ手に入れた`);
+        log(`🌿 戦闘終了やくそうを手に入れた`);
       }
     }
   }

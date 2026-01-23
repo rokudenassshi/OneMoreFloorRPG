@@ -505,17 +505,15 @@ function discardUnprotectedItems() {
     return;
   }
 
-  let discardedCount = 0;
-
   for (let i = inventory.length - 1; i >= 0; i -= 1) {
     const item = inventory[i];
     if (!item) continue;
     const isEquipped = player.weapon === item || player.accessory === item;
     const isLocked = !!item.isLocked;
-    if (isEquipped || isLocked) continue;
+    const isHerb = item.id === HERB_ITEM_TEMPLATE.id;
+    if (isEquipped || isLocked || isHerb) continue;
 
     inventory.splice(i, 1);
-    discardedCount += 1;
   }
   renderInventory();
   refresh();
