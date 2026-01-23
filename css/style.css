@@ -286,6 +286,7 @@ status-actions {
   display: flex;
   gap: 6px;
   flex-wrap: wrap;
+  width: 100%;
 }
 
 .status-point-buttons button {
@@ -462,7 +463,9 @@ status-actions {
   margin: 4px 0 6px;
   border: 1px solid #444;
 }
-
+.status-point-buttons{
+  font-size: 12px;
+}
 .exp-bar-fill {
   height: 100%;
   width: 0%;

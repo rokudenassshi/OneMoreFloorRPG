@@ -1,5 +1,10 @@
 const statPointUnits = [1, 10, 100, 1000];
 let statPointUnit = 1;
+const statAutoAssignOptions = [
+  { id: "power", label: "ちから" },
+  { id: "vitality", label: "たいりょく" },
+  { id: "agility", label: "すばやさ" },
+];
 function openStatus() {
   if (gameState !== "EXPLORE") return;
 
@@ -38,12 +43,13 @@ function renderStatus() {
   const vitalityDecreaseDisabled = !isStatPointUnlocked;
   const agilityDecreaseDisabled = !isStatPointUnlocked;
   const addDisabled = !isStatPointUnlocked || player.statPoints <= 0;
+  const autoAssignTarget = player.autoAssignStatTarget || null;
   const nextExp = calcNextExp() - player.exp;
   const weaponName = player.weapon ? `${player.weapon.name}` : "なし";
   const accessoryName = player.accessory ? `${player.accessory.name}` : "なし";
   statusContentEl.innerHTML = `
     <div>記録：${player.maxReachedFloor}階</div>
-    <div>Lv：${player.level}</div>    
+    <div>Lv：${player.level}</div>
     <div>スキルポイント：${player.unassignedPoints}</div>
     <div>${statPointLabel}</div>
     ${statPointNote}
@@ -54,6 +60,23 @@ function renderStatus() {
     </div>
     <hr>
     ${statPointNote}
+          ${
+            isStatPointUnlocked
+              ? `<div class="status-point-toggle">
+            <span class="status-point-label">自動割り振り：</span>
+            <div class="status-point-buttons">
+              ${statAutoAssignOptions
+                .map(
+                  (option) =>
+                    `<button onclick="setStatAutoAssign('${option.id}')" ${
+                      autoAssignTarget === option.id ? 'class="is-active"' : ""
+                    }>${option.label}</button>`,
+                )
+                .join("")}
+            </div>
+          </div>`
+              : ""
+          }
     ${
       isStatPointUnlocked
         ? `<div class="status-point-toggle">
@@ -154,4 +177,52 @@ function setStatPointUnit(unit) {
   if (!statPointUnits.includes(unit)) return;
   statPointUnit = unit;
   renderStatus();
+}
+
+function setStatAutoAssign(target) {
+  const validTargets = statAutoAssignOptions.map((option) => option.id);
+  const nextTarget = target === "none" ? "none" : target;
+  if (nextTarget !== "none" && !validTargets.includes(nextTarget)) return;
+
+  player.autoAssignStatTarget = nextTarget === "none" ? null : nextTarget;
+  if (typeof autoAssignStatPoints === "function") {
+    autoAssignStatPoints();
+  }
+  renderStatus();
+}
+
+function setStatAutoAssign(target) {
+  const validTargets = statAutoAssignOptions.map((option) => option.id);
+  if (!validTargets.includes(target)) return;
+
+  player.autoAssignStatTarget =
+    player.autoAssignStatTarget === target ? null : target;
+  if (typeof autoAssignStatPoints === "function") {
+    autoAssignStatPoints();
+  }
+  renderStatus();
+}
+
+function autoAssignStatPoints() {
+  if (player.maxReachedFloor < UNLOCK_FLOOR) return 0;
+  if (!player.statPoints || player.statPoints <= 0) return 0;
+  const target = player.autoAssignStatTarget;
+  if (!target) return 0;
+  if (!["power", "vitality", "agility"].includes(target)) return 0;
+
+  const pointsToUse = player.statPoints;
+  player.status[target] += 5 * pointsToUse;
+  player.statPoints = 0;
+
+  if (typeof log === "function") {
+    const label = statAutoAssignOptions.find(
+      (option) => option.id === target,
+    )?.label;
+    log(
+      `✨ ステータスポイントを${label || target}へ自動割り振り +${pointsToUse}`,
+    );
+  }
+
+  refresh();
+  return pointsToUse;
 }
