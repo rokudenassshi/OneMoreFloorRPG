@@ -24,6 +24,11 @@ const player = {
 
 function calcMaxHp() {
   const totalVitality = getTotalStatus().vitality;
+  const skillEffects =
+    typeof getSkillEffects === "function" ? getSkillEffects() : {};
+  if ((skillEffects.maxHpOverride || 0) > 0) {
+    return 1;
+  }
   return player.baseHp + totalVitality * 10;
 }
 

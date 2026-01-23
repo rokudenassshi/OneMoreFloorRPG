@@ -61,6 +61,7 @@ function getSkillEffects() {
     guts: 0,
     singleHitBoost: 0,
     lastStandAttackBoost: 0,
+    maxHpOverride: 0,
   };
 
   SKILLS.forEach((skill) => {
@@ -192,6 +193,9 @@ function renderSkillScreen() {
   if (total.lastStandAttackBoost > 0) {
     summaryItems.push("<div>背水の一撃</div>");
   }
+  if (total.maxHpOverride > 0) {
+    summaryItems.push("<div>最大HP1</div>");
+  }
   const summaryBody = summaryItems.length
     ? summaryItems.join("")
     : "<div>獲得済みの効果はありません</div>";
@@ -229,7 +233,7 @@ function renderSkillScreen() {
       ? skill.maxLevel
       : "∞";
     const requirementLabel = requirements.length
-      ? `前提：${requirements
+      ? `前提スキル：${requirements
           .map((requirement) => {
             const requiredSkill = SKILLS.find(
               (entry) => entry.id === requirement.id,
@@ -321,6 +325,11 @@ function renderSkillScreen() {
       ${summaryHtml}
     </div>
     <div class="skill-list">${skillListHtml}</div>
+        <div class="skill-footer">
+      <button class="scroll-top-button" onclick="closeSkillAllocation()">
+        戻る
+      </button>
+    </div>
   `;
 }
 

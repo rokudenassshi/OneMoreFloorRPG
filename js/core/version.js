@@ -1,1 +1,1 @@
-const GAME_VERSION = "1.0.6";
+const GAME_VERSION = "1.0.7";

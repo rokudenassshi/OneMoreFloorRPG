@@ -150,4 +150,13 @@ const SKILLS = [
     exclusiveWith: ["agility_attack", "vitality_attack"],
     effects: { lastStandAttackBoost: 1 },
   },
+  {
+    id: "last_stand_formation",
+    name: "背水の陣",
+    maxLevel: 1,
+    requiredPoints: 1,
+    description: "最大HPが1になる",
+    requires: [{ id: "last_stand", level: 1 }],
+    effects: { maxHpOverride: 1 },
+  },
 ];

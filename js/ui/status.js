@@ -21,6 +21,10 @@ function closeStatus() {
   gameState = "EXPLORE";
   statusScreenEl.style.display = "none";
   exploreButtons.style.display = "block";
+  //ページ上部へスクロール
+  window.scroll({
+    top: 0,
+  });
 }
 
 function renderStatus() {
