@@ -79,6 +79,10 @@ function closeSkillAllocation() {
   if (gameState === "STATUS") {
     statusScreenEl.style.display = "block";
     renderStatus();
+    //ページ上部へスムーススクロール
+    window.scroll({
+      top: 0,
+    });
     return;
   }
 
