@@ -67,20 +67,21 @@
         <button onclick="openStatus()">ステータス</button>
       </div>
   </div>
-    
+
   <!-- アイテム画面 -->
   <div id="inventory" style="display:none;">
     <div class="screen-header">
               <div class="screen-header-actions">
                 <button class="discard-button" onclick="openDiscardWeakScreen()">フィルター</button>
                 <button class="discard-button" onclick="discardUnprotectedItems()">一括破棄</button>
+                <button class="discard-button" onclick="toggleInventorySort()">ソート</button>
                 <button class="back-button" onclick="closeInventory()">戻る</button>
       </div></div>
        <div class="inventory-tabs" role="tablist" aria-label="アイテム分類">
       <button class="inventory-tab is-active" data-tab="equipment" role="tab" aria-selected="true" onclick="setInventoryTab('equipment')">装備</button>
       <button class="inventory-tab" data-tab="accessory" role="tab" aria-selected="false" onclick="setInventoryTab('accessory')">装飾品</button>
     </div>
-    <div id="itemList"></div>    
+    <div id="itemList"></div>
     <div class="inventory-footer">
       <button class="scroll-top-button" onclick="closeInventory()">戻る</button>
     </div>

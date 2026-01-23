@@ -19,6 +19,13 @@ const discardThresholdsKey = "roguelike_discard_thresholds";
 const discardThresholdDefaults = { value: 0 };
 let discardThresholds = { ...discardThresholdDefaults };
 let currentInventoryTab = "equipment";
+let inventorySortEnabled = false;
+
+function toggleInventorySort() {
+  inventorySortEnabled = !inventorySortEnabled;
+  log(inventorySortEnabled ? "📊 ソートON" : "📊 ソートOFF");
+  renderInventory();
+}
 function grantHerbs(count, shouldLog = true) {
   const maxHerbCount = getHerbMaxCount();
   const currentCount = getHerbCount();
@@ -189,6 +196,11 @@ function renderEquipmentItems() {
     itemListEl.textContent = "アイテムなし";
     return;
   }
+  if (inventorySortEnabled) {
+    equipmentItems.sort((a, b) => {
+      return getItemScore(b.item) - getItemScore(a.item);
+    });
+  }
 
   if (equipmentItems.length > 0) {
     hasContent = true;
@@ -264,11 +276,31 @@ function renderAccessoryItems() {
     itemListEl.textContent = "アイテムなし";
     return;
   }
+  if (inventorySortEnabled) {
+    accessoryItems.sort((a, b) => {
+      // 1) ID順（昇順）
+      const keyA = getAccessorySortKey(a.item);
+      const keyB = getAccessorySortKey(b.item);
+      const keyCmp = keyA.localeCompare(keyB);
+      if (keyCmp !== 0) return keyCmp;
 
+      // 2) 同じID内：そのIDの能力値（specialOption.value）降順
+      const valA = getAccessoryOptionValueByKey(a.item, keyA);
+      const valB = getAccessoryOptionValueByKey(b.item, keyB);
+      if (valA !== valB) return valB - valA;
+
+      // 3) 同値なら（任意）ちから等の合計で降順（0が多いなら意味薄い）
+      const scoreA = getItemScore(a.item);
+      const scoreB = getItemScore(b.item);
+      if (scoreA !== scoreB) return scoreB - scoreA;
+
+      // 4) 最後に安定化
+      return a.index - b.index;
+    });
+  }
   accessoryItems.forEach(({ item, index, isAccessory }) => {
     const isEquipped = player.weapon === item || player.accessory === item;
     const isLocked = !!item.isLocked;
-    // const rareDropMark = item.isRareDrop ? "★" : "";
     const lockMark = isLocked ? "🔒" : "";
     const specialOptions = Array.isArray(item.specialOptions)
       ? item.specialOptions
@@ -346,7 +378,26 @@ function getItemTotalBonus(item) {
     agility: baseBonus.agility + optionBonus.agility,
   };
 }
+/* =====================
+   ソート用ユーティリティ
+===================== */
 
+// 装備：能力値合計
+function getItemScore(item) {
+  const b = getItemTotalBonus(item);
+  return (b.power || 0) + (b.vitality || 0) + (b.agility || 0);
+}
+
+// 装飾品：specialOption.id
+function getAccessorySortKey(item) {
+  const opt = item.specialOptions?.[0];
+  return opt?.id || "zzzz";
+}
+function getAccessoryOptionValueByKey(item, key) {
+  const opt = item.specialOptions?.find((o) => o?.id === key);
+  // value がなければ 0（念のため fixed/min/max も見るならここで）
+  return Number(opt?.value) || 0;
+}
 function normalizeDiscardThreshold(value) {
   const parsed = Number(value);
   if (!Number.isFinite(parsed)) return 0;
