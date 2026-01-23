@@ -86,6 +86,7 @@ const SKILLS = [
     maxLevel: 1,
     requiredPoints: 10,
     description: "ダメージ計算にすばやさを適用（ステータス値の70%で計算）",
+    exclusiveWith: ["vitality_attack"],
     effects: { agilityAttackRate: 0.7 },
   },
   {
@@ -112,6 +113,7 @@ const SKILLS = [
     maxLevel: 1,
     requiredPoints: 10,
     description: "ダメージ計算にたいりょくを適用（ステータス値の40%で計算）",
+    exclusiveWith: ["agility_attack"],
     effects: { vitalityAttackRate: 0.4 },
   },
   {
@@ -128,8 +130,8 @@ const SKILLS = [
     name: "二刀流",
     maxLevel: 1,
     requiredPoints: 30,
-    description: "ちからが1.5倍になるがたいりょく、すばやさが半分になる",
-    effects: { powerRate: 0.5, vitalityRate: -0.5, agilityRate: -0.5 },
+    description: "ちからとすばやさが1.5倍になるがたいりょくは半分になる",
+    effects: { powerRate: 0.5, vitalityRate: -0.5, agilityRate: 0.5 },
   },
   {
     id: "iai_slash",
