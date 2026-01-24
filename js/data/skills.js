@@ -109,6 +109,15 @@ const SKILLS = [
     effects: { evadeBoost: 15 },
   },
   {
+    id: "emergency_evade",
+    name: "緊急回避",
+    maxLevel: 1,
+    requiredPoints: 1,
+    description: "HPが1の時、回避率+10%",
+    requires: [{ id: "swift_evade", level: 1 }],
+    effects: { lastStandEvadeBoost: 10 },
+  },
+  {
     id: "vitality_attack",
     name: "シールドバッシュ",
     maxLevel: 1,

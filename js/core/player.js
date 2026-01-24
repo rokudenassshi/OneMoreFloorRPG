@@ -101,8 +101,11 @@ function rollEvade() {
   const baseRate = 0.05; // 固定5%
   const specialEffects = getSpecialEffects();
   const extraRate = (specialEffects.evadeBoost || 0) / 100;
-
-  const evadeRate = baseRate + extraRate;
+  const lastStandEvadeRate =
+    player.hp === 1 && (specialEffects.lastStandEvadeBoost || 0) > 0
+      ? (specialEffects.lastStandEvadeBoost || 0) / 100
+      : 0;
+  const evadeRate = baseRate + extraRate + lastStandEvadeRate;
   return Math.random() < evadeRate;
 }
 
@@ -359,5 +362,6 @@ function getSpecialEffects() {
     vitalityAttackRate: skillEffects.vitalityAttackRate || 0,
     singleHitBoost: skillEffects.singleHitBoost || 0,
     lastStandAttackBoost: skillEffects.lastStandAttackBoost || 0,
+    lastStandEvadeBoost: skillEffects.lastStandEvadeBoost || 0,
   };
 }

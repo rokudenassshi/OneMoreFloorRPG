@@ -61,6 +61,7 @@ function getSkillEffects() {
     guts: 0,
     singleHitBoost: 0,
     lastStandAttackBoost: 0,
+    lastStandEvadeBoost: 0,
     maxHpOverride: 0,
   };
 
@@ -173,9 +174,12 @@ function renderSkillScreen() {
   if (total.evadeCounter > 0) {
     summaryItems.push("<div>回避カウンター</div>");
   }
+  if (total.lastStandEvadeBoost > 0) {
+    summaryItems.push(`<div>緊急回避</div>`);
+  }
   if (total.minHits > 0) {
     summaryItems.push(
-      `<div>連続攻撃の最低ヒット数：+${Math.floor(total.minHits)}</div>`,
+      `<div>連続攻撃のヒット数：+${Math.floor(total.minHits)}</div>`,
     );
   }
   if (total.vitalityAttackRate > 0) {
