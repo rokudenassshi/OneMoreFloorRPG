@@ -169,6 +169,7 @@ const SKILLS = [
     requiredPoints: 50,
     description:
       "受けるダメージを10%軽減する。反射ダメージは軽減前のダメージで計算",
+    requires: [{ id: "reflect_amplify_plus", level: 1 }],
     effects: { damageReduction: 10 },
   },
   {
@@ -193,6 +194,7 @@ const SKILLS = [
     maxLevel: 1,
     requiredPoints: 300,
     description: "アイテムを2つ装備できる",
+    exclusiveWith: ["agility_attack", "vitality_attack"],
     effects: {},
   },
   {

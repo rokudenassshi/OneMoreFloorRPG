@@ -107,7 +107,6 @@ function setInventoryTab(tab) {
   updateInventoryTabs();
   renderInventory();
 }
-
 function updateInventoryTabs() {
   inventoryTabButtons.forEach((button) => {
     const isActive = button.dataset.tab === currentInventoryTab;
@@ -205,9 +204,13 @@ function renderEquipmentItems() {
   if (equipmentItems.length > 0) {
     hasContent = true;
   }
-
+  const canUseDualWield =
+    typeof getSkillLevel === "function" && getSkillLevel("dual_wield") > 0;
   equipmentItems.forEach(({ item, index, isAccessory }) => {
-    const isEquipped = player.weapon === item || player.accessory === item;
+    const isEquipped =
+      player.weapon === item ||
+      player.weapon2 === item ||
+      player.accessory === item;
     const isLocked = !!item.isLocked;
     const lockMark = isLocked ? "🔒" : "";
     const specialOptions = Array.isArray(item.specialOptions)
@@ -228,6 +231,12 @@ function renderEquipmentItems() {
     }
     const div = document.createElement("div");
 
+    const equipButtons = isEquipped
+      ? ""
+      : canUseDualWield
+        ? `<button onclick="equip(${index}, 'primary')">装備1</button>
+           <button onclick="equip(${index}, 'secondary')">装備2</button>`
+        : `<button onclick="equip(${index})">装備</button>`;
     div.innerHTML = `
       <div>
         ${isEquipped ? "🟢[E] " : ""}
@@ -246,7 +255,7 @@ function renderEquipmentItems() {
                     isLocked ? "解除" : "ロック"
                   }</button>`
             }
-${isEquipped ? "" : `<button onclick="equip(${index})">装備</button>`}
+${equipButtons}
                     ${
                       isEquipped
                         ? ""
@@ -547,7 +556,7 @@ window.closeDiscardWeakScreen = closeDiscardWeakScreen;
    ★重要：player.statusを直接増減しない！
    装備補正は計算時に getEquipmentBonus() で足す方式にする
 ===================== */
-function equip(index) {
+function equip(index, slot = "primary") {
   const item = inventory[index];
   if (!item) return;
 
@@ -559,13 +568,18 @@ function equip(index) {
     return;
   }
   const prevMaxHp = calcMaxHp();
-  player.weapon = item;
+  if (slot === "secondary") {
+    player.weapon2 = item;
+  } else {
+    player.weapon = item;
+  }
 
   // 最大HPが変わる可能性があるので安全に丸める
   const nextMaxHp = calcMaxHp();
   adjustHpForMaxChange(prevMaxHp, nextMaxHp);
 
-  log(`🗡 ${item.name}を装備した`);
+  const slotLabel = slot === "secondary" ? "装備2" : "装備1";
+  log(`🗡 ${item.name}を${slotLabel}に装備した`);
   renderInventory();
   refresh();
 }
