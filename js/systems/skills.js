@@ -55,6 +55,7 @@ function getSkillEffects() {
     vitalityAttackRate: 0,
     expBoost: 0,
     rareEncounterBoost: 0,
+    rareEncounterBlock: 0,
     powerRate: 0,
     vitalityRate: 0,
     agilityRate: 0,
@@ -140,6 +141,9 @@ function renderSkillScreen() {
     summaryItems.push(
       `<div>レアモンスター遭遇率：+${Math.floor(total.rareEncounterBoost)}%</div>`,
     );
+  }
+  if (total.rareEncounterBlock > 0) {
+    summaryItems.push("<div>忍び足</div>");
   }
   if (total.herbHealBoost > 0) {
     summaryItems.push(

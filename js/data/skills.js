@@ -16,6 +16,15 @@ const SKILLS = [
     effects: { rareEncounterBoost: 1 },
   },
   {
+    id: "silent_steps",
+    name: "忍び足",
+    maxLevel: 1,
+    requiredPoints: 1,
+    description: "レアモンスターと遭遇しなくなる",
+    exclusiveWith: ["rare_encounter_boost"],
+    effects: { rareEncounterBlock: 1 },
+  },
+  {
     id: "herb_mastery",
     name: "やくそう強化",
     maxLevel: 50,
