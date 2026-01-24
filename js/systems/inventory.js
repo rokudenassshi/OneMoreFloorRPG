@@ -47,6 +47,15 @@ function setHerbCount(count, shouldLog = true) {
     grantHerbs(needed, shouldLog);
     return;
   }
+  if (needed < 0) {
+    let toRemove = Math.abs(needed);
+    for (let i = inventory.length - 1; i >= 0 && toRemove > 0; i -= 1) {
+      if (inventory[i] && inventory[i].id === HERB_ITEM_TEMPLATE.id) {
+        inventory.splice(i, 1);
+        toRemove -= 1;
+      }
+    }
+  }
 }
 function getHerbCount() {
   return inventory.filter((item) => item && item.id === HERB_ITEM_TEMPLATE.id)
