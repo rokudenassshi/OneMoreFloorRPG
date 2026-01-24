@@ -17,6 +17,7 @@ const player = {
   statPointUnlockGranted: false,
   skills: {},
   weapon: null,
+  weapon2: null,
   accessory: null,
   autoAssignExpSkillPoints: false,
   autoAssignStatTarget: null,
@@ -189,7 +190,12 @@ function damagePlayer(amount) {
 
   const skillEffects =
     typeof getSkillEffects === "function" ? getSkillEffects() : {};
-  const nextHp = player.hp - amount;
+  const damageReductionRate = (skillEffects.damageReduction || 0) / 100;
+  const reducedDamage =
+    damageReductionRate > 0
+      ? Math.max(0, Math.floor(amount * (1 - damageReductionRate)))
+      : amount;
+  const nextHp = player.hp - reducedDamage;
   if (
     gameState === "BATTLE" &&
     nextHp <= 0 &&
@@ -200,7 +206,7 @@ function damagePlayer(amount) {
     battleGutsUsed = true;
     log("🧡 ガッツでHP1で耐えた！");
     refresh();
-    return { evaded: false, damage: amount };
+    return { evaded: false, damage: reducedDamage, rawDamage: amount };
   }
 
   player.hp = Math.max(0, nextHp);
@@ -210,7 +216,7 @@ function damagePlayer(amount) {
   if (player.hp === 0) {
     gameOver();
   }
-  return { evaded: false, damage: amount };
+  return { evaded: false, damage: reducedDamage, rawDamage: amount };
 }
 function getSkillStatusRates() {
   const skillEffects =
@@ -254,9 +260,8 @@ function getBaseStatus() {
 }
 
 function getEquipmentBonus() {
-  if (!player.weapon) {
-    return { power: 0, vitality: 0, agility: 0 };
-  }
+  const canUseDualWield =
+    typeof getSkillLevel === "function" && getSkillLevel("dual_wield") > 0;
 
   const normalizeBonus = (bonus) => ({
     power: Number(bonus?.power) || 0,
@@ -264,23 +269,48 @@ function getEquipmentBonus() {
     agility: Number(bonus?.agility) || 0,
   });
 
-  if (player.weapon.bonus) {
-    return normalizeBonus(player.weapon.bonus);
-  }
+  const getWeaponBonus = (weapon) => {
+    if (!weapon) {
+      return { power: 0, vitality: 0, agility: 0 };
+    }
 
-  const baseBonus = normalizeBonus(player.weapon.baseBonus);
-  const optionBonus = normalizeBonus(player.weapon.optionBonus);
+    if (weapon.bonus) {
+      return normalizeBonus(weapon.bonus);
+    }
+    const baseBonus = normalizeBonus(weapon.baseBonus);
+    const optionBonus = normalizeBonus(weapon.optionBonus);
+
+    return {
+      power: baseBonus.power + optionBonus.power,
+      vitality: baseBonus.vitality + optionBonus.vitality,
+      agility: baseBonus.agility + optionBonus.agility,
+    };
+  };
+
+  const primaryBonus = getWeaponBonus(player.weapon);
+  const secondaryBonus = canUseDualWield
+    ? getWeaponBonus(player.weapon2)
+    : { power: 0, vitality: 0, agility: 0 };
 
   return {
-    power: baseBonus.power + optionBonus.power,
-    vitality: baseBonus.vitality + optionBonus.vitality,
-    agility: baseBonus.agility + optionBonus.agility,
+    power: primaryBonus.power + secondaryBonus.power,
+    vitality: primaryBonus.vitality + secondaryBonus.vitality,
+    agility: primaryBonus.agility + secondaryBonus.agility,
   };
 }
 function getEquipmentSpecialOptions() {
   const options = [];
+  const canUseDualWield =
+    typeof getSkillLevel === "function" && getSkillLevel("dual_wield") > 0;
   if (player.weapon && Array.isArray(player.weapon.specialOptions)) {
     options.push(...player.weapon.specialOptions);
+  }
+  if (
+    canUseDualWield &&
+    player.weapon2 &&
+    Array.isArray(player.weapon2.specialOptions)
+  ) {
+    options.push(...player.weapon2.specialOptions);
   }
   if (player.accessory && Array.isArray(player.accessory.specialOptions)) {
     options.push(...player.accessory.specialOptions);

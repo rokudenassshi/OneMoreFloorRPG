@@ -28,6 +28,8 @@ function autoSave() {
   if (!isGameReady) return;
   const weaponIndex =
     player && player.weapon ? inventory.indexOf(player.weapon) : -1;
+  const weapon2Index =
+    player && player.weapon2 ? inventory.indexOf(player.weapon2) : -1;
   const accessoryIndex =
     player && player.accessory ? inventory.indexOf(player.accessory) : -1;
   const data = {
@@ -52,6 +54,7 @@ function autoSave() {
       skills: { ...player.skills },
       autoAssignExpSkillPoints: player.autoAssignExpSkillPoints,
       weaponIndex,
+      weapon2Index,
       accessoryIndex,
     },
     inventory: inventory.map((item) => ({ ...item })),
@@ -118,6 +121,11 @@ function loadAutoSave() {
   player.weapon =
     Number.isInteger(weaponIndex) && inventory[weaponIndex]
       ? inventory[weaponIndex]
+      : null;
+  const weapon2Index = Number(savedPlayer.weapon2Index);
+  player.weapon2 =
+    Number.isInteger(weapon2Index) && inventory[weapon2Index]
+      ? inventory[weapon2Index]
       : null;
   const accessoryIndex = Number(savedPlayer.accessoryIndex);
   player.accessory =

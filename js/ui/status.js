@@ -50,6 +50,7 @@ function renderStatus() {
   const autoAssignTarget = player.autoAssignStatTarget || null;
   const nextExp = calcNextExp() - player.exp;
   const weaponName = player.weapon ? `${player.weapon.name}` : "なし";
+  const weapon2Name = player.weapon2 ? `${player.weapon2.name}` : "なし";
   const accessoryName = player.accessory ? `${player.accessory.name}` : "なし";
   statusContentEl.innerHTML = `
     <div>記録：${player.maxReachedFloor}階</div>
@@ -147,7 +148,8 @@ function renderStatus() {
     </div>
 
     <hr>
-    <div>装備：${weaponName}</div>
+    <div>装備1：${weaponName}</div>
+    <div>装備2：${weapon2Name}</div>
     <div>装飾品：${accessoryName}</div>
   `;
 }

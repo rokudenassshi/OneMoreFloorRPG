@@ -60,6 +60,7 @@ function getSkillEffects() {
     vitalityRate: 0,
     agilityRate: 0,
     guts: 0,
+    damageReduction: 0,
     singleHitBoost: 0,
     lastStandAttackBoost: 0,
     lastStandEvadeBoost: 0,

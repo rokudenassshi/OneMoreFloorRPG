@@ -69,7 +69,7 @@ function attack() {
   const selfDamageBoostRate = (specialEffects.selfDamageBoost || 0) / 100;
   const singleHitBoostRate = specialEffects.singleHitBoost || 0;
   const lastStandBoostRate = specialEffects.lastStandAttackBoost || 0;
-  const decayBase = specialEffects.agilityAttackRate > 0 ? 0.8 : 0.6;
+  const decayBase = specialEffects.agilityAttackRate > 0 ? 0.7 : 0.6;
   const singleHitMultiplier =
     hits === 1 && singleHitBoostRate > 0 ? 1 + singleHitBoostRate : 1;
   const lastStandMultiplier =
@@ -195,7 +195,8 @@ function enemyAttack() {
   const specialEffects = getSpecialEffects();
   const reflectRate = (specialEffects.reflect || 0) / 100;
   if (reflectRate > 0 && enemy) {
-    let reflectDamage = Math.floor((result?.damage || 0) * reflectRate);
+    const reflectSourceDamage = result?.rawDamage ?? result?.damage ?? 0;
+    let reflectDamage = Math.floor(reflectSourceDamage * reflectRate);
     // ★ ろく氏は反射ダメージ80%軽減
     if (enemy.id === "boss_rokushi") {
       reflectDamage = Math.floor(reflectDamage * 0.2);
