@@ -194,7 +194,7 @@ function renderSkillScreen() {
     summaryItems.push("<div>背水の一撃</div>");
   }
   if (total.maxHpOverride > 0) {
-    summaryItems.push("<div>最大HP1</div>");
+    summaryItems.push("<div>背水の陣</div>");
   }
   const summaryBody = summaryItems.length
     ? summaryItems.join("")
