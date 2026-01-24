@@ -85,7 +85,8 @@ const SKILLS = [
     name: "スピードアタック",
     maxLevel: 1,
     requiredPoints: 10,
-    description: "ダメージ計算にすばやさを適用（ステータス値の70%で計算）",
+    description:
+      "ダメージ計算にすばやさを適用（ステータス値の70%で計算）、連続攻撃の衰退緩和",
     exclusiveWith: ["vitality_attack", "last_stand"],
     effects: { agilityAttackRate: 0.7 },
   },

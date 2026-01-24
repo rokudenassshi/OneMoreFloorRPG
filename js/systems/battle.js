@@ -65,6 +65,7 @@ function attack() {
   const selfDamageBoostRate = (specialEffects.selfDamageBoost || 0) / 100;
   const singleHitBoostRate = specialEffects.singleHitBoost || 0;
   const lastStandBoostRate = specialEffects.lastStandAttackBoost || 0;
+  const decayBase = specialEffects.agilityAttackRate > 0 ? 0.8 : 0.6;
   const singleHitMultiplier =
     hits === 1 && singleHitBoostRate > 0 ? 1 + singleHitBoostRate : 1;
   const lastStandMultiplier =
@@ -76,7 +77,7 @@ function attack() {
   const hitDamages = [];
   const hitComboBonusDamages = [];
   for (let i = 0; i < hits; i++) {
-    const decayMultiplier = Math.pow(0.6, i);
+    const decayMultiplier = Math.pow(decayBase, i);
     const baseHitAtk = Math.max(1, Math.floor(effectiveAtk * decayMultiplier));
     const hitAtk = Math.max(
       1,
