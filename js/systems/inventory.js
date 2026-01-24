@@ -238,6 +238,15 @@ function renderEquipmentItems() {
     if (isAccessory && specialLines.length) {
       totalParts.push(...specialLines);
     }
+
+    const equippedLabel =
+      player.weapon2 === item
+        ? "🟢[E2] "
+        : player.weapon === item
+          ? "🟢[E1] "
+          : player.accessory === item
+            ? "🟢[E] "
+            : "";
     const div = document.createElement("div");
 
     const equipButtons = isEquipped
@@ -248,7 +257,7 @@ function renderEquipmentItems() {
         : `<button onclick="equip(${index})">装備</button>`;
     div.innerHTML = `
       <div>
-        ${isEquipped ? "🟢[E] " : ""}
+        ${equippedLabel}
         ${lockMark}${item.name}
       </div>
 
@@ -334,7 +343,10 @@ function renderAccessoryItems() {
   }
 
   accessoryItems.forEach(({ item, index, isAccessory }) => {
-    const isEquipped = player.weapon === item || player.accessory === item;
+    const isEquipped =
+      player.weapon === item ||
+      player.weapon2 === item ||
+      player.accessory === item;
     const isLocked = !!item.isLocked;
     const lockMark = isLocked ? "🔒" : "";
     const specialOptions = Array.isArray(item.specialOptions)
@@ -526,7 +538,10 @@ function discardUnprotectedItems() {
   for (let i = inventory.length - 1; i >= 0; i -= 1) {
     const item = inventory[i];
     if (!item) continue;
-    const isEquipped = player.weapon === item || player.accessory === item;
+    const isEquipped =
+      player.weapon === item ||
+      player.weapon2 === item ||
+      player.accessory === item;
     const isLocked = !!item.isLocked;
     const isHerb = item.id === HERB_ITEM_TEMPLATE.id;
     if (isEquipped || isLocked || isHerb) continue;
