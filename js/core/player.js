@@ -89,7 +89,13 @@ function calcAttackCount() {
   const minHits = 1 + minHitBonus;
   const adjustedMaxHits = Math.max(maxHits, minHits);
 
-  return Math.floor(Math.random() * (adjustedMaxHits - minHits + 1)) + minHits;
+  const minRandomHits =
+    adjustedMaxHits >= 5 ? Math.max(minHits, adjustedMaxHits - 3) : minHits;
+
+  return (
+    Math.floor(Math.random() * (adjustedMaxHits - minRandomHits + 1)) +
+    minRandomHits
+  );
 }
 
 // すばやさ：回避（上限20%）
