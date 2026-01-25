@@ -134,6 +134,8 @@ function renderSkillScreen() {
     player.skills && Object.keys(player.skills).length > 0;
   // （任意）合計効果を上に出す：すでに getSkillEffects() があるので活用
   const total = getSkillEffects();
+  const hasSacrificialAttack = getSkillLevel("sacrificial_attack") > 0;
+  const hasDualWield = getSkillLevel("dual_wield") > 0;
   const summaryItems = [];
   if (total.expBoost > 0) {
     summaryItems.push(`<div>獲得経験値：+${Math.floor(total.expBoost)}%</div>`);
@@ -193,7 +195,10 @@ function renderSkillScreen() {
   if (total.agilityAttackRate > 0) {
     summaryItems.push("<div>スピードアタック</div>");
   }
-  if (total.powerRate !== 0) {
+  if (hasSacrificialAttack) {
+    summaryItems.push("<div>捨て身</div>");
+  }
+  if (hasDualWield) {
     summaryItems.push("<div>二刀流</div>");
   }
   if (total.singleHitBoost > 0) {
@@ -424,6 +429,26 @@ function resetAllSkills() {
   }
   refresh();
   renderSkillScreen();
+}
+function resetAllSkillsSilently() {
+  if (!player.skills || Object.keys(player.skills).length === 0) return 0;
+
+  let refundedPoints = 0;
+  Object.entries(player.skills).forEach(([skillId, level]) => {
+    const skill = SKILLS.find((entry) => entry.id === skillId);
+    if (!skill) return;
+    const requiredPoints = Number(skill.requiredPoints) || 1;
+    refundedPoints += requiredPoints * Number(level || 0);
+  });
+
+  player.skills = {};
+  player.unassignedPoints += refundedPoints;
+  const maxHp = calcMaxHp();
+  if (player.hp > maxHp) {
+    player.hp = maxHp;
+  }
+
+  return refundedPoints;
 }
 function maxLearnSkill(skillId) {
   const skill = SKILLS.find((entry) => entry.id === skillId);

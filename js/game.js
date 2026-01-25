@@ -2,6 +2,7 @@ const hasAutoSave = loadAutoSave();
 const URL_ITEM_GIFT_PARAM = "gift";
 const URL_ITEM_GIFT_CODE = "rokudemonai";
 const URL_ITEM_GIFT_STORAGE_KEY = "11";
+const SKILL_RESET_ONCE_KEY = "skill_reset_once_v1";
 
 const URL_ITEM_GIFT_PARAM2 = "gift";
 const URL_ITEM_GIFT_CODE2 = "owabi";
@@ -58,12 +59,20 @@ function claimUrlGiftItem() {
   autoSave();
   removeGiftParamFromUrl();
 }
+let skillResetRefundedPoints = 0;
+if (!localStorage.getItem(SKILL_RESET_ONCE_KEY)) {
+  skillResetRefundedPoints = resetAllSkillsSilently();
+  localStorage.setItem(SKILL_RESET_ONCE_KEY, "done");
+}
 if (!hasAutoSave) {
   player.hp = calcMaxHp();
   setHerbCount(10, false);
   log("探索開始");
 } else {
   log("💾 オートセーブをロード");
+}
+if (skillResetRefundedPoints > 0) {
+  log("🔁 起動時スキルリセットを実行しました");
 }
 function removeGiftParamFromUrl2() {
   const url = new URL(window.location.href);
@@ -93,3 +102,6 @@ claimUrlGiftItem2();
 awardStatPointUnlock();
 refresh();
 setGameReady(true);
+if (skillResetRefundedPoints > 0) {
+  autoSave();
+}
