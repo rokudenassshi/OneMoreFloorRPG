@@ -214,6 +214,19 @@ function damagePlayer(amount) {
   refresh();
 
   if (player.hp === 0) {
+    const hasHerbRevive = (skillEffects.herbRevive || 0) > 0;
+    if (
+      hasHerbRevive &&
+      typeof getHerbCount === "function" &&
+      typeof setHerbCount === "function" &&
+      getHerbCount() > 0
+    ) {
+      setHerbCount(getHerbCount() - 1);
+      player.hp = calcMaxHp();
+      log("🌿 草の守護が発動し、やくそうで全回復した！");
+      refresh();
+      return { evaded: false, damage: reducedDamage, rawDamage: amount };
+    }
     gameOver();
   }
   return { evaded: false, damage: reducedDamage, rawDamage: amount };

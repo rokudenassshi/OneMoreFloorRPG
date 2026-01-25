@@ -96,7 +96,7 @@ const SKILLS = [
     requiredPoints: 10,
     description:
       "ダメージ計算にすばやさを適用（ステータス値の70%で計算）、連続攻撃の衰退緩和",
-    exclusiveWith: ["vitality_attack", "last_stand"],
+    exclusiveWith: ["vitality_attack", "last_stand", "dual_wield"],
     effects: { agilityAttackRate: 0.7 },
   },
   {
@@ -141,7 +141,7 @@ const SKILLS = [
     maxLevel: 1,
     requiredPoints: 10,
     description: "ダメージ計算にたいりょくを適用（ステータス値の40%で計算）",
-    exclusiveWith: ["agility_attack", "last_stand"],
+    exclusiveWith: ["agility_attack", "last_stand", "dual_wield"],
     effects: { vitalityAttackRate: 0.4 },
   },
   {
@@ -171,6 +171,15 @@ const SKILLS = [
       "受けるダメージを10%軽減する。反射ダメージは軽減前のダメージで計算",
     requires: [{ id: "reflect_amplify_plus", level: 1 }],
     effects: { damageReduction: 10 },
+  },
+  {
+    id: "herb_guard",
+    name: "草命転生",
+    maxLevel: 1,
+    requiredPoints: 1,
+    description: "やくそう所持時、HPが0になるとやくそうを1消費して全回復",
+    requires: [{ id: "defensive_stance", level: 1 }],
+    effects: { herbRevive: 1 },
   },
   {
     id: "sacrificial_attack",

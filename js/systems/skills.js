@@ -45,6 +45,7 @@ function getSkillEffects() {
     herbHealBoost: 0,
     herbCapacityBoost: 0,
     herbBattleReward: 0,
+    herbRevive: 0,
     lifeSteal: 0,
     reflect: 0,
     reflectBoost: 0,
@@ -191,6 +192,9 @@ function renderSkillScreen() {
   }
   if (total.vitalityAttackRate > 0) {
     summaryItems.push("<div>シールドバッシュ</div>");
+  }
+  if (total.herbRevive > 0) {
+    summaryItems.push("<div>草命転生</div>");
   }
   if (total.agilityAttackRate > 0) {
     summaryItems.push("<div>スピードアタック</div>");

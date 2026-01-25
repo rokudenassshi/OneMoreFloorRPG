@@ -1,10 +1,19 @@
+const MAX_LOG_LINES = 200;
 function log(text) {
-  logEl.innerHTML += text + "<br>";
+  if (!logEl) return;
+  const lineEl = document.createElement("div");
+  lineEl.textContent = text;
+  logEl.appendChild(lineEl);
+
+  while (logEl.childElementCount > MAX_LOG_LINES) {
+    logEl.removeChild(logEl.firstElementChild);
+  }
   logEl.scrollTop = logEl.scrollHeight;
 }
 
 function clearLog() {
-  logEl.innerHTML = "";
+  if (!logEl) return;
+  logEl.textContent = "";
 }
 let rareEnemyPopupTimer = null;
 
