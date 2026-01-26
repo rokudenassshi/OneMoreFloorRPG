@@ -32,10 +32,10 @@
     bonus: { power: 0, vitality: 0, agility: 0 },
     specialOptions: [
       {
-        id: "exp_boost",
-        name: "経験値上昇",
-        value: 100,
-        description: "獲得経験値 +100%",
+        id: "exp_final_double",
+        name: "経験値5倍",
+        value: 5,
+        description: "獲得経験値が5倍",
       },
     ],
     isLocked: true,

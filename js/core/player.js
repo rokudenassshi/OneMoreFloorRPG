@@ -140,8 +140,11 @@ function gainExp(exp) {
   const specialEffects = getSpecialEffects();
   const boostRate = (specialEffects.expBoost || 0) / 100;
   const boostedExp = Math.floor(exp * (1 + boostRate));
-  player.exp += boostedExp;
-  log(`✨ 経験値 ${boostedExp} 獲得`);
+
+  const finalMultiplier = specialEffects.expFinalMultiplier || 1;
+  const finalExp = Math.floor(boostedExp * finalMultiplier);
+  player.exp += finalExp;
+  log(`✨ 経験値 ${finalExp} 獲得`);
 
   while (player.exp >= calcNextExp()) {
     player.exp -= calcNextExp();
@@ -340,6 +343,7 @@ function getEquipmentSpecialEffects() {
     victoryRecover: 0,
     evadeBoost: 0,
     expBoost: 0,
+    expFinalMultiplier: 1,
     rareEncounterBoost: 0,
     minHits: 0,
     powerRate: 0,
@@ -365,6 +369,9 @@ function getEquipmentSpecialEffects() {
         break;
       case "exp_boost":
         effects.expBoost += value;
+        break;
+      case "exp_final_double":
+        effects.expFinalMultiplier *= value || 1;
         break;
       case "rare_encounter":
         effects.rareEncounterBoost += value;
@@ -398,6 +405,7 @@ function getSpecialEffects() {
 
   return {
     ...equipmentEffects,
+    expFinalMultiplier: equipmentEffects.expFinalMultiplier || 1,
     lifeSteal: equipmentEffects.lifeSteal + (skillEffects.lifeSteal || 0),
     reflect:
       equipmentEffects.reflect + (skillEffects.reflect || 0) + reflectBoost,
