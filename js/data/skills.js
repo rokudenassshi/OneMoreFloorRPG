@@ -21,7 +21,6 @@ const SKILLS = [
     maxLevel: 1,
     requiredPoints: 1,
     description: "レアモンスターと遭遇しなくなる",
-    exclusiveWith: ["rare_encounter_boost"],
     effects: { rareEncounterBlock: 1 },
   },
   {
