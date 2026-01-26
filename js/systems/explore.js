@@ -99,7 +99,11 @@ function openTeleportModal() {
     option.textContent = `${floor}階`;
     selectEl.appendChild(option);
   });
-  selectEl.value = String(availableFloors[availableFloors.length - 1]);
+  const lastTeleported = Number(player.lastTeleportedFloor);
+  const defaultFloor = availableFloors.includes(lastTeleported)
+    ? lastTeleported
+    : availableFloors[availableFloors.length - 1];
+  selectEl.value = String(defaultFloor);
 
   const modal = document.getElementById("teleportModal");
   if (!modal) return;
@@ -127,8 +131,10 @@ function teleportToFloor() {
     return;
   }
   floor = target;
+  player.lastTeleportedFloor = target;
   log(`✨ ${target}階層へ転移した。`);
   refresh();
+  autoSave();
   closeTeleportModal();
 }
 

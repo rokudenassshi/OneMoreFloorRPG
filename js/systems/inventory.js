@@ -78,6 +78,7 @@ function openInventory() {
   discardWeakScreenEl.style.display = "none";
   exploreButtons.style.display = "none";
   battleButtons.style.display = "none";
+  document.body.classList.add("screen-scrollable");
 
   updateInventoryTabs();
   renderInventory();
@@ -89,6 +90,7 @@ function closeInventory() {
   discardWeakScreenEl.style.display = "none";
   exploreButtons.style.display = gameState === "EXPLORE" ? "block" : "none";
   battleButtons.style.display = gameState === "BATTLE" ? "block" : "none";
+  document.body.classList.remove("screen-scrollable");
 
   //ページ上部へスクロール
   window.scroll({

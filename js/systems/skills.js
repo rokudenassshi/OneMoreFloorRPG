@@ -105,6 +105,7 @@ function openSkillAllocation(forceOpen = false) {
   inventoryEl.style.display = "none";
   discardWeakScreenEl.style.display = "none";
   statusScreenEl.style.display = "none";
+  document.body.classList.add("screen-scrollable");
 
   skillScreenEl.style.display = "block";
   renderSkillScreen();
@@ -113,9 +114,11 @@ function openSkillAllocation(forceOpen = false) {
 function closeSkillAllocation() {
   gameState = skillReturnState || "EXPLORE";
   skillScreenEl.style.display = "none";
+  document.body.classList.remove("screen-scrollable");
 
   if (gameState === "STATUS") {
     statusScreenEl.style.display = "block";
+    document.body.classList.add("screen-scrollable");
     renderStatus();
     return;
   }

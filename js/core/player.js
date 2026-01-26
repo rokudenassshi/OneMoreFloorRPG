@@ -6,6 +6,7 @@ const player = {
   hp: 50,
 
   maxReachedFloor: 0,
+  lastTeleportedFloor: null,
 
   status: {
     power: 10,

@@ -11,6 +11,7 @@ function openStatus() {
   gameState = "STATUS";
   exploreButtons.style.display = "none";
   statusScreenEl.style.display = "block";
+  document.body.classList.add("screen-scrollable");
   if (statusVersionEl) {
     statusVersionEl.textContent = `v${GAME_VERSION}`;
   }
@@ -21,6 +22,7 @@ function closeStatus() {
   gameState = "EXPLORE";
   statusScreenEl.style.display = "none";
   exploreButtons.style.display = "block";
+  document.body.classList.remove("screen-scrollable");
   //ページ上部へスクロール
   window.scroll({
     top: 0,
