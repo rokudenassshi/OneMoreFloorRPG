@@ -57,6 +57,7 @@ function getSkillEffects() {
     expBoost: 0,
     rareEncounterBoost: 0,
     rareEncounterBlock: 0,
+    brokenEncounterBlock: 0,
     powerRate: 0,
     vitalityRate: 0,
     agilityRate: 0,
@@ -152,6 +153,9 @@ function renderSkillScreen() {
   if (total.rareEncounterBlock > 0) {
     summaryItems.push("<div>忍び足</div>");
   }
+  if (total.brokenEncounterBlock > 0) {
+    summaryItems.push("<div>忍び足2</div>");
+  }
   if (total.herbHealBoost > 0) {
     summaryItems.push(
       `<div>やくそう回復量：+${Math.round(total.herbHealBoost * 100)}%</div>`,
@@ -229,51 +233,55 @@ function renderSkillScreen() {
     </div>
 `;
 
-  const skillListHtml = SKILLS.map((skill) => {
-    const level = getSkillLevel(skill.id);
-    const isMax = Number.isFinite(skill.maxLevel)
-      ? level >= skill.maxLevel
-      : false;
-    const requiredPoints = Number(skill.requiredPoints) || 1;
-    const requirements = Array.isArray(skill.requires) ? skill.requires : [];
-    const hasRequirements = hasRequiredSkills(skill);
-    const hasExclusiveConflict = hasExclusiveSkillConflict(skill);
-    const canLearn =
-      player.unassignedPoints >= requiredPoints &&
-      !isMax &&
-      hasRequirements &&
-      !hasExclusiveConflict;
-    const canMax =
-      player.unassignedPoints >= requiredPoints &&
-      !isMax &&
-      hasRequirements &&
-      !hasExclusiveConflict;
-    const canMin = level > 0;
-    const canDecrease = level > 0;
-    const maxLevelLabel = Number.isFinite(skill.maxLevel)
-      ? skill.maxLevel
-      : "∞";
-    const requirementLabel = requirements.length
-      ? `前提スキル：${requirements
-          .map((requirement) => {
-            const requiredSkill = SKILLS.find(
-              (entry) => entry.id === requirement.id,
-            );
-            return requiredSkill ? requiredSkill.name : requirement.id;
-          })
-          .join(" / ")}`
-      : "";
-    const exclusiveLabel = Array.isArray(skill.exclusiveWith)
-      ? `同時取得不可：${skill.exclusiveWith
-          .map((exclusiveId) => {
-            const exclusiveSkill = SKILLS.find(
-              (entry) => entry.id === exclusiveId,
-            );
-            return exclusiveSkill ? exclusiveSkill.name : exclusiveId;
-          })
-          .join(" / ")}`
-      : "";
-    return `
+  const skillListHtml = SKILLS.filter((skill) => {
+    const unlockFloor = Number(skill.unlockFloor) || 0;
+    return !unlockFloor || player.maxReachedFloor >= unlockFloor;
+  })
+    .map((skill) => {
+      const level = getSkillLevel(skill.id);
+      const isMax = Number.isFinite(skill.maxLevel)
+        ? level >= skill.maxLevel
+        : false;
+      const requiredPoints = Number(skill.requiredPoints) || 1;
+      const requirements = Array.isArray(skill.requires) ? skill.requires : [];
+      const hasRequirements = hasRequiredSkills(skill);
+      const hasExclusiveConflict = hasExclusiveSkillConflict(skill);
+      const canLearn =
+        player.unassignedPoints >= requiredPoints &&
+        !isMax &&
+        hasRequirements &&
+        !hasExclusiveConflict;
+      const canMax =
+        player.unassignedPoints >= requiredPoints &&
+        !isMax &&
+        hasRequirements &&
+        !hasExclusiveConflict;
+      const canMin = level > 0;
+      const canDecrease = level > 0;
+      const maxLevelLabel = Number.isFinite(skill.maxLevel)
+        ? skill.maxLevel
+        : "∞";
+      const requirementLabel = requirements.length
+        ? `前提スキル：${requirements
+            .map((requirement) => {
+              const requiredSkill = SKILLS.find(
+                (entry) => entry.id === requirement.id,
+              );
+              return requiredSkill ? requiredSkill.name : requirement.id;
+            })
+            .join(" / ")}`
+        : "";
+      const exclusiveLabel = Array.isArray(skill.exclusiveWith)
+        ? `同時取得不可：${skill.exclusiveWith
+            .map((exclusiveId) => {
+              const exclusiveSkill = SKILLS.find(
+                (entry) => entry.id === exclusiveId,
+              );
+              return exclusiveSkill ? exclusiveSkill.name : exclusiveId;
+            })
+            .join(" / ")}`
+        : "";
+      return `
       <div class="skill-card ${canLearn ? "is-affordable" : ""} ${
         isMax ? "is-max" : ""
       }">
@@ -327,7 +335,8 @@ function renderSkillScreen() {
         </div>
       </div>
     `;
-  }).join("");
+    })
+    .join("");
 
   skillScreenContentEl.innerHTML = `
     <div class="skill-top">
@@ -357,6 +366,8 @@ function renderSkillScreen() {
 function learnSkill(skillId) {
   const skill = SKILLS.find((entry) => entry.id === skillId);
   if (!skill) return;
+  const unlockFloor = Number(skill.unlockFloor) || 0;
+  if (unlockFloor && player.maxReachedFloor < unlockFloor) return;
   const current = getSkillLevel(skillId);
   if (current >= skill.maxLevel) return;
   const requiredPoints = Number(skill.requiredPoints) || 1;
@@ -486,6 +497,8 @@ function resetAllSkillsSilently() {
 function maxLearnSkill(skillId) {
   const skill = SKILLS.find((entry) => entry.id === skillId);
   if (!skill) return;
+  const unlockFloor = Number(skill.unlockFloor) || 0;
+  if (unlockFloor && player.maxReachedFloor < unlockFloor) return;
   if (!hasRequiredSkills(skill)) return;
   if (hasExclusiveSkillConflict(skill)) return;
 

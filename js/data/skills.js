@@ -25,6 +25,15 @@ const SKILLS = [
     effects: { rareEncounterBlock: 1 },
   },
   {
+    id: "silent_steps2",
+    name: "忍び足2",
+    maxLevel: 1,
+    requiredPoints: 1,
+    unlockFloor: UNLOCK_FLOOR,
+    description: "壊れたモンスターと遭遇しなくなる",
+    effects: { brokenEncounterBlock: 1 },
+  },
+  {
     id: "herb_mastery",
     name: "やくそう強化",
     maxLevel: 50,

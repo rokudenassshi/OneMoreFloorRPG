@@ -9,11 +9,12 @@ function startBattle() {
   const specialEffects = getSpecialEffects();
   bonusRareRate = (specialEffects.rareEncounterBoost || 0) / 100;
   const isRareBlocked = (specialEffects.rareEncounterBlock || 0) > 0;
+  const isBrokenBlocked = (specialEffects.brokenEncounterBlock || 0) > 0;
   // ★壊れたエネミー（1001階層以降）
   const brokenEnemyRate = 0.01;
   const isBroken =
     floor >= UNLOCK_FLOOR &&
-    !isRareBlocked &&
+    !isBrokenBlocked &&
     Math.random() < brokenEnemyRate + bonusRareRate;
   // レアモンスター
   const baseRareRate = 0.02;

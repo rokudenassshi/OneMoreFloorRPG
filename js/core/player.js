@@ -417,6 +417,7 @@ function getSpecialEffects() {
       equipmentEffects.rareEncounterBoost +
       (skillEffects.rareEncounterBoost || 0),
     rareEncounterBlock: skillEffects.rareEncounterBlock || 0,
+    brokenEncounterBlock: skillEffects.brokenEncounterBlock || 0,
     agilityAttackRate: skillEffects.agilityAttackRate || 0,
     vitalityAttackRate: skillEffects.vitalityAttackRate || 0,
     singleHitBoost: skillEffects.singleHitBoost || 0,
