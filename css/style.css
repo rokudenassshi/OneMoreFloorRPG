@@ -448,6 +448,28 @@ status-actions {
   font-size: 12px;
   border-radius: 8px;
 }
+.battle-status {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 4px 0;
+}
+
+.player-hp {
+  align-self: flex-start;
+}
+
+.enemy-info {
+  align-self: flex-end;
+  max-width: 100%;
+  text-align: right;
+}
+
+.enemy-name,
+.enemy-hp {
+  line-height: 1.2;
+  min-height: 1.2em;
+}
 #enemyName,
 #enemyHp {
   display: block;

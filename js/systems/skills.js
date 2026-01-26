@@ -391,8 +391,32 @@ function removeInvalidDependentSkills() {
     });
     didRemove = didRemove || removedThisPass;
   } while (removedThisPass);
-
+  if (ensureSecondaryWeaponSlotState()) {
+    didRemove = true;
+  }
   return didRemove;
+}
+function ensureSecondaryWeaponSlotState() {
+  const canUseDualWield =
+    typeof getSkillLevel === "function" && getSkillLevel("dual_wield") > 0;
+  if (canUseDualWield || !player.weapon2) return false;
+
+  const prevMaxHp = calcMaxHp();
+  const removedWeapon = player.weapon2;
+  player.weapon2 = null;
+  const nextMaxHp = calcMaxHp();
+
+  if (typeof adjustHpForMaxChange === "function") {
+    adjustHpForMaxChange(prevMaxHp, nextMaxHp);
+  } else if (player.hp > nextMaxHp) {
+    player.hp = nextMaxHp;
+  }
+
+  if (typeof log === "function" && removedWeapon?.name) {
+    log(`🗡 ${removedWeapon.name}を装備2から外した`);
+  }
+
+  return true;
 }
 function unlearnSkill(skillId) {
   const skill = SKILLS.find((entry) => entry.id === skillId);
@@ -434,6 +458,7 @@ function resetAllSkills() {
   if (player.hp > maxHp) {
     player.hp = maxHp;
   }
+  ensureSecondaryWeaponSlotState();
   refresh();
   renderSkillScreen();
 }
@@ -454,6 +479,7 @@ function resetAllSkillsSilently() {
   if (player.hp > maxHp) {
     player.hp = maxHp;
   }
+  ensureSecondaryWeaponSlotState();
 
   return refundedPoints;
 }
