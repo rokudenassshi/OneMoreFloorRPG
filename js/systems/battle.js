@@ -58,7 +58,12 @@ function startBattle() {
   }
   updateUI();
 }
-
+function adjustDamageForEnemy(rawDamage) {
+  if (enemy?.id === "boss_rokushi") {
+    return Math.floor(rawDamage * 0.5);
+  }
+  return rawDamage;
+}
 function attack() {
   if (gameState !== "BATTLE") return;
 
@@ -96,9 +101,12 @@ function attack() {
       Math.floor(hitAtk * (1 + selfDamageBoostRate)),
     );
     const damageRoll = Math.random();
-
-    const damage = rollDamageWithRoll(boostedHitAtk, 0.3, damageRoll);
-    const baseDamage = rollDamageWithRoll(boostedBaseHitAtk, 0.3, damageRoll);
+    const damage = adjustDamageForEnemy(
+      rollDamageWithRoll(boostedHitAtk, 0.3, damageRoll),
+    );
+    const baseDamage = adjustDamageForEnemy(
+      rollDamageWithRoll(boostedBaseHitAtk, 0.3, damageRoll),
+    );
     const comboBonusDamage = Math.max(0, damage - baseDamage);
     enemy.hp -= damage;
     total += damage;
@@ -202,6 +210,7 @@ function enemyAttack() {
       reflectDamage = Math.floor(reflectDamage * 0.2);
       log("ろく氏「キカヌ」");
     }
+    reflectDamage = adjustDamageForEnemy(reflectDamage);
     if (reflectDamage > 0) {
       enemy.hp -= reflectDamage;
       log(`🛡️ ${enemy.name} に${reflectDamage}ダメージ反射`);
@@ -227,7 +236,7 @@ function triggerEvadeCounter() {
     player.hp === 1 && lastStandBoostRate > 0 ? 1 + lastStandBoostRate : 1;
   const attackMultiplier = singleHitMultiplier * lastStandMultiplier;
   const effectiveAtk = Math.max(1, Math.floor(attackPower * attackMultiplier));
-  const damage = rollDamage(effectiveAtk, 0.3);
+  const damage = adjustDamageForEnemy(rollDamage(effectiveAtk, 0.3));
   enemy.hp -= damage;
   log(`⚡ 回避反撃！ ${enemy.name} に${damage}ダメージ`);
   if (enemy.hp <= 0) {
