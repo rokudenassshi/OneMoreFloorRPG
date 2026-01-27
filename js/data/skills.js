@@ -229,7 +229,6 @@ const SKILLS = [
     maxLevel: 1,
     requiredPoints: 1,
     description: "最大HPが1になる",
-    requires: [{ id: "last_stand", level: 1 }],
     effects: { maxHpOverride: 1 },
   },
 ];
