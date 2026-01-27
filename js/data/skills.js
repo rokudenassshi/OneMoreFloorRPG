@@ -210,8 +210,8 @@ const SKILLS = [
     name: "居合切り",
     maxLevel: 1,
     requiredPoints: 50,
-    description: "ヒット数が1のとき攻撃が2倍になる",
-    effects: { singleHitBoost: 1 },
+    description: "ヒット数が1のとき攻撃が3倍になる",
+    effects: { singleHitBoost: 2 },
   },
   {
     id: "dual_wield",
