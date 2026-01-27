@@ -12,6 +12,7 @@ const SKILLS = [
     name: "ドロップ強化",
     maxLevel: 100,
     requiredPoints: 50,
+    unlockFloor: UNLOCK_FLOOR,
     description: "ドロップアイテムの数値+1%",
     effects: { dropItemValueBoost: 1 },
   },

@@ -65,34 +65,51 @@ function adjustDamageForEnemy(rawDamage) {
   }
   return rawDamage;
 }
-function attack() {
+async function attack() {
   if (gameState !== "BATTLE") return;
 
   const atk = calcAttack();
   const hits = calcAttackCount();
+
   const specialEffects = getSpecialEffects();
   const comboBoostRate = (specialEffects.comboBoost || 0) / 100;
   const selfDamageBoostRate = (specialEffects.selfDamageBoost || 0) / 100;
   const singleHitBoostRate = specialEffects.singleHitBoost || 0;
   const lastStandBoostRate = specialEffects.lastStandAttackBoost || 0;
   const decayBase = specialEffects.agilityAttackRate > 0 ? 0.8 : 0.6;
+
   const singleHitMultiplier =
     hits === 1 && singleHitBoostRate > 0 ? 1 + singleHitBoostRate : 1;
   const lastStandMultiplier =
     player.hp === 1 && lastStandBoostRate > 0 ? 1 + lastStandBoostRate : 1;
+
   const attackMultiplier = singleHitMultiplier * lastStandMultiplier;
   const effectiveAtk = Math.max(1, Math.floor(atk * attackMultiplier));
-  let total = 0;
+
   const enemyHpBefore = enemy.hp;
-  const hitDamages = [];
-  const hitComboBonusDamages = [];
+
+  let total = 0;
+
+  // ---- ログは「表示制限」する（ヒット数上限ではない）----
+  const logs = [];
+  if (hits > 1) logs.push(`▶ ${hits}回の連続攻撃。`);
+
+  const SHOW_HEAD = 12; // 最初に表示する回数
+  const SHOW_TAIL = 3; // 最後に表示する回数
+  const shouldSummarize = hits > SHOW_HEAD + SHOW_TAIL + 1;
+
+  // Safariのクラッシュ対策：長いループは途中でyield
+  const YIELD_EVERY = 300; // 端末が重いなら 300 でもOK
+
   for (let i = 0; i < hits; i++) {
     const decayMultiplier = Math.pow(decayBase, i);
     const baseHitAtk = Math.max(1, Math.floor(effectiveAtk * decayMultiplier));
+
     const hitAtk = Math.max(
       1,
       Math.floor(baseHitAtk * (1 + comboBoostRate * i)),
     );
+
     const boostedBaseHitAtk = Math.max(
       1,
       Math.floor(baseHitAtk * (1 + selfDamageBoostRate)),
@@ -101,7 +118,9 @@ function attack() {
       1,
       Math.floor(hitAtk * (1 + selfDamageBoostRate)),
     );
+
     const damageRoll = Math.random();
+
     const damage = adjustDamageForEnemy(
       rollDamageWithRoll(boostedHitAtk, 0.3, damageRoll),
     );
@@ -109,32 +128,36 @@ function attack() {
       rollDamageWithRoll(boostedBaseHitAtk, 0.3, damageRoll),
     );
     const comboBonusDamage = Math.max(0, damage - baseDamage);
+
     enemy.hp -= damage;
     total += damage;
-    hitDamages.push(damage);
-    hitComboBonusDamages.push(comboBonusDamage);
-  }
-  const logs = [];
 
-  if (hits > 1) {
-    logs.push(`▶ ${hits}回の連続攻撃。`);
-  }
+    // ---- ログは必要な部分だけ作る（配列に全ヒット分溜めない）----
+    const inHead = i < SHOW_HEAD;
+    const inTail = i >= hits - SHOW_TAIL;
 
-  for (let i = 0; i < hits; i++) {
-    const damage = hitDamages[i];
-    const comboBonus = hitComboBonusDamages[i] || 0;
+    if (!shouldSummarize || inHead || inTail) {
+      const comboLog =
+        comboBoostRate > 0 && comboBonusDamage > 0
+          ? `（連撃強化+${comboBonusDamage}）`
+          : "";
+      logs.push(`${i + 1}回目 ${damage}ダメージ${comboLog}`);
+    } else if (i === SHOW_HEAD) {
+      logs.push(`…（中略 ${hits - (SHOW_HEAD + SHOW_TAIL)}回）…`);
+    }
 
-    const comboLog =
-      comboBoostRate > 0 && comboBonus > 0 ? `（連撃強化+${comboBonus}）` : "";
-
-    logs.push(`${i + 1}回目 ${damage}ダメージ${comboLog}`);
+    // ---- Safariのために時々yield（フリーズ/内部エラー回避）----
+    if (hits >= YIELD_EVERY && i > 0 && i % YIELD_EVERY === 0) {
+      await new Promise((r) => setTimeout(r, 0));
+    }
   }
 
   logs.push(`▶ 合計 ${total}ダメージ`);
-
   logBulk(logs);
+
   refresh();
 
+  // 吸血
   const lifeStealRate = (specialEffects.lifeSteal || 0) / 100;
   if (lifeStealRate > 0) {
     const actualDamage = Math.min(total, enemyHpBefore);
@@ -145,9 +168,11 @@ function attack() {
       log(`🩸 吸血でHPを${recoverAmount}回復`);
     }
   }
+
   refresh();
   afterPlayerAction();
 }
+
 function escape() {
   if (gameState !== "BATTLE") return;
 

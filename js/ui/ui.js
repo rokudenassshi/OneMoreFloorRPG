@@ -40,10 +40,16 @@ function log(text, { silent = false } = {}) {
 function logBulk(lines) {
   if (!Array.isArray(lines) || lines.length === 0) return;
 
-  // DOM操作は append だけにして、最後に flush 1回
-  lines.forEach((text) => {
-    log(text, { silent: true });
-  });
+  const el = getLogContainer();
+  if (!el) return;
+
+  const frag = document.createDocumentFragment();
+  for (const text of lines) {
+    const div = document.createElement("div");
+    div.textContent = text;
+    frag.appendChild(div);
+  }
+  el.appendChild(frag);
 
   flushLog();
 }
