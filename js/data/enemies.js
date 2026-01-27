@@ -387,9 +387,9 @@
         title: "創造神",
         titleMul: 1,
 
-        maxHp: 99999999,
-        hp: 99999999,
-        atk: 9999999,
+        maxHp: 999999999,
+        hp: 999999999,
+        atk: 99999999,
         exp: 1,
 
         isBoss: true,
