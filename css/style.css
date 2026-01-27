@@ -10,7 +10,7 @@ body {
   margin: 0;
   padding: 0 12px 24px;
   overflow: hidden;
-  touch-action: none;
+  touch-action: manipulation;
 }
 body.screen-scrollable {
   overflow-y: auto;

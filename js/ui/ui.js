@@ -1,19 +1,56 @@
 const MAX_LOG_LINES = 200;
-function log(text) {
-  if (!logEl) return;
-  const lineEl = document.createElement("div");
-  lineEl.textContent = text;
-  logEl.appendChild(lineEl);
+// DOMがまだの時でも落ちないように、遅延取得＆キャッシュする
+let logContainer = null;
 
-  while (logEl.childElementCount > MAX_LOG_LINES) {
-    logEl.removeChild(logEl.firstElementChild);
-  }
-  logEl.scrollTop = logEl.scrollHeight;
+function getLogContainer() {
+  if (logContainer) return logContainer;
+
+  // game.html: <div class="log" id="log"></div>
+  const el = document.getElementById("log");
+  if (!el) return null;
+
+  logContainer = el;
+  return logContainer;
 }
 
+function flushLog() {
+  const el = getLogContainer();
+  if (!el) return;
+
+  // ログ上限
+  while (el.children.length > MAX_LOG_LINES) {
+    el.removeChild(el.firstChild);
+  }
+
+  // 末尾へスクロール
+  el.scrollTop = el.scrollHeight;
+}
+
+function log(text, { silent = false } = {}) {
+  const el = getLogContainer();
+  if (!el) return; // DOM未生成なら何もしない（落ちない）
+
+  const div = document.createElement("div");
+  div.textContent = text;
+  el.appendChild(div);
+
+  if (!silent) flushLog();
+}
+
+function logBulk(lines) {
+  if (!Array.isArray(lines) || lines.length === 0) return;
+
+  // DOM操作は append だけにして、最後に flush 1回
+  lines.forEach((text) => {
+    log(text, { silent: true });
+  });
+
+  flushLog();
+}
 function clearLog() {
-  if (!logEl) return;
-  logEl.textContent = "";
+  const el = getLogContainer();
+  if (!el) return;
+  el.textContent = "";
 }
 let rareEnemyPopupTimer = null;
 

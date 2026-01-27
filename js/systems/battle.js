@@ -114,20 +114,26 @@ function attack() {
     hitDamages.push(damage);
     hitComboBonusDamages.push(comboBonusDamage);
   }
+  const logs = [];
+
   if (hits > 1) {
-    log(`▶ ${hits}回の連続攻撃。`);
-    hitDamages.forEach((damage, index) => {
-      const comboBonus = hitComboBonusDamages[index] || 0;
-      const comboLog =
-        comboBoostRate > 0 && comboBonus > 0
-          ? `（連撃強化+${comboBonus}）`
-          : "";
-      log(`${index + 1}回目 ${damage}ダメージ${comboLog}`);
-    });
-    log(`▶ 合計 ${total}ダメージ`);
-  } else {
-    log(`▶ 攻撃！ ${hits}回ヒット（${total}ダメージ）`);
+    logs.push(`▶ ${hits}回の連続攻撃。`);
   }
+
+  for (let i = 0; i < hits; i++) {
+    const damage = hitDamages[i];
+    const comboBonus = hitComboBonusDamages[i] || 0;
+
+    const comboLog =
+      comboBoostRate > 0 && comboBonus > 0 ? `（連撃強化+${comboBonus}）` : "";
+
+    logs.push(`${i + 1}回目 ${damage}ダメージ${comboLog}`);
+  }
+
+  logs.push(`▶ 合計 ${total}ダメージ`);
+
+  logBulk(logs);
+  refresh();
 
   const lifeStealRate = (specialEffects.lifeSteal || 0) / 100;
   if (lifeStealRate > 0) {
@@ -142,7 +148,6 @@ function attack() {
   refresh();
   afterPlayerAction();
 }
-
 function escape() {
   if (gameState !== "BATTLE") return;
 
