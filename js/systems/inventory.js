@@ -4,6 +4,25 @@
    インベントリ（所持品）
 ===================== */
 const inventory = [];
+const inventoryMutationMethods = [
+  "push",
+  "pop",
+  "shift",
+  "unshift",
+  "splice",
+  "sort",
+  "reverse",
+];
+inventoryMutationMethods.forEach((method) => {
+  const original = inventory[method];
+  if (typeof original !== "function") return;
+  inventory[method] = function (...args) {
+    if (typeof markInventoryDirty === "function") {
+      markInventoryDirty();
+    }
+    return original.apply(this, args);
+  };
+});
 const HERB_ITEM_TEMPLATE = {
   id: "consumable_herb",
   name: "やくそう",

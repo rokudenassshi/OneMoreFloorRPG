@@ -2,8 +2,17 @@ let gameState = "EXPLORE";
 let floor = 0;
 let enemy = null;
 const autosaveKey = "release3";
+const inventorySaveKey = `${autosaveKey}_inventory`;
 let battleGutsUsed = false;
 let isGameReady = false;
+const AUTO_SAVE_INTERVAL_MS = 1200;
+const INVENTORY_SAVE_INTERVAL_MS = 5000;
+let lastAutoSaveAt = 0;
+let lastInventorySaveAt = 0;
+let pendingAutoSaveTimer = null;
+let pendingAutoSaveOptions = {};
+let inventoryDirty = false;
+let isLoadingSave = false;
 
 function isBossFloor(currentFloor) {
   return BOSS_FLOORS.includes(currentFloor);
@@ -24,8 +33,34 @@ function clearEnemy() {
   refresh();
 }
 
-function autoSave() {
+function autoSave(options = {}) {
   if (!isGameReady) return;
+  pendingAutoSaveOptions = { ...pendingAutoSaveOptions, ...options };
+  const now = Date.now();
+  const elapsed = now - lastAutoSaveAt;
+  if (elapsed >= AUTO_SAVE_INTERVAL_MS && !pendingAutoSaveTimer) {
+    performAutoSave(pendingAutoSaveOptions);
+    pendingAutoSaveOptions = {};
+    return;
+  }
+  if (pendingAutoSaveTimer) return;
+  const delay = Math.max(0, AUTO_SAVE_INTERVAL_MS - elapsed);
+  pendingAutoSaveTimer = setTimeout(() => {
+    pendingAutoSaveTimer = null;
+    performAutoSave(pendingAutoSaveOptions);
+    pendingAutoSaveOptions = {};
+  }, delay);
+}
+
+function performAutoSave(options = {}) {
+  if (!isGameReady) return;
+  const now = Date.now();
+  lastAutoSaveAt = now;
+  const hasInventorySnapshot = Boolean(localStorage.getItem(inventorySaveKey));
+  const shouldPersistInventory =
+    options.saveInventory ||
+    !hasInventorySnapshot ||
+    (inventoryDirty && now - lastInventorySaveAt >= INVENTORY_SAVE_INTERVAL_MS);
   const weaponIndex =
     player && player.weapon ? inventory.indexOf(player.weapon) : -1;
   const weapon2Index =
@@ -34,7 +69,7 @@ function autoSave() {
     player && player.accessory ? inventory.indexOf(player.accessory) : -1;
   const data = {
     version: 1,
-    savedAt: Date.now(),
+    savedAt: now,
     floor,
     gameState,
     player: {
@@ -58,14 +93,37 @@ function autoSave() {
       weapon2Index,
       accessoryIndex,
     },
-    inventory: inventory.map((item) => ({ ...item })),
+    inventorySavedAt: lastInventorySaveAt,
   };
 
   localStorage.setItem(autosaveKey, JSON.stringify(data));
+  if (shouldPersistInventory) {
+    data.inventory = inventory.map((item) => ({ ...item }));
+    localStorage.setItem(autosaveKey, JSON.stringify(data));
+    saveInventorySnapshot(now);
+  }
 }
 
 function setGameReady(value) {
   isGameReady = Boolean(value);
+}
+function flushAutoSave() {
+  if (!isGameReady) return;
+  performAutoSave({ saveInventory: true });
+}
+function markInventoryDirty() {
+  if (isLoadingSave) return;
+  inventoryDirty = true;
+}
+function saveInventorySnapshot(timestamp = Date.now()) {
+  if (!isGameReady) return;
+  const snapshot = {
+    savedAt: timestamp,
+    items: inventory.map((item) => ({ ...item })),
+  };
+  localStorage.setItem(inventorySaveKey, JSON.stringify(snapshot));
+  lastInventorySaveAt = timestamp;
+  inventoryDirty = false;
 }
 function loadAutoSave() {
   const raw = localStorage.getItem(autosaveKey);
@@ -116,10 +174,36 @@ function loadAutoSave() {
       : {};
 
   inventory.length = 0;
+  isLoadingSave = true;
   if (Array.isArray(data.inventory)) {
     data.inventory.forEach((item) => {
       if (item) inventory.push({ ...item });
     });
+    const legacyInventorySavedAt = Number(data.inventorySavedAt);
+    lastInventorySaveAt = Number.isFinite(legacyInventorySavedAt)
+      ? legacyInventorySavedAt
+      : Date.now();
+  } else {
+    const inventoryRaw = localStorage.getItem(inventorySaveKey);
+    if (inventoryRaw) {
+      try {
+        const inventoryData = JSON.parse(inventoryRaw);
+        if (Array.isArray(inventoryData?.items)) {
+          inventoryData.items.forEach((item) => {
+            if (item) inventory.push({ ...item });
+          });
+        }
+        const savedAt = Number(inventoryData?.savedAt);
+        lastInventorySaveAt = Number.isFinite(savedAt) ? savedAt : Date.now();
+      } catch (error) {
+        // ignore invalid inventory cache
+      }
+    }
+  }
+  inventoryDirty = false;
+  isLoadingSave = false;
+  if (!lastInventorySaveAt) {
+    lastInventorySaveAt = Date.now();
   }
 
   const weaponIndex = Number(savedPlayer.weaponIndex);
@@ -144,3 +228,13 @@ function loadAutoSave() {
   player.hp = Math.min(Math.max(0, hpToApply), maxHp);
   return true;
 }
+
+window.addEventListener("beforeunload", () => {
+  flushAutoSave();
+});
+
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "hidden") {
+    flushAutoSave();
+  }
+});
