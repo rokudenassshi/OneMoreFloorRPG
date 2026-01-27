@@ -67,6 +67,7 @@ function getSkillEffects() {
     lastStandAttackBoost: 0,
     lastStandEvadeBoost: 0,
     maxHpOverride: 0,
+    dropItemValueBoost: 0,
   };
 
   SKILLS.forEach((skill) => {

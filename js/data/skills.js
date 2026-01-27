@@ -8,6 +8,14 @@ const SKILLS = [
     effects: { expBoost: 1 },
   },
   {
+    id: "drop_value_boost",
+    name: "ドロップ強化",
+    maxLevel: 100,
+    requiredPoints: 50,
+    description: "ドロップアイテムの数値+1%",
+    effects: { dropItemValueBoost: 1 },
+  },
+  {
     id: "rare_encounter_boost",
     name: "レアモンスターの遭遇率up",
     maxLevel: 10,

@@ -762,6 +762,14 @@ function dropItem() {
   if (!enemy) return;
   const finalBossFloor = window.getFinalBossFloor?.();
 
+  const skillEffects =
+    typeof getSkillEffects === "function" ? getSkillEffects() : {};
+  const dropItemValueBoost = Math.max(0, skillEffects.dropItemValueBoost || 0);
+  const dropItemMultiplier = 1 + dropItemValueBoost / 100;
+  const applyDropItemValueBoost = (item) => {
+    if (!item || dropItemMultiplier <= 1) return;
+    scaleItemBonuses(item, dropItemMultiplier);
+  };
   if (finalBossFloor && enemy.minFloor === finalBossFloor) {
     const proof = window.ItemGen?.PROOF_OF_SLAYING;
     if (!proof) return;
@@ -784,6 +792,7 @@ function dropItem() {
       );
       item.name = `★壊れた${item.name}`;
       applyBrokenItemStat(item);
+      applyDropItemValueBoost(item);
       if (!shouldPickupItem(item)) {
         log(`⏭ ${item.name} は拾わなかった`);
         return;
@@ -802,6 +811,7 @@ function dropItem() {
       );
       item.name = `★六神★${item.name}`;
       scaleItemBonuses(item, 1.5);
+      applyDropItemValueBoost(item);
       if (!shouldPickupItem(item)) {
         log(`⏭ ${item.name} は拾わなかった`);
         return;
@@ -841,11 +851,9 @@ function dropItem() {
     enemy.titleMul,
     desiredBaseStatCount,
   );
-
-  item.isRareDrop = !!enemy.isRare;
-  const rareDropMark = item.isRareDrop ? "★" : "";
+  applyDropItemValueBoost(item);
   if (!shouldPickupItem(item)) {
-    log(`⏭ ${rareDropMark}${item.name} は拾わなかった`);
+    log(`⏭ ${item.name} は拾わなかった`);
     return;
   }
   inventory.push(item);
