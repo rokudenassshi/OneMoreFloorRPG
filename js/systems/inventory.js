@@ -41,7 +41,7 @@ let currentInventoryTab = "equipment";
 let inventorySortEnabled = false;
 
 // ユニーク武器
-const WEATHERED_KILL_THRESHOLD = 5;
+const WEATHERED_KILL_THRESHOLD = 500;
 const CURSED_KILL_STEP = 100;
 
 function isWeatheredItem(item) {
@@ -53,18 +53,23 @@ function isCursedItem(item) {
 }
 
 function isDualWieldRestrictedItem(item) {
-  return isWeatheredItem(item) || isCursedItem(item);
+  return (
+    Boolean(item?.isUniqueWeapon) || isWeatheredItem(item) || isCursedItem(item)
+  );
 }
 
 function enforceRestrictedSingleWeapon() {
-  if (
-    isDualWieldRestrictedItem(player.weapon) ||
-    isDualWieldRestrictedItem(player.weapon2)
-  ) {
-    if (player.weapon2) {
-      player.weapon2 = null;
-      log("⚠️ 風化したアイテムは二刀流と併用できない。");
-    }
+  const weaponRestricted = isDualWieldRestrictedItem(player.weapon);
+  const weapon2Restricted = isDualWieldRestrictedItem(player.weapon2);
+  if (!weaponRestricted && !weapon2Restricted) return;
+  if (weaponRestricted && player.weapon2) {
+    player.weapon2 = null;
+    log("⚠️ ユニーク武器は二刀流と併用できない。");
+    return;
+  }
+  if (weapon2Restricted && player.weapon) {
+    player.weapon = null;
+    log("⚠️ ユニーク武器は二刀流と併用できない。");
   }
 }
 
@@ -84,10 +89,8 @@ function getCursedStatLabel(stat) {
 function transformToCursedItem(item) {
   item.isWeathered = false;
   item.isCursed = true;
-  if (item.cursedName) {
-    item.name = item.cursedName;
-  }
-  log(`⚠️ ${item.name}が禍々しく変化した。`);
+  showEventPopup(` ${item.name}が${item.cursedName}に変化した。`);
+  item.name = item.cursedName;
 }
 
 function incrementCursedItemStat(item) {
@@ -114,17 +117,13 @@ function handleWeatheredWeaponProgress() {
     if (isWeatheredItem(item)) {
       item.killCount = (item.killCount || 0) + 1;
       didUpdate = true;
-      if (!item.hintLogged) {
-        log("装備して敵を倒していると・・・");
-        item.hintLogged = true;
-      }
       if (item.killCount >= WEATHERED_KILL_THRESHOLD) {
         transformToCursedItem(item);
         didUpdate = true;
       }
       return;
     }
-    if (isCursedItem(item) && floor >= UNLOCK_FLOOR) {
+    if (isCursedItem(item) && floor >= 1) {
       const previousCount = item.cursedKillCount || 0;
       item.cursedKillCount = previousCount + 1;
       didUpdate = true;
@@ -723,13 +722,13 @@ function equip(index, slot = "primary") {
     (isDualWieldRestrictedItem(item) ||
       isDualWieldRestrictedItem(player.weapon))
   ) {
-    log("⚠️ 風化したアイテムは二刀流と併用できない。");
+    log("⚠️ ユニーク武器は二刀流と併用できない。");
     return;
   }
   const prevMaxHp = calcMaxHp();
   if (isDualWieldRestrictedItem(item) && hasDualWieldSkill && player.weapon2) {
     player.weapon2 = null;
-    log("⚠️ 風化したアイテムは二刀流と併用できない。");
+    log("⚠️ ユニーク武器は二刀流と併用できない。");
   }
   if (slot === "secondary") {
     player.weapon2 = item;

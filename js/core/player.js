@@ -9,7 +9,7 @@ const player = {
   lastTeleportedFloor: null,
 
   status: {
-    power: 1000,
+    power: 10,
     vitality: 10,
     agility: 10,
   },
@@ -280,8 +280,7 @@ function getBaseStatus() {
 }
 
 function getEquipmentBonus() {
-  const isDualWieldRestrictedItem = (item) =>
-    Boolean(item?.isWeathered) || Boolean(item?.isCursed);
+  const isDualWieldRestrictedItem = (item) => Boolean(item?.isWeathered);
   const canUseDualWield =
     typeof getSkillLevel === "function" &&
     getSkillLevel("dual_wield") > 0 &&
@@ -323,8 +322,7 @@ function getEquipmentBonus() {
   };
 }
 function getEquipmentSpecialOptions() {
-  const isDualWieldRestrictedItem = (item) =>
-    Boolean(item?.isWeathered) || Boolean(item?.isCursed);
+  const isDualWieldRestrictedItem = (item) => Boolean(item?.isWeathered);
   const options = [];
   const canUseDualWield =
     typeof getSkillLevel === "function" &&

@@ -80,12 +80,13 @@
       optionBonus: { power: 0, vitality: 0, agility: 0 },
       specialOptions: [],
       isWeathered: true,
+      isUniqueWeapon: true,
       isCursed: false,
+      isLocked: true,
       cursedName: template.cursedName,
       cursedStat: template.cursedStat,
       killCount: 0,
       cursedKillCount: 0,
-      hintLogged: false,
     };
   }
   // ★あなたの「二つ名の量」は減らさない：ここは今のTITLE_BY_TIERをそのまま貼る

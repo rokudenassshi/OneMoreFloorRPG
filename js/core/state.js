@@ -233,10 +233,10 @@ function loadAutoSave() {
     Number.isInteger(accessoryIndex) && inventory[accessoryIndex]
       ? inventory[accessoryIndex]
       : null;
-  if (player.weapon?.isWeathered || player.weapon?.isCursed) {
+  if (player.weapon?.isWeathered) {
     player.weapon2 = null;
   }
-  if (player.weapon2?.isWeathered || player.weapon2?.isCursed) {
+  if (player.weapon2?.isWeathered) {
     player.weapon2 = null;
   }
 

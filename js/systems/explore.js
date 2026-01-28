@@ -29,8 +29,11 @@ function move(dir) {
     return;
   }
 
-  if ((floor = WEATHERED_EVENT_FLOOR)) {
+  if (floor == WEATHERED_EVENT_FLOOR) {
+    // if (floor == 1) {
     handleFloorArrival();
+    refresh();
+    return;
   } // 50階層ごとの節目：必ずHP全回復（ボス階層は勝利時に表示）
   if (floor % 50 === 0 && !isBossFloor(floor)) {
     log("🔥静かに炎が燈っている。ここでは休めそうだ。");
@@ -150,11 +153,10 @@ function handleFloorArrival() {
   if (floor >= WEATHERED_EVENT_FLOOR && !player.weatheredWeaponUnlocked) {
     player.weatheredWeaponUnlocked = true;
   }
-  if (floor === WEATHERED_EVENT_FLOOR && !player.weatheredWeaponHintShown) {
+  if (floor === WEATHERED_EVENT_FLOOR && !player.weatheredWeaponReceived) {
     if (typeof showEventPopup === "function") {
       showEventPopup("始まりの地に今一度戻ろう。");
     }
-    player.weatheredWeaponHintShown = true;
   }
 }
 
@@ -173,7 +175,9 @@ function handleBaseArrival() {
     inventory.push(createWeatheredItem(template));
   });
   if (typeof showEventPopup === "function") {
-    showEventPopup("風化した武器を手に入れた。");
+    showEventPopup(
+      "風化した武器を手に入れた。装備してモンスターを倒していると・・・",
+    );
   }
   player.weatheredWeaponReceived = true;
 }

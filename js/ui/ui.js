@@ -59,34 +59,71 @@ function clearLog() {
   el.textContent = "";
 }
 let rareEnemyPopupTimer = null;
+let allowRarePopupOverlayClose = true;
 
 function hideRareEnemyPopup() {
   if (!rareEnemyPopupEl) return;
   rareEnemyPopupEl.classList.remove("is-visible");
   rareEnemyPopupEl.setAttribute("aria-hidden", "true");
 }
-function showRareEnemyPopup(enemyName, titleText = "レアモンスター出現！") {
+function showRareEnemyPopup(
+  enemyName,
+  titleText = "レアモンスター出現！",
+  {
+    autoClose = true,
+    allowOverlayClose = true,
+    showCloseButton = false,
+    hintText = "タップで閉じる",
+  } = {},
+) {
   if (!rareEnemyPopupEl || !rareEnemyPopupNameEl) return;
   if (rareEnemyPopupTitleEl) {
     rareEnemyPopupTitleEl.textContent = titleText;
   }
   rareEnemyPopupNameEl.textContent = enemyName;
+  if (rareEnemyPopupHintEl) {
+    rareEnemyPopupHintEl.textContent = hintText;
+  }
+  if (rareEnemyPopupCloseEl) {
+    rareEnemyPopupCloseEl.hidden = !showCloseButton;
+  }
+  allowRarePopupOverlayClose = allowOverlayClose;
   rareEnemyPopupEl.classList.add("is-visible");
   rareEnemyPopupEl.setAttribute("aria-hidden", "false");
 
   if (rareEnemyPopupTimer) {
     clearTimeout(rareEnemyPopupTimer);
   }
-  rareEnemyPopupTimer = setTimeout(() => {
-    hideRareEnemyPopup();
-  }, 2200);
+  if (autoClose) {
+    rareEnemyPopupTimer = setTimeout(() => {
+      hideRareEnemyPopup();
+    }, 2200);
+  } else {
+    rareEnemyPopupTimer = null;
+  }
 }
 
 function showEventPopup(message, titleText = "イベント発生") {
-  showRareEnemyPopup(message, titleText);
+  showRareEnemyPopup(message, titleText, {
+    autoClose: false,
+    allowOverlayClose: false,
+    showCloseButton: true,
+    hintText: "閉じるボタンで閉じる",
+  });
 }
 if (rareEnemyPopupEl) {
-  rareEnemyPopupEl.addEventListener("click", () => {
+  rareEnemyPopupEl.addEventListener("click", (event) => {
+    if (!allowRarePopupOverlayClose) return;
+    if (rareEnemyPopupTimer) {
+      clearTimeout(rareEnemyPopupTimer);
+      rareEnemyPopupTimer = null;
+    }
+    hideRareEnemyPopup();
+  });
+}
+if (rareEnemyPopupCloseEl) {
+  rareEnemyPopupCloseEl.addEventListener("click", (event) => {
+    event.stopPropagation();
     if (rareEnemyPopupTimer) {
       clearTimeout(rareEnemyPopupTimer);
       rareEnemyPopupTimer = null;

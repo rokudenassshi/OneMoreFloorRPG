@@ -7,6 +7,8 @@ const enemyHpEl = document.getElementById("enemyHp");
 const logEl = document.getElementById("log");
 const rareEnemyPopupEl = document.getElementById("rareEnemyPopup");
 const rareEnemyPopupNameEl = document.getElementById("rareEnemyPopupName");
+const rareEnemyPopupHintEl = document.getElementById("rareEnemyPopupHint");
+const rareEnemyPopupCloseEl = document.getElementById("rareEnemyPopupClose");
 
 const rareEnemyPopupTitleEl = document.getElementById("rareEnemyPopupTitle");
 const exploreButtons = document.getElementById("exploreButtons");
