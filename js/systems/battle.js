@@ -78,6 +78,10 @@ async function attack() {
   const lastStandBoostRate = specialEffects.lastStandAttackBoost || 0;
   const decayBase = specialEffects.agilityAttackRate > 0 ? 0.8 : 0.6;
 
+  const selfDamageMultiplier = 1 + selfDamageBoostRate;
+  const isRokushi = enemy?.id === "boss_rokushi";
+  const enemyDamageMultiplier = isRokushi ? 0.5 : 1;
+
   const singleHitMultiplier =
     hits === 1 && singleHitBoostRate > 0 ? 1 + singleHitBoostRate : 1;
   const lastStandMultiplier =
@@ -101,8 +105,9 @@ async function attack() {
   // Safariのクラッシュ対策：長いループは途中でyield
   const YIELD_EVERY = 300; // 端末が重いなら 300 でもOK
 
+  let decayMultiplier = 1;
   for (let i = 0; i < hits; i++) {
-    const decayMultiplier = Math.pow(decayBase, i);
+    if (i > 0) decayMultiplier *= decayBase;
     const baseHitAtk = Math.max(1, Math.floor(effectiveAtk * decayMultiplier));
 
     const hitAtk = Math.max(
@@ -112,7 +117,7 @@ async function attack() {
 
     const boostedBaseHitAtk = Math.max(
       1,
-      Math.floor(baseHitAtk * (1 + selfDamageBoostRate)),
+      Math.floor(hitAtk * selfDamageMultiplier),
     );
     const boostedHitAtk = Math.max(
       1,
@@ -120,13 +125,20 @@ async function attack() {
     );
 
     const damageRoll = Math.random();
-
-    const damage = adjustDamageForEnemy(
-      rollDamageWithRoll(boostedHitAtk, 0.3, damageRoll),
+    const rawDamage = rollDamageWithRoll(boostedHitAtk, 0.3, damageRoll);
+    const rawBaseDamage = rollDamageWithRoll(
+      boostedBaseHitAtk,
+      0.3,
+      damageRoll,
     );
-    const baseDamage = adjustDamageForEnemy(
-      rollDamageWithRoll(boostedBaseHitAtk, 0.3, damageRoll),
-    );
+    const damage =
+      enemyDamageMultiplier === 1
+        ? rawDamage
+        : Math.floor(rawDamage * enemyDamageMultiplier);
+    const baseDamage =
+      enemyDamageMultiplier === 1
+        ? rawBaseDamage
+        : Math.floor(rawBaseDamage * enemyDamageMultiplier);
     const comboBonusDamage = Math.max(0, damage - baseDamage);
 
     enemy.hp -= damage;
