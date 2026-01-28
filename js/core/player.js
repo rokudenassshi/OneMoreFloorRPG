@@ -103,7 +103,7 @@ function calcAttackCount() {
   );
 }
 
-// すばやさ：回避（上限20%）
+// すばやさ：回避
 function rollEvade() {
   // ★ ろく氏の攻撃は回避率1%固定
   if (typeof enemy !== "undefined" && enemy?.id === "boss_rokushi") {

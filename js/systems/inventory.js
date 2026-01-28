@@ -123,7 +123,7 @@ function handleWeatheredWeaponProgress() {
       }
       return;
     }
-    if (isCursedItem(item) && floor >= 1) {
+    if (isCursedItem(item) && floor >= UNLOCK_FLOOR) {
       const previousCount = item.cursedKillCount || 0;
       item.cursedKillCount = previousCount + 1;
       didUpdate = true;
