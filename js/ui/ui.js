@@ -77,12 +77,14 @@ function showRareEnemyPopup(enemyName, titleText = "レアモンスター出現�
   if (rareEnemyPopupTimer) {
     clearTimeout(rareEnemyPopupTimer);
   }
-
   rareEnemyPopupTimer = setTimeout(() => {
     hideRareEnemyPopup();
   }, 2200);
 }
 
+function showEventPopup(message, titleText = "イベント発生") {
+  showRareEnemyPopup(message, titleText);
+}
 if (rareEnemyPopupEl) {
   rareEnemyPopupEl.addEventListener("click", () => {
     if (rareEnemyPopupTimer) {
@@ -92,7 +94,7 @@ if (rareEnemyPopupEl) {
     hideRareEnemyPopup();
   });
 }
-
+window.showEventPopup = showEventPopup;
 function updateUI() {
   floorEl.textContent = floor;
   playerHpEl.textContent = `${player.hp}/${calcMaxHp()}`;

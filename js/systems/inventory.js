@@ -40,6 +40,107 @@ let discardThresholds = { ...discardThresholdDefaults };
 let currentInventoryTab = "equipment";
 let inventorySortEnabled = false;
 
+// ユニーク武器
+const WEATHERED_KILL_THRESHOLD = 5;
+const CURSED_KILL_STEP = 100;
+
+function isWeatheredItem(item) {
+  return Boolean(item?.isWeathered);
+}
+
+function isCursedItem(item) {
+  return Boolean(item?.isCursed);
+}
+
+function isDualWieldRestrictedItem(item) {
+  return isWeatheredItem(item) || isCursedItem(item);
+}
+
+function enforceRestrictedSingleWeapon() {
+  if (
+    isDualWieldRestrictedItem(player.weapon) ||
+    isDualWieldRestrictedItem(player.weapon2)
+  ) {
+    if (player.weapon2) {
+      player.weapon2 = null;
+      log("⚠️ 風化したアイテムは二刀流と併用できない。");
+    }
+  }
+}
+
+function getCursedStatLabel(stat) {
+  switch (stat) {
+    case "power":
+      return "ちから";
+    case "vitality":
+      return "たいりょく";
+    case "agility":
+      return "すばやさ";
+    default:
+      return "";
+  }
+}
+
+function transformToCursedItem(item) {
+  item.isWeathered = false;
+  item.isCursed = true;
+  if (item.cursedName) {
+    item.name = item.cursedName;
+  }
+  log(`⚠️ ${item.name}が禍々しく変化した。`);
+}
+
+function incrementCursedItemStat(item) {
+  const stats = ["power", "vitality", "agility"];
+  const targetStat =
+    item.cursedStat === "random"
+      ? stats[Math.floor(Math.random() * stats.length)]
+      : item.cursedStat;
+  if (!stats.includes(targetStat)) return;
+  item.baseBonus = {
+    power: Number(item.baseBonus?.power) || 0,
+    vitality: Number(item.baseBonus?.vitality) || 0,
+    agility: Number(item.baseBonus?.agility) || 0,
+  };
+  item.baseBonus[targetStat] += 1;
+  log(`🔮 ${item.name}の${getCursedStatLabel(targetStat)}が1上がった。`);
+}
+
+function handleWeatheredWeaponProgress() {
+  const equippedItems = [player.weapon, player.weapon2];
+  let didUpdate = false;
+  equippedItems.forEach((item) => {
+    if (!item) return;
+    if (isWeatheredItem(item)) {
+      item.killCount = (item.killCount || 0) + 1;
+      didUpdate = true;
+      if (!item.hintLogged) {
+        log("装備して敵を倒していると・・・");
+        item.hintLogged = true;
+      }
+      if (item.killCount >= WEATHERED_KILL_THRESHOLD) {
+        transformToCursedItem(item);
+        didUpdate = true;
+      }
+      return;
+    }
+    if (isCursedItem(item) && floor >= UNLOCK_FLOOR) {
+      const previousCount = item.cursedKillCount || 0;
+      item.cursedKillCount = previousCount + 1;
+      didUpdate = true;
+      if (
+        Math.floor(previousCount / CURSED_KILL_STEP) <
+        Math.floor(item.cursedKillCount / CURSED_KILL_STEP)
+      ) {
+        incrementCursedItemStat(item);
+        didUpdate = true;
+      }
+    }
+  });
+  if (didUpdate && typeof markInventoryDirty === "function") {
+    markInventoryDirty();
+  }
+}
 function toggleInventorySort() {
   inventorySortEnabled = !inventorySortEnabled;
   log(inventorySortEnabled ? "📊 能力値でソート" : "📊 入手順でソート");
@@ -234,8 +335,10 @@ function renderEquipmentItems() {
   if (equipmentItems.length > 0) {
     hasContent = true;
   }
-  const canUseDualWield =
+  const hasDualWieldSkill =
     typeof getSkillLevel === "function" && getSkillLevel("dual_wield") > 0;
+  const canUseDualWield =
+    hasDualWieldSkill && !isDualWieldRestrictedItem(player.weapon);
   equipmentItems.forEach(({ item, index, isAccessory }) => {
     const isEquipped =
       player.weapon === item ||
@@ -272,7 +375,7 @@ function renderEquipmentItems() {
 
     const equipButtons = isEquipped
       ? ""
-      : canUseDualWield
+      : canUseDualWield && !isDualWieldRestrictedItem(item)
         ? `<button onclick="equip(${index}, 'primary')">装備1</button>
            <button onclick="equip(${index}, 'secondary')">装備2</button>`
         : `<button onclick="equip(${index})">装備</button>`;
@@ -596,6 +699,7 @@ function discardWeakerEquipment() {
 window.discardWeakerEquipment = discardWeakerEquipment;
 window.openDiscardWeakScreen = openDiscardWeakScreen;
 window.closeDiscardWeakScreen = closeDiscardWeakScreen;
+window.handleWeatheredWeaponProgress = handleWeatheredWeaponProgress;
 /* =====================
    装備
    ★重要：player.statusを直接増減しない！
@@ -612,12 +716,27 @@ function equip(index, slot = "primary") {
     refresh();
     return;
   }
+  const hasDualWieldSkill =
+    typeof getSkillLevel === "function" && getSkillLevel("dual_wield") > 0;
+  if (
+    slot === "secondary" &&
+    (isDualWieldRestrictedItem(item) ||
+      isDualWieldRestrictedItem(player.weapon))
+  ) {
+    log("⚠️ 風化したアイテムは二刀流と併用できない。");
+    return;
+  }
   const prevMaxHp = calcMaxHp();
+  if (isDualWieldRestrictedItem(item) && hasDualWieldSkill && player.weapon2) {
+    player.weapon2 = null;
+    log("⚠️ 風化したアイテムは二刀流と併用できない。");
+  }
   if (slot === "secondary") {
     player.weapon2 = item;
   } else {
     player.weapon = item;
   }
+  enforceRestrictedSingleWeapon();
 
   // 最大HPが変わる可能性があるので安全に丸める
   const nextMaxHp = calcMaxHp();

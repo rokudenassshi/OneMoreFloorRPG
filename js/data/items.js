@@ -40,6 +40,54 @@
     ],
     isLocked: true,
   };
+  // ユニーク武器
+  const WEATHERED_ITEM_TEMPLATES = [
+    {
+      id: "weathered_axe",
+      name: "風化した斧",
+      type: "axe",
+      cursedName: "呪われた大斧",
+      cursedStat: "power",
+    },
+    {
+      id: "weathered_twin_blades",
+      name: "風化した双剣",
+      type: "dagger",
+      cursedName: "呪われた双剣",
+      cursedStat: "agility",
+    },
+    {
+      id: "weathered_great_shield",
+      name: "風化した大盾",
+      type: "shield",
+      cursedName: "呪われた大盾",
+      cursedStat: "vitality",
+    },
+    {
+      id: "weathered_sword",
+      name: "風化した剣",
+      type: "sword",
+      cursedName: "呪われた剣",
+      cursedStat: "random",
+    },
+  ];
+  function createWeatheredItem(template) {
+    return {
+      id: template.id,
+      name: template.name,
+      type: template.type,
+      baseBonus: { power: 0, vitality: 0, agility: 0 },
+      optionBonus: { power: 0, vitality: 0, agility: 0 },
+      specialOptions: [],
+      isWeathered: true,
+      isCursed: false,
+      cursedName: template.cursedName,
+      cursedStat: template.cursedStat,
+      killCount: 0,
+      cursedKillCount: 0,
+      hintLogged: false,
+    };
+  }
   // ★あなたの「二つ名の量」は減らさない：ここは今のTITLE_BY_TIERをそのまま貼る
   /* ========= 二つ名（tier別・倍率付き） ========= */
   const TITLE_BY_TIER = {
@@ -583,5 +631,7 @@
     createLootItemForDrop,
     createAccessoryForDrop,
     PROOF_OF_SLAYING,
+    WEATHERED_ITEM_TEMPLATES,
+    createWeatheredItem,
   };
 })();

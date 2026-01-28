@@ -9,7 +9,7 @@ const player = {
   lastTeleportedFloor: null,
 
   status: {
-    power: 10,
+    power: 1000,
     vitality: 10,
     agility: 10,
   },
@@ -22,6 +22,9 @@ const player = {
   accessory: null,
   autoAssignExpSkillPoints: false,
   autoAssignStatTarget: null,
+  weatheredWeaponUnlocked: false,
+  weatheredWeaponReceived: false,
+  weatheredWeaponHintShown: false,
 };
 
 function calcMaxHp() {
@@ -277,8 +280,12 @@ function getBaseStatus() {
 }
 
 function getEquipmentBonus() {
+  const isDualWieldRestrictedItem = (item) =>
+    Boolean(item?.isWeathered) || Boolean(item?.isCursed);
   const canUseDualWield =
-    typeof getSkillLevel === "function" && getSkillLevel("dual_wield") > 0;
+    typeof getSkillLevel === "function" &&
+    getSkillLevel("dual_wield") > 0 &&
+    !isDualWieldRestrictedItem(player.weapon);
 
   const normalizeBonus = (bonus) => ({
     power: Number(bonus?.power) || 0,
@@ -316,9 +323,13 @@ function getEquipmentBonus() {
   };
 }
 function getEquipmentSpecialOptions() {
+  const isDualWieldRestrictedItem = (item) =>
+    Boolean(item?.isWeathered) || Boolean(item?.isCursed);
   const options = [];
   const canUseDualWield =
-    typeof getSkillLevel === "function" && getSkillLevel("dual_wield") > 0;
+    typeof getSkillLevel === "function" &&
+    getSkillLevel("dual_wield") > 0 &&
+    !isDualWieldRestrictedItem(player.weapon);
   if (player.weapon && Array.isArray(player.weapon.specialOptions)) {
     options.push(...player.weapon.specialOptions);
   }

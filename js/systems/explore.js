@@ -9,6 +9,7 @@ function goToBase() {
   inventoryEl.style.display = "none";
 
   log("🏠 拠点に戻った");
+  handleBaseArrival();
   refresh();
 }
 
@@ -20,13 +21,17 @@ function move(dir) {
     Math.min(MAX_FLOOR, floor),
   );
   awardStatPointUnlock();
+  handleBaseArrival();
   // 拠点（0階層）
   if (floor === 0) {
     goToBase();
     autoSave();
     return;
   }
-  // 50階層ごとの節目：必ずHP全回復（ボス階層は勝利時に表示）
+
+  if ((floor = WEATHERED_EVENT_FLOOR)) {
+    handleFloorArrival();
+  } // 50階層ごとの節目：必ずHP全回復（ボス階層は勝利時に表示）
   if (floor % 50 === 0 && !isBossFloor(floor)) {
     log("🔥静かに炎が燈っている。ここでは休めそうだ。");
     autoSave();
@@ -133,9 +138,42 @@ function teleportToFloor() {
   floor = target;
   player.lastTeleportedFloor = target;
   log(`✨ ${target}階層へ転移した。`);
+  if (floor === 0) {
+    handleBaseArrival();
+  }
   refresh();
   autoSave();
   closeTeleportModal();
 }
 
-function handleFloorArrival() {}
+function handleFloorArrival() {
+  if (floor >= WEATHERED_EVENT_FLOOR && !player.weatheredWeaponUnlocked) {
+    player.weatheredWeaponUnlocked = true;
+  }
+  if (floor === WEATHERED_EVENT_FLOOR && !player.weatheredWeaponHintShown) {
+    if (typeof showEventPopup === "function") {
+      showEventPopup("始まりの地に今一度戻ろう。");
+    }
+    player.weatheredWeaponHintShown = true;
+  }
+}
+
+function handleBaseArrival() {
+  if (
+    floor !== 0 ||
+    !player.weatheredWeaponUnlocked ||
+    player.weatheredWeaponReceived
+  ) {
+    return;
+  }
+  const templates = window.ItemGen?.WEATHERED_ITEM_TEMPLATES || [];
+  const createWeatheredItem = window.ItemGen?.createWeatheredItem;
+  if (typeof createWeatheredItem !== "function") return;
+  templates.forEach((template) => {
+    inventory.push(createWeatheredItem(template));
+  });
+  if (typeof showEventPopup === "function") {
+    showEventPopup("風化した武器を手に入れた。");
+  }
+  player.weatheredWeaponReceived = true;
+}
