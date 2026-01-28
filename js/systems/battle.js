@@ -17,7 +17,7 @@ function startBattle() {
     !isBrokenBlocked &&
     Math.random() < brokenEnemyRate + bonusRareRate;
   // レアモンスター
-  const baseRareRate = 0.02;
+  const baseRareRate = 1.02;
   const isRare =
     !isBroken && !isRareBlocked && Math.random() < baseRareRate + bonusRareRate;
   const rate = isBroken ? 2.5 : isRare ? 1.8 : 1;
@@ -216,16 +216,21 @@ function afterPlayerAction() {
     handleEnemyDefeat();
   } else {
     const specialEffects = getSpecialEffects();
+    const equipmentEffects = getEquipmentSpecialEffects();
     const selfDamageBoostRate = (specialEffects.selfDamageBoost || 0) / 100;
+    const hasSelfDamageBoostAccessory =
+      (equipmentEffects.selfDamageBoost || 0) > 0;
     if (selfDamageBoostRate > 0) {
-      const maxHp = calcMaxHp();
-      const selfDamage = Math.max(1, Math.floor(maxHp * 0.4));
-      player.hp = Math.max(0, player.hp - selfDamage);
-      log(`💥 HPを${selfDamage}消費`);
-      if (player.hp === 0) {
-        refresh();
-        gameOver();
-        return;
+      if (!(hasSelfDamageBoostAccessory && player.hp === 1)) {
+        const maxHp = calcMaxHp();
+        const selfDamage = Math.max(1, Math.floor(maxHp * 0.4));
+        player.hp = Math.max(0, player.hp - selfDamage);
+        log(`💥 HPを${selfDamage}消費`);
+        if (player.hp === 0) {
+          refresh();
+          gameOver();
+          return;
+        }
       }
     }
     enemyAttack();
