@@ -41,8 +41,8 @@ let currentInventoryTab = "equipment";
 let inventorySortEnabled = false;
 
 // ユニーク武器
-const WEATHERED_KILL_THRESHOLD = 500;
-const CURSED_KILL_STEP = 100;
+const WEATHERED_KILL_THRESHOLD = 100;
+const CURSED_KILL_STEP = 10;
 
 function isWeatheredItem(item) {
   return Boolean(item?.isWeathered);
