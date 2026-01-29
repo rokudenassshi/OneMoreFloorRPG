@@ -32,7 +32,7 @@
     bonus: { power: 0, vitality: 0, agility: 0 },
     specialOptions: [
       {
-        id: "exp_final_double",
+        id: "exp_final_ex",
         name: "経験値15倍",
         value: 15,
         describe: () => "獲得経験値が15倍",
@@ -457,19 +457,30 @@
 
   function pickSpecialOptions(count, { floor = 0, forAccessory = false } = {}) {
     if (count <= 0) return [];
+
     const pool = (window.SpecialOptionPool || [])
       .filter((option) => {
         if (!forAccessory) return true;
+
         const minFloor = Number(option.minFloor);
-        if (floor >= minFloor) {
-          return Number.isFinite(minFloor) && floor >= minFloor;
+        const hasMinFloor = Number.isFinite(minFloor);
+
+        // ★WEATHERED_EVENT_FLOOR 未満：通常のみ（minFloor無しのみ）
+        if (floor < WEATHERED_EVENT_FLOOR) {
+          return !hasMinFloor;
         }
-        return !Number.isFinite(minFloor) || floor >= minFloor;
+
+        // ★WEATHERED_EVENT_FLOOR 以降：改のみ（minFloor有り & floor >= minFloor）
+        return hasMinFloor && floor >= minFloor;
       })
       .slice();
+
+    if (pool.length === 0) return [];
+
     const shuffled = pool.sort(() => Math.random() - 0.5);
     const result = [];
     const pickCount = Math.min(count, shuffled.length);
+
     for (let i = 0; i < pickCount; i += 1) {
       const option = shuffled[i];
       const value = rollSpecialOptionValue(option, { floor, forAccessory });
@@ -484,8 +495,10 @@
         description: option.describe(value),
       });
     }
+
     return result;
   }
+
   //　効果二つアクセサリー
   function pickAccessoryOptionsWithDuplicates(
     count,

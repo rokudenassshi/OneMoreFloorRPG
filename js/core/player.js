@@ -387,7 +387,7 @@ function getEquipmentSpecialEffects() {
       case "exp_boost_plus":
         effects.expFinalMultiplier *= value || 1;
         break;
-      case "exp_final_double":
+      case "exp_final_ex":
         effects.expFinalMultiplier *= value || 1;
         break;
       case "rare_encounter":
@@ -446,6 +446,8 @@ function getSpecialEffects() {
       (skillEffects.rareEncounterBoost || 0),
     rareEncounterBlock: skillEffects.rareEncounterBlock || 0,
     brokenEncounterBlock: skillEffects.brokenEncounterBlock || 0,
+    rareEncounterPopupCut: skillEffects.rareEncounterPopupCut || 0,
+    brokenEncounterPopupCut: skillEffects.brokenEncounterPopupCut || 0,
     agilityAttackRate: skillEffects.agilityAttackRate || 0,
     vitalityAttackRate: skillEffects.vitalityAttackRate || 0,
     singleHitBoost: skillEffects.singleHitBoost || 0,

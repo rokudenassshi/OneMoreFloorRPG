@@ -314,7 +314,12 @@ function appendConsumableGroups(consumableGroups) {
 
 function renderEquipmentItems() {
   const consumableGroups = collectConsumableGroups();
-
+  const herbGroups = consumableGroups.filter(
+    (group) => group.item?.id === HERB_ITEM_TEMPLATE.id,
+  );
+  const otherConsumableGroups = consumableGroups.filter(
+    (group) => group.item?.id !== HERB_ITEM_TEMPLATE.id,
+  );
   const equipmentItems = [];
   inventory.forEach((item, index) => {
     if (item.kind === "consumable") {
@@ -418,10 +423,14 @@ ${equipButtons}
     });
   };
 
-  renderEquipmentEntries(equipmentItems.filter((entry) => entry.isEquipped));
-  if (consumableGroups.length > 0) {
-    appendConsumableGroups(consumableGroups);
+  if (herbGroups.length > 0) {
+    appendConsumableGroups(herbGroups);
   }
+  renderEquipmentEntries(equipmentItems.filter((entry) => entry.isEquipped));
+  if (otherConsumableGroups.length > 0) {
+    appendConsumableGroups(otherConsumableGroups);
+  }
+
   renderEquipmentEntries(equipmentItems.filter((entry) => !entry.isEquipped));
 }
 
@@ -957,12 +966,20 @@ function dropItem() {
   }
 
   if (enemy.isRare) {
-    const doubleEffectChance = floor >= WEATHERED_EVENT_FLOOR ? 0.0001 : 0;
+    const rareAccessoryDropRate = floor >= WEATHERED_EVENT_FLOOR ? 0.5 : 1;
+    if (Math.random() >= rareAccessoryDropRate) {
+      return;
+    }
+    const doubleEffectChance = floor >= WEATHERED_EVENT_FLOOR ? 0.0002 : 0;
     const optionCount = Math.random() < doubleEffectChance ? 2 : 1;
     const item = window.ItemGen.createAccessoryForDrop(floor, { optionCount });
     item.isRareDrop = true;
     inventory.push(item);
-    log(`🎁 ${item.name}を手に入れた`);
+    if (optionCount === 2) {
+      log(`🎁✨光り輝く装飾品 ${item.name}を手に入れた！`);
+    } else {
+      log(`🎁 ${item.name}を手に入れた`);
+    }
     if (
       typeof showRareEnemyPopup === "function" &&
       typeof item.name === "string" &&

@@ -10,6 +10,8 @@ function startBattle() {
   bonusRareRate = (specialEffects.rareEncounterBoost || 0) / 100;
   const isRareBlocked = (specialEffects.rareEncounterBlock || 0) > 0;
   const isBrokenBlocked = (specialEffects.brokenEncounterBlock || 0) > 0;
+  const isRarePopupCut = (specialEffects.rareEncounterPopupCut || 0) > 0;
+  const isBrokenPopupCut = (specialEffects.brokenEncounterPopupCut || 0) > 0;
   // ★壊れたエネミー（1001階層以降）
   const brokenEnemyRate = 0.01;
   const isBroken =
@@ -52,9 +54,9 @@ function startBattle() {
   battleButtons.style.display = "block";
 
   log(`⚔ ${enemy.name} があらわれた！`);
-  if (isBroken) {
+  if (isBroken && !isBrokenPopupCut) {
     showRareEnemyPopup(base.name, "★壊れたエネミーが出現した。");
-  } else if (isRare) {
+  } else if (isRare && !isRarePopupCut) {
     showRareEnemyPopup(base.name);
   }
   updateUI();
@@ -175,11 +177,12 @@ async function attack({ isExtraAttack = false } = {}) {
     if (recoverAmount > 0) {
       const overHealRate = specialEffects.lifeStealOverHealRate || 0;
       if (overHealRate > 0) {
-        const overHealAmount = Math.max(1, recoverAmount * overHealRate);
-        const maxHp = calcMaxHp();
-        const maxRecoverHp = maxHp + overHealAmount;
-        player.hp = Math.min(maxRecoverHp, player.hp + recoverAmount);
-        log(`🩸 血装衛でHPを${recoverAmount}回復`);
+        const overHealAmount = Math.max(
+          1,
+          Math.floor(recoverAmount * overHealRate),
+        );
+        player.hp = player.hp + overHealAmount;
+        log(`🩸 血装衛でHPを${overHealAmount}回復`);
       } else {
         const maxHp = calcMaxHp();
         player.hp = Math.min(maxHp, player.hp + recoverAmount);
@@ -192,7 +195,7 @@ async function attack({ isExtraAttack = false } = {}) {
         );
         if (extraDamage > 0) {
           enemy.hp -= extraDamage;
-          log(`🩸 血装撃ダメージ ${extraDamage}`);
+          log(`🩸 血装撃${extraDamage}ダメージ `);
         }
       }
     }

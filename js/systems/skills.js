@@ -60,6 +60,8 @@ function getSkillEffects() {
     rareEncounterBoost: 0,
     rareEncounterBlock: 0,
     brokenEncounterBlock: 0,
+    rareEncounterPopupCut: 0,
+    brokenEncounterPopupCut: 0,
     powerRate: 0,
     vitalityRate: 0,
     agilityRate: 0,
@@ -158,6 +160,12 @@ function renderSkillScreen() {
   }
   if (total.brokenEncounterBlock > 0) {
     summaryItems.push("<div>忍び足2</div>");
+  }
+  if (total.rareEncounterPopupCut > 0) {
+    summaryItems.push("<div>静寂の予兆</div>");
+  }
+  if (total.brokenEncounterPopupCut > 0) {
+    summaryItems.push("<div>静寂の予兆2</div>");
   }
   if (total.herbHealBoost > 0) {
     summaryItems.push(
