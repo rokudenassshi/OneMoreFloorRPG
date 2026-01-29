@@ -685,6 +685,7 @@
       kind: "accessory",
       name: getAccessoryName(specialOptions),
       specialOptions,
+      isLocked: specialOptions.length >= 2,
       bonus: { power: 0, vitality: 0, agility: 0 },
     };
   }

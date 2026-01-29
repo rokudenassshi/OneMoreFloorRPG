@@ -955,6 +955,18 @@ function dropItem() {
     item.isRareDrop = true;
     inventory.push(item);
     log(`🎁 ${item.name}を手に入れた`);
+    if (
+      typeof showRareEnemyPopup === "function" &&
+      typeof item.name === "string" &&
+      item.name.startsWith("神々しい")
+    ) {
+      showRareEnemyPopup(item.name, "神々しい装飾品を手に入れた！", {
+        autoClose: false,
+        allowOverlayClose: false,
+        showCloseButton: true,
+        hintText: "閉じるボタンで閉じる",
+      });
+    }
     return;
   }
   // 敵tierに合わせてアイテムtierを決める（±1くらい揺らす）
