@@ -171,19 +171,20 @@ async function attack() {
   // 吸血
   const lifeStealRate = (specialEffects.lifeSteal || 0) / 100;
   if (lifeStealRate > 0) {
-    const recoverAmount = Math.floor(total * lifeStealRate);
+    const recoverAmount = Math.max(1, Math.floor(total * lifeStealRate));
     if (recoverAmount > 0) {
       const overHealRate = specialEffects.lifeStealOverHealRate || 0;
       if (overHealRate > 0) {
-        const overHealAmount = Math.ceil(recoverAmount * overHealRate);
-        player.hp = player.hp + overHealAmount;
-        log(overHealAmount);
+        const overHealAmount = Math.max(1, recoverAmount * overHealRate);
+        const maxHp = calcMaxHp();
+        const maxRecoverHp = maxHp + overHealAmount;
+        player.hp = Math.min(maxRecoverHp, player.hp + recoverAmount);
+        log(`🩸 血装衛でHPを${recoverAmount}回復`);
       } else {
         const maxHp = calcMaxHp();
         player.hp = Math.min(maxHp, player.hp + recoverAmount);
+        log(`🩸 吸血でHPを${recoverAmount}回復`);
       }
-      log(player.hp);
-      log(`🩸 吸血でHPを${recoverAmount}回復`);
       const lifeStealDamageRate = specialEffects.lifeStealDamage || 0;
       if (lifeStealDamageRate > 0 && enemy) {
         const extraDamage = adjustDamageForEnemy(

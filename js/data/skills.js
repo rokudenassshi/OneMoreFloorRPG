@@ -246,12 +246,7 @@ const SKILLS = [
     maxLevel: 1,
     requiredPoints: 200,
     description: "吸収したHP分のダメージを与える",
-    exclusiveWith: [
-      "agility_attack",
-      "vitality_attack",
-      "dual_wield",
-      "blood_over_heal",
-    ],
+    exclusiveWith: ["agility_attack", "vitality_attack", "dual_wield"],
     effects: { lifeStealDamage: 1 },
   },
   {
@@ -259,13 +254,8 @@ const SKILLS = [
     name: "血装衛",
     maxLevel: 1,
     requiredPoints: 200,
-    description: "吸収したHPの半分だけ最大HPを超えて回復する",
-    exclusiveWith: [
-      "agility_attack",
-      "vitality_attack",
-      "blood_echo",
-      "dual_wield",
-    ],
+    description: "HP吸収の値が半分になるが最大HPを超えて回復する",
+    exclusiveWith: ["agility_attack", "vitality_attack", "dual_wield"],
     effects: { lifeStealOverHealRate: 0.5 },
   },
   {
