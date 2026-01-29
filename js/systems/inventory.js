@@ -271,7 +271,7 @@ function renderInventory() {
 
   renderEquipmentItems();
 }
-function renderConsumableItems() {
+function collectConsumableGroups() {
   const consumableGroups = [];
   const consumableMap = new Map();
 
@@ -290,6 +290,10 @@ function renderConsumableItems() {
     consumableMap.get(key).indices.push(index);
   });
 
+  return consumableGroups;
+}
+
+function appendConsumableGroups(consumableGroups) {
   consumableGroups.forEach((group) => {
     const { item, indices } = group;
     const div = document.createElement("div");
@@ -306,15 +310,10 @@ function renderConsumableItems() {
     `;
     itemListEl.appendChild(div);
   });
-  return consumableGroups.length;
 }
 
 function renderEquipmentItems() {
-  let hasContent = false;
-
-  if (renderConsumableItems() > 0) {
-    hasContent = true;
-  }
+  const consumableGroups = collectConsumableGroups();
 
   const equipmentItems = [];
   inventory.forEach((item, index) => {
@@ -325,67 +324,67 @@ function renderEquipmentItems() {
     if (isAccessory) {
       return;
     }
-    equipmentItems.push({ item, index, isAccessory });
-  });
-
-  if (equipmentItems.length === 0 && !hasContent) {
-    itemListEl.textContent = "アイテムなし";
-    return;
-  }
-  if (inventorySortEnabled) {
-    equipmentItems.sort((a, b) => {
-      return getItemScore(b.item) - getItemScore(a.item);
-    });
-  }
-
-  if (equipmentItems.length > 0) {
-    hasContent = true;
-  }
-  const hasDualWieldSkill =
-    typeof getSkillLevel === "function" && getSkillLevel("dual_wield") > 0;
-  const canUseDualWield =
-    hasDualWieldSkill && !isDualWieldRestrictedItem(player.weapon);
-  equipmentItems.forEach(({ item, index, isAccessory }) => {
     const isEquipped =
       player.weapon === item ||
       player.weapon2 === item ||
       player.accessory === item;
-    const isLocked = !!item.isLocked;
-    const lockMark = isLocked ? "🔒" : "";
-    const specialOptions = Array.isArray(item.specialOptions)
-      ? item.specialOptions
-      : [];
-    const specialLines = specialOptions
-      .map((option) => option.description || option.name)
-      .filter(Boolean);
+    equipmentItems.push({ item, index, isAccessory, isEquipped });
+  });
 
-    const totalBonus = getItemTotalBonus(item);
-    const totalParts = [];
-    if (totalBonus.power) totalParts.push(`ちから+${totalBonus.power}`);
-    if (totalBonus.vitality)
-      totalParts.push(`たいりょく+${totalBonus.vitality}`);
-    if (totalBonus.agility) totalParts.push(`すばやさ+${totalBonus.agility}`);
-    if (isAccessory && specialLines.length) {
-      totalParts.push(...specialLines);
+  if (equipmentItems.length === 0 && consumableGroups.length === 0) {
+    itemListEl.textContent = "アイテムなし";
+    return;
+  }
+  const sortEquipment = (a, b) => {
+    if (inventorySortEnabled) {
+      const scoreDiff = getItemScore(b.item) - getItemScore(a.item);
+      if (scoreDiff !== 0) return scoreDiff;
     }
+    return a.index - b.index;
+  };
+  equipmentItems.sort(sortEquipment);
+  const hasDualWieldSkill =
+    typeof getSkillLevel === "function" && getSkillLevel("dual_wield") > 0;
+  const canUseDualWield =
+    hasDualWieldSkill && !isDualWieldRestrictedItem(player.weapon);
+  const renderEquipmentEntries = (entries) => {
+    entries.forEach(({ item, index, isAccessory, isEquipped }) => {
+      const isLocked = !!item.isLocked;
+      const lockMark = isLocked ? "🔒" : "";
+      const specialOptions = Array.isArray(item.specialOptions)
+        ? item.specialOptions
+        : [];
+      const specialLines = specialOptions
+        .map((option) => option.description || option.name)
+        .filter(Boolean);
 
-    const equippedLabel =
-      player.weapon2 === item
-        ? "🟢[E2] "
-        : player.weapon === item
-          ? "🟢[E1] "
-          : player.accessory === item
-            ? "🟢[E] "
-            : "";
-    const div = document.createElement("div");
+      const totalBonus = getItemTotalBonus(item);
+      const totalParts = [];
+      if (totalBonus.power) totalParts.push(`ちから+${totalBonus.power}`);
+      if (totalBonus.vitality)
+        totalParts.push(`たいりょく+${totalBonus.vitality}`);
+      if (totalBonus.agility) totalParts.push(`すばやさ+${totalBonus.agility}`);
+      if (isAccessory && specialLines.length) {
+        totalParts.push(...specialLines);
+      }
 
-    const equipButtons = isEquipped
-      ? ""
-      : canUseDualWield && !isDualWieldRestrictedItem(item)
-        ? `<button onclick="equip(${index}, 'primary')">装備1</button>
+      const equippedLabel =
+        player.weapon2 === item
+          ? "🟢[E2] "
+          : player.weapon === item
+            ? "🟢[E1] "
+            : player.accessory === item
+              ? "🟢[E] "
+              : "";
+      const div = document.createElement("div");
+
+      const equipButtons = isEquipped
+        ? ""
+        : canUseDualWield && !isDualWieldRestrictedItem(item)
+          ? `<button onclick="equip(${index}, 'primary')">装備1</button>
            <button onclick="equip(${index}, 'secondary')">装備2</button>`
-        : `<button onclick="equip(${index})">装備</button>`;
-    div.innerHTML = `
+          : `<button onclick="equip(${index})">装備</button>`;
+      div.innerHTML = `
       <div>
         ${equippedLabel}
         ${lockMark}${item.name}
@@ -415,8 +414,15 @@ ${equipButtons}
       <hr>
     `;
 
-    itemListEl.appendChild(div);
-  });
+      itemListEl.appendChild(div);
+    });
+  };
+
+  renderEquipmentEntries(equipmentItems.filter((entry) => entry.isEquipped));
+  if (consumableGroups.length > 0) {
+    appendConsumableGroups(consumableGroups);
+  }
+  renderEquipmentEntries(equipmentItems.filter((entry) => !entry.isEquipped));
 }
 
 function renderAccessoryItems() {
@@ -426,7 +432,11 @@ function renderAccessoryItems() {
     if (item.kind !== "accessory") {
       return;
     }
-    accessoryItems.push({ item, index, isAccessory: true });
+    const isEquipped =
+      player.weapon === item ||
+      player.weapon2 === item ||
+      player.accessory === item;
+    accessoryItems.push({ item, index, isAccessory: true, isEquipped });
   });
 
   if (accessoryItems.length === 0) {
@@ -455,8 +465,11 @@ function renderAccessoryItems() {
     return 0;
   }
 
-  if (inventorySortEnabled) {
-    accessoryItems.sort((a, b) => {
+  accessoryItems.sort((a, b) => {
+    if (a.isEquipped !== b.isEquipped) {
+      return a.isEquipped ? -1 : 1;
+    }
+    if (inventorySortEnabled) {
       // 1) sortKey 昇順
       const skA = getAccessorySortKey(a.item);
       const skB = getAccessorySortKey(b.item);
@@ -466,17 +479,12 @@ function renderAccessoryItems() {
       const vA = getAccessoryAbilityValue(a.item);
       const vB = getAccessoryAbilityValue(b.item);
       if (vA !== vB) return vB - vA;
+    }
+    // 3) 最後に安定化（元の並び）
+    return a.index - b.index;
+  });
 
-      // 3) 最後に安定化（元の並び）
-      return a.index - b.index;
-    });
-  }
-
-  accessoryItems.forEach(({ item, index, isAccessory }) => {
-    const isEquipped =
-      player.weapon === item ||
-      player.weapon2 === item ||
-      player.accessory === item;
+  accessoryItems.forEach(({ item, index, isAccessory, isEquipped }) => {
     const isLocked = !!item.isLocked;
     const lockMark = isLocked ? "🔒" : "";
     const specialOptions = Array.isArray(item.specialOptions)
