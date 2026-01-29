@@ -117,7 +117,7 @@ async function attack() {
 
     const boostedBaseHitAtk = Math.max(
       1,
-      Math.floor(hitAtk * selfDamageMultiplier),
+      Math.floor(baseHitAtk * selfDamageMultiplier),
     );
     const boostedHitAtk = Math.max(
       1,
@@ -147,7 +147,6 @@ async function attack() {
     // ---- ログは必要な部分だけ作る（配列に全ヒット分溜めない）----
     const inHead = i < SHOW_HEAD;
     const inTail = i >= hits - SHOW_TAIL;
-
     if (!shouldSummarize || inHead || inTail) {
       const comboLog =
         comboBoostRate > 0 && comboBonusDamage > 0
