@@ -87,10 +87,17 @@ function getCursedStatLabel(stat) {
 }
 
 function transformToCursedItem(item) {
+  const originalName = item.name;
   item.isWeathered = false;
   item.isCursed = true;
-  showEventPopup(` ${item.name}が${item.cursedName}に変化した。`);
   item.name = item.cursedName;
+  showEventPopup(
+    `${originalName}が${item.cursedName}に禍々しく変化した。\n\n` +
+      `モット血ヲヨコセ。\n` +
+      `ツヨイ血ヲモットダ。\n` +
+      `オマエガ倒シタ数ダケ、\n` +
+      `我ハチカラヲ得ル。`,
+  );
 }
 
 function incrementCursedItemStat(item) {
