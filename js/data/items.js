@@ -461,6 +461,9 @@
       .filter((option) => {
         if (!forAccessory) return true;
         const minFloor = Number(option.minFloor);
+        if (floor >= minFloor) {
+          return Number.isFinite(minFloor) && floor >= minFloor;
+        }
         return !Number.isFinite(minFloor) || floor >= minFloor;
       })
       .slice();
@@ -486,12 +489,14 @@
   //　効果二つアクセサリー
   function pickAccessoryOptionsWithDuplicates(
     count,
-    { floor = 0, excludedIds = [] } = {},
+    { floor = 0, excludedIds = [], requireMinFloor = false } = {},
   ) {
     if (count <= 0) return [];
     const pool = (window.SpecialOptionPool || []).filter((option) => {
       if (excludedIds.includes(option.id)) return false;
       const minFloor = Number(option.minFloor);
+      // ★2効果用：minFloorが設定されているものだけに絞る
+      if (requireMinFloor && !Number.isFinite(minFloor)) return false;
       return !Number.isFinite(minFloor) || floor >= minFloor;
     });
     if (pool.length === 0) return [];
@@ -505,6 +510,7 @@
       result.push({
         id: option.id,
         name: option.name,
+        alias: option.alias,
         accessoryTypes: option.accessoryTypes,
         max: option.max,
         min: option.min,
@@ -515,6 +521,7 @@
     }
     return result;
   }
+
   function getAccessoryValueCap(option, floor = 0) {
     const max = Number(option.max);
     if (!Number.isFinite(max)) return null;
@@ -590,20 +597,65 @@
     const optionList = Array.isArray(options) ? options : [];
     const first = optionList[0];
     if (!first) return "装飾品";
+
     const suffixes = first.accessoryTypes;
-    const optionNames = optionList.map((option) => option.name).join("と");
-    const baseName = `${optionNames}の${pick(Math.random, suffixes)}`;
-    if (optionList.some((option) => hasAccessoryHighValue(option))) {
-      return `輝く${baseName}`;
-    }
-    return baseName;
+
+    const isAccessoryOptionShiny = (option, ratio = 0.8) => {
+      const maxValue = Number(option?.max);
+      const value = Number(option?.value);
+      if (!Number.isFinite(maxValue) || !Number.isFinite(value)) return false;
+      return value >= Math.ceil(maxValue * ratio);
+    };
+
+    const isMultiEffect = optionList.length >= 2;
+    const shinyCount = optionList.filter((o) =>
+      isAccessoryOptionShiny(o),
+    ).length;
+    const isAllShiny = isMultiEffect && shinyCount === optionList.length;
+
+    // ★ 表示名をここで分岐
+    const optionNames = optionList
+      .map((o) => {
+        const label = o.alias || o.name;
+        if (isAllShiny) {
+          // 神々しい場合は「輝く」を付けない
+          return label;
+        }
+        // 通常時のみ個別に「輝く」
+        return isAccessoryOptionShiny(o) ? `輝く${label}` : label;
+      })
+      .join("と");
+
+    const prefix = isAllShiny ? "神々しい" : "";
+    console.log(
+      "[DBG accessory name]",
+      optionList.map((o) => {
+        const max = Number(o.max);
+        const value = Number(o.value);
+        const threshold = Math.ceil(max * 0.8);
+        return {
+          id: o.id,
+          alias: o.alias,
+          value,
+          max,
+          threshold,
+          shiny: value >= threshold,
+        };
+      }),
+      { shinyCount, isAllShiny },
+    );
+    return `${prefix}${optionNames}の${pick(Math.random, suffixes)}`;
   }
+
   function createAccessoryForDrop(floor = 0, { optionCount = 1 } = {}) {
     let specialOptions = [];
     if (optionCount <= 1) {
       specialOptions = pickSpecialOptions(1, { floor, forAccessory: true });
     } else {
-      const primary = pickAccessoryOptionsWithDuplicates(1, { floor });
+      const primary = pickAccessoryOptionsWithDuplicates(1, {
+        floor,
+        requireMinFloor: true,
+      });
       const first = primary[0];
       const excludedIds =
         first?.id === "evade_boost" || first?.id === "evade_boost_plus"
@@ -612,6 +664,7 @@
       const secondary = pickAccessoryOptionsWithDuplicates(1, {
         floor,
         excludedIds,
+        requireMinFloor: true,
       });
       specialOptions = [...primary, ...secondary].slice(0, optionCount);
     }

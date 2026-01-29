@@ -359,6 +359,7 @@ function getEquipmentSpecialEffects() {
     vitalityRate: 0,
     agilityRate: 0,
     selfDamageBoost: 0,
+    attackAgainChance: 0,
   };
 
   getEquipmentSpecialOptions().forEach((option) => {
@@ -412,6 +413,9 @@ function getEquipmentSpecialEffects() {
       case "self_damage_boost":
       case "self_damage_boost_plus":
         effects.selfDamageBoost += value;
+        break;
+      case "attack_again":
+        effects.attackAgainChance += value;
         break;
       default:
         break;

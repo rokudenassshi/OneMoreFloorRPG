@@ -65,7 +65,7 @@ function adjustDamageForEnemy(rawDamage) {
   }
   return rawDamage;
 }
-async function attack() {
+async function attack({ isExtraAttack = false } = {}) {
   if (gameState !== "BATTLE") return;
 
   const atk = calcAttack();
@@ -197,7 +197,20 @@ async function attack() {
       }
     }
   }
+  if (enemy.hp <= 0) {
+    afterPlayerAction();
+    return;
+  }
 
+  const attackAgainChance = specialEffects.attackAgainChance || 0;
+  if (!isExtraAttack && attackAgainChance > 0) {
+    const roll = Math.random() * 100;
+    if (roll < attackAgainChance) {
+      log("⚔️ 追撃！");
+      await attack({ isExtraAttack: true });
+      return;
+    }
+  }
   refresh();
   afterPlayerAction();
 }
