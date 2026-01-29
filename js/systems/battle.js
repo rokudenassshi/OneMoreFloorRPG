@@ -171,11 +171,18 @@ async function attack() {
   // 吸血
   const lifeStealRate = (specialEffects.lifeSteal || 0) / 100;
   if (lifeStealRate > 0) {
-    const actualDamage = Math.min(total, enemyHpBefore);
-    const recoverAmount = Math.floor(actualDamage * lifeStealRate);
+    const recoverAmount = Math.floor(total * lifeStealRate);
     if (recoverAmount > 0) {
-      const maxHp = calcMaxHp();
-      player.hp = Math.min(maxHp, player.hp + recoverAmount);
+      const overHealRate = specialEffects.lifeStealOverHealRate || 0;
+      if (overHealRate > 0) {
+        const overHealAmount = Math.ceil(recoverAmount * overHealRate);
+        player.hp = player.hp + overHealAmount;
+        log(overHealAmount);
+      } else {
+        const maxHp = calcMaxHp();
+        player.hp = Math.min(maxHp, player.hp + recoverAmount);
+      }
+      log(player.hp);
       log(`🩸 吸血でHPを${recoverAmount}回復`);
       const lifeStealDamageRate = specialEffects.lifeStealDamage || 0;
       if (lifeStealDamageRate > 0 && enemy) {

@@ -430,6 +430,7 @@ function getSpecialEffects() {
     expFinalMultiplier: equipmentEffects.expFinalMultiplier || 1,
     lifeSteal: equipmentEffects.lifeSteal + (skillEffects.lifeSteal || 0),
     lifeStealDamage: skillEffects.lifeStealDamage || 0,
+    lifeStealOverHealRate: skillEffects.lifeStealOverHealRate || 0,
     reflect:
       equipmentEffects.reflect + (skillEffects.reflect || 0) + reflectBoost,
     evadeBoost: equipmentEffects.evadeBoost + (skillEffects.evadeBoost || 0),
