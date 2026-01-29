@@ -949,7 +949,9 @@ function dropItem() {
   }
 
   if (enemy.isRare) {
-    const item = window.ItemGen.createAccessoryForDrop(floor);
+    const doubleEffectChance = floor >= WEATHERED_EVENT_FLOOR ? 0.0001 : 0;
+    const optionCount = Math.random() < doubleEffectChance ? 2 : 1;
+    const item = window.ItemGen.createAccessoryForDrop(floor, { optionCount });
     item.isRareDrop = true;
     inventory.push(item);
     log(`🎁 ${item.name}を手に入れた`);

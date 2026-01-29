@@ -33,9 +33,9 @@
     specialOptions: [
       {
         id: "exp_final_double",
-        name: "経験値5倍",
-        value: 5,
-        description: "獲得経験値が5倍",
+        name: "経験値15倍",
+        value: 15,
+        describe: () => "獲得経験値が15倍",
       },
     ],
     isLocked: true,
@@ -457,7 +457,13 @@
 
   function pickSpecialOptions(count, { floor = 0, forAccessory = false } = {}) {
     if (count <= 0) return [];
-    const pool = (window.SpecialOptionPool || []).slice();
+    const pool = (window.SpecialOptionPool || [])
+      .filter((option) => {
+        if (!forAccessory) return true;
+        const minFloor = Number(option.minFloor);
+        return !Number.isFinite(minFloor) || floor >= minFloor;
+      })
+      .slice();
     const shuffled = pool.sort(() => Math.random() - 0.5);
     const result = [];
     const pickCount = Math.min(count, shuffled.length);
@@ -471,12 +477,44 @@
         max: option.max,
         min: option.min,
         value,
+        describe: option.describe,
         description: option.describe(value),
       });
     }
     return result;
   }
-
+  //　効果二つアクセサリー
+  function pickAccessoryOptionsWithDuplicates(
+    count,
+    { floor = 0, excludedIds = [] } = {},
+  ) {
+    if (count <= 0) return [];
+    const pool = (window.SpecialOptionPool || []).filter((option) => {
+      if (excludedIds.includes(option.id)) return false;
+      const minFloor = Number(option.minFloor);
+      return !Number.isFinite(minFloor) || floor >= minFloor;
+    });
+    if (pool.length === 0) return [];
+    const result = [];
+    for (let i = 0; i < count; i += 1) {
+      const option = pool[Math.floor(Math.random() * pool.length)];
+      const value = rollSpecialOptionValue(option, {
+        floor,
+        forAccessory: true,
+      });
+      result.push({
+        id: option.id,
+        name: option.name,
+        accessoryTypes: option.accessoryTypes,
+        max: option.max,
+        min: option.min,
+        value,
+        describe: option.describe,
+        description: option.describe(value),
+      });
+    }
+    return result;
+  }
   function getAccessoryValueCap(option, floor = 0) {
     const max = Number(option.max);
     if (!Number.isFinite(max)) return null;
@@ -539,31 +577,61 @@
     if (!Number.isFinite(cap)) return value;
     return Math.min(value, cap);
   }
-  function getAccessoryName(option, floor = 0) {
-    const suffixes = option.accessoryTypes;
-    const baseName = `${option.name}の${pick(Math.random, suffixes)}`;
+  function hasAccessoryHighValue(option) {
     const maxValue = Number(option.max);
     const currentValue = Number(option.value);
-    if (
+    return (
       Number.isFinite(maxValue) &&
       Number.isFinite(currentValue) &&
       currentValue >= Math.ceil(maxValue * 0.8)
-    ) {
+    );
+  }
+  function getAccessoryName(options) {
+    const optionList = Array.isArray(options) ? options : [];
+    const first = optionList[0];
+    if (!first) return "装飾品";
+    const suffixes = first.accessoryTypes;
+    const optionNames = optionList.map((option) => option.name).join("と");
+    const baseName = `${optionNames}の${pick(Math.random, suffixes)}`;
+    if (optionList.some((option) => hasAccessoryHighValue(option))) {
       return `輝く${baseName}`;
     }
     return baseName;
   }
-  function createAccessoryForDrop(floor = 0) {
-    const specialOptions = pickSpecialOptions(1, { floor, forAccessory: true });
-    const option = specialOptions[0];
-    if (option) {
-      option.value = capAccessoryOptionValue(option, option.value, floor);
+  function createAccessoryForDrop(floor = 0, { optionCount = 1 } = {}) {
+    let specialOptions = [];
+    if (optionCount <= 1) {
+      specialOptions = pickSpecialOptions(1, { floor, forAccessory: true });
+    } else {
+      const primary = pickAccessoryOptionsWithDuplicates(1, { floor });
+      const first = primary[0];
+      const excludedIds =
+        first?.id === "evade_boost" || first?.id === "evade_boost_plus"
+          ? ["evade_boost", "evade_boost_plus"]
+          : [];
+      const secondary = pickAccessoryOptionsWithDuplicates(1, {
+        floor,
+        excludedIds,
+      });
+      specialOptions = [...primary, ...secondary].slice(0, optionCount);
     }
+    specialOptions = specialOptions.map((option) => {
+      const cappedValue = capAccessoryOptionValue(option, option.value, floor);
+      return {
+        ...option,
+        value: cappedValue,
+        description:
+          typeof option.describe === "function"
+            ? option.describe(cappedValue)
+            : (option.description ?? `${option.name}+${cappedValue}`),
+      };
+    });
+    const option = specialOptions[0];
     return {
       id: `acc_${option?.id || "unknown"}`,
       kind: "accessory",
-      name: getAccessoryName(option, floor),
-      specialOptions: option ? [option] : [],
+      name: getAccessoryName(specialOptions),
+      specialOptions,
       bonus: { power: 0, vitality: 0, agility: 0 },
     };
   }

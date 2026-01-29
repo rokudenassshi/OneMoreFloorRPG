@@ -177,6 +177,16 @@ async function attack() {
       const maxHp = calcMaxHp();
       player.hp = Math.min(maxHp, player.hp + recoverAmount);
       log(`🩸 吸血でHPを${recoverAmount}回復`);
+      const lifeStealDamageRate = specialEffects.lifeStealDamage || 0;
+      if (lifeStealDamageRate > 0 && enemy) {
+        const extraDamage = adjustDamageForEnemy(
+          Math.floor(recoverAmount * lifeStealDamageRate),
+        );
+        if (extraDamage > 0) {
+          enemy.hp -= extraDamage;
+          log(`🩸 血装撃ダメージ ${extraDamage}`);
+        }
+      }
     }
   }
 

@@ -224,6 +224,15 @@ const SKILLS = [
     effects: {},
   },
   {
+    id: "blood_echo",
+    name: "血装撃",
+    maxLevel: 1,
+    requiredPoints: 200,
+    description: "吸収したHP分のダメージを与える",
+    exclusiveWith: ["agility_attack", "vitality_attack", "dual_wield"],
+    effects: { lifeStealDamage: 1 },
+  },
+  {
     id: "last_stand",
     name: "背水の一撃",
     maxLevel: 1,
