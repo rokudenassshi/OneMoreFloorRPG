@@ -47,6 +47,8 @@ function getSkillEffects() {
     herbBattleReward: 0,
     herbRevive: 0,
     lifeSteal: 0,
+    lifeStealDamage: 0,
+    lifeStealOverHealRate: 0,
     reflect: 0,
     reflectBoost: 0,
     evadeBoost: 0,
@@ -212,6 +214,12 @@ function renderSkillScreen() {
   }
   if (hasDualWield) {
     summaryItems.push("<div>二刀流</div>");
+  }
+  if (total.lifeStealDamage > 0) {
+    summaryItems.push("<div>血装撃</div>");
+  }
+  if (total.lifeStealOverHealRate > 0) {
+    summaryItems.push("<div>血装衛</div>");
   }
   if (total.singleHitBoost > 0) {
     summaryItems.push("<div>居合切り</div>");

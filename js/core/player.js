@@ -22,6 +22,9 @@ const player = {
   accessory: null,
   autoAssignExpSkillPoints: false,
   autoAssignStatTarget: null,
+  weatheredWeaponUnlocked: false,
+  weatheredWeaponReceived: false,
+  weatheredWeaponHintShown: false,
 };
 
 function calcMaxHp() {
@@ -100,7 +103,7 @@ function calcAttackCount() {
   );
 }
 
-// すばやさ：回避（上限20%）
+// すばやさ：回避
 function rollEvade() {
   // ★ ろく氏の攻撃は回避率1%固定
   if (typeof enemy !== "undefined" && enemy?.id === "boss_rokushi") {
@@ -277,8 +280,11 @@ function getBaseStatus() {
 }
 
 function getEquipmentBonus() {
+  const isDualWieldRestrictedItem = (item) => Boolean(item?.isWeathered);
   const canUseDualWield =
-    typeof getSkillLevel === "function" && getSkillLevel("dual_wield") > 0;
+    typeof getSkillLevel === "function" &&
+    getSkillLevel("dual_wield") > 0 &&
+    !isDualWieldRestrictedItem(player.weapon);
 
   const normalizeBonus = (bonus) => ({
     power: Number(bonus?.power) || 0,
@@ -316,9 +322,12 @@ function getEquipmentBonus() {
   };
 }
 function getEquipmentSpecialOptions() {
+  const isDualWieldRestrictedItem = (item) => Boolean(item?.isWeathered);
   const options = [];
   const canUseDualWield =
-    typeof getSkillLevel === "function" && getSkillLevel("dual_wield") > 0;
+    typeof getSkillLevel === "function" &&
+    getSkillLevel("dual_wield") > 0 &&
+    !isDualWieldRestrictedItem(player.weapon);
   if (player.weapon && Array.isArray(player.weapon.specialOptions)) {
     options.push(...player.weapon.specialOptions);
   }
@@ -356,39 +365,52 @@ function getEquipmentSpecialEffects() {
     const value = Number(option?.value) || 0;
     switch (option?.id) {
       case "life_steal":
+      case "life_steal_plus":
         effects.lifeSteal += value;
         break;
       case "damage_reflect":
+      case "damage_reflect_plus":
         effects.reflect += value;
         break;
       case "combo_boost":
+      case "combo_boost_plus":
         effects.comboBoost += value;
         break;
       case "evade_boost":
+      case "evade_boost_plus":
         effects.evadeBoost += value;
         break;
       case "exp_boost":
         effects.expBoost += value;
         break;
+      case "exp_boost_plus":
+        effects.expFinalMultiplier *= value || 1;
+        break;
       case "exp_final_double":
         effects.expFinalMultiplier *= value || 1;
         break;
       case "rare_encounter":
+      case "rare_encounter_plus":
         effects.rareEncounterBoost += value;
         break;
       case "min_hits":
+      case "min_hits_plus":
         effects.minHits += value;
         break;
       case "power_rate":
+      case "power_rate_plus":
         effects.powerRate += value / 100;
         break;
       case "vitality_rate":
+      case "vitality_rate_plus":
         effects.vitalityRate += value / 100;
         break;
       case "agility_rate":
+      case "agility_rate_plus":
         effects.agilityRate += value / 100;
         break;
       case "self_damage_boost":
+      case "self_damage_boost_plus":
         effects.selfDamageBoost += value;
         break;
       default:
@@ -407,6 +429,8 @@ function getSpecialEffects() {
     ...equipmentEffects,
     expFinalMultiplier: equipmentEffects.expFinalMultiplier || 1,
     lifeSteal: equipmentEffects.lifeSteal + (skillEffects.lifeSteal || 0),
+    lifeStealDamage: skillEffects.lifeStealDamage || 0,
+    lifeStealOverHealRate: skillEffects.lifeStealOverHealRate || 0,
     reflect:
       equipmentEffects.reflect + (skillEffects.reflect || 0) + reflectBoost,
     evadeBoost: equipmentEffects.evadeBoost + (skillEffects.evadeBoost || 0),

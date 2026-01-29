@@ -78,6 +78,10 @@ async function attack() {
   const lastStandBoostRate = specialEffects.lastStandAttackBoost || 0;
   const decayBase = specialEffects.agilityAttackRate > 0 ? 0.8 : 0.6;
 
+  const selfDamageMultiplier = 1 + selfDamageBoostRate;
+  const isRokushi = enemy?.id === "boss_rokushi";
+  const enemyDamageMultiplier = isRokushi ? 0.5 : 1;
+
   const singleHitMultiplier =
     hits === 1 && singleHitBoostRate > 0 ? 1 + singleHitBoostRate : 1;
   const lastStandMultiplier =
@@ -101,8 +105,9 @@ async function attack() {
   // Safariのクラッシュ対策：長いループは途中でyield
   const YIELD_EVERY = 300; // 端末が重いなら 300 でもOK
 
+  let decayMultiplier = 1;
   for (let i = 0; i < hits; i++) {
-    const decayMultiplier = Math.pow(decayBase, i);
+    if (i > 0) decayMultiplier *= decayBase;
     const baseHitAtk = Math.max(1, Math.floor(effectiveAtk * decayMultiplier));
 
     const hitAtk = Math.max(
@@ -112,7 +117,7 @@ async function attack() {
 
     const boostedBaseHitAtk = Math.max(
       1,
-      Math.floor(baseHitAtk * (1 + selfDamageBoostRate)),
+      Math.floor(baseHitAtk * selfDamageMultiplier),
     );
     const boostedHitAtk = Math.max(
       1,
@@ -120,13 +125,20 @@ async function attack() {
     );
 
     const damageRoll = Math.random();
-
-    const damage = adjustDamageForEnemy(
-      rollDamageWithRoll(boostedHitAtk, 0.3, damageRoll),
+    const rawDamage = rollDamageWithRoll(boostedHitAtk, 0.3, damageRoll);
+    const rawBaseDamage = rollDamageWithRoll(
+      boostedBaseHitAtk,
+      0.3,
+      damageRoll,
     );
-    const baseDamage = adjustDamageForEnemy(
-      rollDamageWithRoll(boostedBaseHitAtk, 0.3, damageRoll),
-    );
+    const damage =
+      enemyDamageMultiplier === 1
+        ? rawDamage
+        : Math.floor(rawDamage * enemyDamageMultiplier);
+    const baseDamage =
+      enemyDamageMultiplier === 1
+        ? rawBaseDamage
+        : Math.floor(rawBaseDamage * enemyDamageMultiplier);
     const comboBonusDamage = Math.max(0, damage - baseDamage);
 
     enemy.hp -= damage;
@@ -135,7 +147,6 @@ async function attack() {
     // ---- ログは必要な部分だけ作る（配列に全ヒット分溜めない）----
     const inHead = i < SHOW_HEAD;
     const inTail = i >= hits - SHOW_TAIL;
-
     if (!shouldSummarize || inHead || inTail) {
       const comboLog =
         comboBoostRate > 0 && comboBonusDamage > 0
@@ -160,12 +171,30 @@ async function attack() {
   // 吸血
   const lifeStealRate = (specialEffects.lifeSteal || 0) / 100;
   if (lifeStealRate > 0) {
-    const actualDamage = Math.min(total, enemyHpBefore);
-    const recoverAmount = Math.floor(actualDamage * lifeStealRate);
+    const recoverAmount = Math.max(1, Math.floor(total * lifeStealRate));
     if (recoverAmount > 0) {
-      const maxHp = calcMaxHp();
-      player.hp = Math.min(maxHp, player.hp + recoverAmount);
-      log(`🩸 吸血でHPを${recoverAmount}回復`);
+      const overHealRate = specialEffects.lifeStealOverHealRate || 0;
+      if (overHealRate > 0) {
+        const overHealAmount = Math.max(1, recoverAmount * overHealRate);
+        const maxHp = calcMaxHp();
+        const maxRecoverHp = maxHp + overHealAmount;
+        player.hp = Math.min(maxRecoverHp, player.hp + recoverAmount);
+        log(`🩸 血装衛でHPを${recoverAmount}回復`);
+      } else {
+        const maxHp = calcMaxHp();
+        player.hp = Math.min(maxHp, player.hp + recoverAmount);
+        log(`🩸 吸血でHPを${recoverAmount}回復`);
+      }
+      const lifeStealDamageRate = specialEffects.lifeStealDamage || 0;
+      if (lifeStealDamageRate > 0 && enemy) {
+        const extraDamage = adjustDamageForEnemy(
+          Math.floor(recoverAmount * lifeStealDamageRate),
+        );
+        if (extraDamage > 0) {
+          enemy.hp -= extraDamage;
+          log(`🩸 血装撃ダメージ ${extraDamage}`);
+        }
+      }
     }
   }
 
@@ -204,16 +233,21 @@ function afterPlayerAction() {
     handleEnemyDefeat();
   } else {
     const specialEffects = getSpecialEffects();
+    const equipmentEffects = getEquipmentSpecialEffects();
     const selfDamageBoostRate = (specialEffects.selfDamageBoost || 0) / 100;
+    const hasSelfDamageBoostAccessory =
+      (equipmentEffects.selfDamageBoost || 0) > 0;
     if (selfDamageBoostRate > 0) {
-      const maxHp = calcMaxHp();
-      const selfDamage = Math.max(1, Math.floor(maxHp * 0.4));
-      player.hp = Math.max(0, player.hp - selfDamage);
-      log(`💥 HPを${selfDamage}消費`);
-      if (player.hp === 0) {
-        refresh();
-        gameOver();
-        return;
+      if (!(hasSelfDamageBoostAccessory && player.hp === 1)) {
+        const maxHp = calcMaxHp();
+        const selfDamage = Math.max(1, Math.floor(maxHp * 0.4));
+        player.hp = Math.max(0, player.hp - selfDamage);
+        log(`💥 HPを${selfDamage}消費`);
+        if (player.hp === 0) {
+          refresh();
+          gameOver();
+          return;
+        }
       }
     }
     enemyAttack();
@@ -322,6 +356,9 @@ function endBattle({ grantHerbReward = true } = {}) {
 }
 function handleEnemyDefeat() {
   log(` ${enemy.name} を倒した！`);
+  if (typeof handleWeatheredWeaponProgress === "function") {
+    handleWeatheredWeaponProgress();
+  }
   gainExp(enemy.exp);
   dropItem();
   applyVictoryRecovery();

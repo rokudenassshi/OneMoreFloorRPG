@@ -89,6 +89,9 @@ function performAutoSave(options = {}) {
       unassignedPoints: player.unassignedPoints,
       skills: { ...player.skills },
       autoAssignExpSkillPoints: player.autoAssignExpSkillPoints,
+      weatheredWeaponUnlocked: player.weatheredWeaponUnlocked,
+      weatheredWeaponReceived: player.weatheredWeaponReceived,
+      weatheredWeaponHintShown: player.weatheredWeaponHintShown,
       weaponIndex,
       weapon2Index,
       accessoryIndex,
@@ -167,6 +170,15 @@ function loadAutoSave() {
   player.autoAssignExpSkillPoints = Boolean(
     savedPlayer.autoAssignExpSkillPoints,
   );
+  const savedWeatheredUnlocked =
+    typeof savedPlayer.weatheredWeaponUnlocked === "boolean"
+      ? savedPlayer.weatheredWeaponUnlocked
+      : player.maxReachedFloor >= WEATHERED_EVENT_FLOOR;
+  player.weatheredWeaponUnlocked = savedWeatheredUnlocked;
+  player.weatheredWeaponReceived = Boolean(savedPlayer.weatheredWeaponReceived);
+  player.weatheredWeaponHintShown = Boolean(
+    savedPlayer.weatheredWeaponHintShown,
+  );
 
   player.skills =
     savedPlayer.skills && typeof savedPlayer.skills === "object"
@@ -221,6 +233,12 @@ function loadAutoSave() {
     Number.isInteger(accessoryIndex) && inventory[accessoryIndex]
       ? inventory[accessoryIndex]
       : null;
+  if (player.weapon?.isWeathered) {
+    player.weapon2 = null;
+  }
+  if (player.weapon2?.isWeathered) {
+    player.weapon2 = null;
+  }
 
   const loadedHp = Number(savedPlayer.hp);
   const maxHp = calcMaxHp();

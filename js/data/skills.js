@@ -113,7 +113,13 @@ const SKILLS = [
     requiredPoints: 10,
     description:
       "ダメージ計算にすばやさを適用（ステータス値の70%で計算）、連続攻撃の衰退緩和",
-    exclusiveWith: ["vitality_attack", "last_stand", "dual_wield"],
+    exclusiveWith: [
+      "vitality_attack",
+      "last_stand",
+      "dual_wield",
+      "blood_echo",
+      "blood_over_heal",
+    ],
     effects: { agilityAttackRate: 0.7 },
   },
   {
@@ -158,7 +164,13 @@ const SKILLS = [
     maxLevel: 1,
     requiredPoints: 10,
     description: "ダメージ計算にたいりょくを適用（ステータス値の40%で計算）",
-    exclusiveWith: ["agility_attack", "last_stand", "dual_wield"],
+    exclusiveWith: [
+      "agility_attack",
+      "last_stand",
+      "dual_wield",
+      "blood_echo",
+      "blood_over_heal",
+    ],
     effects: { vitalityAttackRate: 0.4 },
   },
   {
@@ -220,8 +232,31 @@ const SKILLS = [
     maxLevel: 1,
     requiredPoints: 300,
     description: "アイテムを2つ装備できる",
-    exclusiveWith: ["agility_attack", "vitality_attack"],
+    exclusiveWith: [
+      "agility_attack",
+      "vitality_attack",
+      "blood_echo",
+      "blood_over_heal",
+    ],
     effects: {},
+  },
+  {
+    id: "blood_echo",
+    name: "血装撃",
+    maxLevel: 1,
+    requiredPoints: 200,
+    description: "吸収したHP分のダメージを与える",
+    exclusiveWith: ["agility_attack", "vitality_attack", "dual_wield"],
+    effects: { lifeStealDamage: 1 },
+  },
+  {
+    id: "blood_over_heal",
+    name: "血装衛",
+    maxLevel: 1,
+    requiredPoints: 200,
+    description: "HP吸収の値が半分になるが最大HPを超えて回復する",
+    exclusiveWith: ["agility_attack", "vitality_attack", "dual_wield"],
+    effects: { lifeStealOverHealRate: 0.5 },
   },
   {
     id: "last_stand",
