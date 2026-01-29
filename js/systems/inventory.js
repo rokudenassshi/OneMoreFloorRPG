@@ -35,7 +35,11 @@ const HERB_ITEM_TEMPLATE = {
 const HERB_BASE_MAX = 10;
 
 const discardThresholdsKey = "roguelike_discard_thresholds";
-const discardThresholdDefaults = { value: 0 };
+const discardThresholdDefaults = {
+  value: 0,
+  accessoryShinyOnly: false,
+  accessoryNone: false,
+};
 let discardThresholds = { ...discardThresholdDefaults };
 let currentInventoryTab = "equipment";
 let inventorySortEnabled = false;
@@ -610,10 +614,14 @@ function loadDiscardThresholds() {
     if (typeof data === "number") {
       discardThresholds = {
         value: normalizeDiscardThreshold(data),
+        accessoryShinyOnly: false,
+        accessoryNone: false,
       };
     } else if (typeof data?.value !== "undefined") {
       discardThresholds = {
         value: normalizeDiscardThreshold(data.value),
+        accessoryShinyOnly: Boolean(data?.accessoryShinyOnly),
+        accessoryNone: Boolean(data?.accessoryNone),
       };
     } else {
       const legacyValues = [
@@ -623,6 +631,8 @@ function loadDiscardThresholds() {
       ];
       discardThresholds = {
         value: Math.max(...legacyValues),
+        accessoryShinyOnly: false,
+        accessoryNone: false,
       };
     }
   } catch (error) {
@@ -637,11 +647,19 @@ function saveDiscardThresholds() {
 }
 function syncDiscardThresholdInputs() {
   discardCommonInputEl.value = discardThresholds.value;
+  if (discardAccessoryShinyOnlyEl) {
+    discardAccessoryShinyOnlyEl.checked = discardThresholds.accessoryShinyOnly;
+  }
+  if (discardAccessoryNoneEl) {
+    discardAccessoryNoneEl.checked = discardThresholds.accessoryNone;
+  }
 }
 
 function storeDiscardThresholdInputs() {
   discardThresholds = {
     value: normalizeDiscardThreshold(discardCommonInputEl.value),
+    accessoryShinyOnly: Boolean(discardAccessoryShinyOnlyEl?.checked),
+    accessoryNone: Boolean(discardAccessoryNoneEl?.checked),
   };
   syncDiscardThresholdInputs();
   saveDiscardThresholds();
@@ -896,6 +914,24 @@ function shouldPickupItem(item) {
     itemBonus.agility <= thresholds.value
   );
 }
+function isAccessoryOptionShiny(option, ratio = 0.8) {
+  const maxValue = Number(option?.max);
+  const value = Number(option?.value);
+  if (!Number.isFinite(maxValue) || !Number.isFinite(value)) return false;
+  return value >= Math.ceil(maxValue * ratio);
+}
+
+function shouldPickupAccessory(item) {
+  const thresholds = loadDiscardThresholds();
+  const optionList = Array.isArray(item?.specialOptions)
+    ? item.specialOptions
+    : [];
+  if (optionList.length >= 2) return true;
+  if (thresholds.accessoryNone) return false;
+  if (!thresholds.accessoryShinyOnly) return true;
+  if (optionList.length === 0) return false;
+  return isAccessoryOptionShiny(optionList[0]);
+}
 /* =====================
    ドロップ（敵ごとの drops から抽選）
    
@@ -974,6 +1010,10 @@ function dropItem() {
     const optionCount = Math.random() < doubleEffectChance ? 2 : 1;
     const item = window.ItemGen.createAccessoryForDrop(floor, { optionCount });
     item.isRareDrop = true;
+    if (!shouldPickupAccessory(item)) {
+      log(`⏭ ${item.name} は拾わなかった`);
+      return;
+    }
     inventory.push(item);
     if (optionCount === 2) {
       log(`🎁✨光り輝く装飾品 ${item.name}を手に入れた！`);

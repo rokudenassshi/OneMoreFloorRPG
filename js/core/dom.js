@@ -21,6 +21,10 @@ const inventoryTabButtons = Array.from(
 );
 const discardCommonInputEl = document.getElementById("discardCommonInput");
 const statusScreenEl = document.getElementById("statusScreen");
+const discardAccessoryShinyOnlyEl = document.getElementById(
+  "discardAccessoryShinyOnly",
+);
+const discardAccessoryNoneEl = document.getElementById("discardAccessoryNone");
 const statusContentEl = document.getElementById("statusContent");
 const statusVersionEl = document.getElementById("statusVersion");
 const skillScreenEl = document.getElementById("skillScreen");

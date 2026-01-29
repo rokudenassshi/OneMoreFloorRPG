@@ -272,7 +272,7 @@ const SKILLS = [
     name: "血装衛",
     maxLevel: 1,
     requiredPoints: 200,
-    description: "HP吸収の値が50%に減少するが最大HPを超えて回復する",
+    description: "最大HPを超えてHPを吸収する※吸収するHPの値は50%で計算される",
     exclusiveWith: ["agility_attack", "vitality_attack", "dual_wield"],
     effects: { lifeStealOverHealRate: 0.5 },
   },

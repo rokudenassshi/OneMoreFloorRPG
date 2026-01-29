@@ -446,7 +446,12 @@ status-actions {
   color: #fff;
   font-size: 14px;
 }
-
+.discard-weak-row input[type="checkbox"] {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+}
 .status {
   background: #222;
   padding: 10px;
