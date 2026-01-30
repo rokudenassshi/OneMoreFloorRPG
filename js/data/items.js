@@ -576,7 +576,7 @@
         }
       } else if (max > min) {
         const highRollChance = 0.1;
-        const highThreshold = Math.max(min, Math.ceil(max * 0.9));
+        const highThreshold = Math.max(min, Math.ceil(max * 0.75));
         if (Math.random() < highRollChance && highThreshold <= max) {
           value =
             Math.floor(Math.random() * (max - highThreshold + 1)) +
@@ -593,7 +593,7 @@
         const minFloor = Number(option.minFloor);
         if (Number.isFinite(minFloor) && Number.isFinite(max) && max > min) {
           const highThreshold = Math.max(min, Math.ceil(max * 0.5));
-          if (value >= highThreshold && Math.random() < 0.6) {
+          if (value >= highThreshold && Math.random() < 0.7) {
             const downgradeMax = Math.max(min, highThreshold - 1);
             value = Math.floor(Math.random() * (downgradeMax - min + 1)) + min;
           }

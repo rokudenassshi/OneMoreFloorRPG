@@ -55,11 +55,11 @@ function isWeatheredItem(item) {
 function isCursedItem(item) {
   return Boolean(item?.isCursed);
 }
-
+function isUniqueWeapon(item) {
+  return Boolean(item?.isUniqueWeapon);
+}
 function isDualWieldRestrictedItem(item) {
-  return (
-    Boolean(item?.isUniqueWeapon) || isWeatheredItem(item) || isCursedItem(item)
-  );
+  return isUniqueWeapon(item) || isWeatheredItem(item) || isCursedItem(item);
 }
 
 function enforceRestrictedSingleWeapon() {
@@ -405,7 +405,7 @@ function renderEquipmentItems() {
       </div>
       <div style="margin-top:6px; display:flex; gap:10px; flex-wrap:wrap;">     
             ${
-              isEquipped
+              isEquipped || isUniqueWeapon(item)
                 ? ""
                 : `<button onclick="toggleItemLock(${index})">${
                     isLocked ? "解除" : "ロック"
@@ -413,7 +413,7 @@ function renderEquipmentItems() {
             }
 ${equipButtons}
                     ${
-                      isEquipped
+                      isEquipped || isUniqueWeapon(item)
                         ? ""
                         : isLocked
                           ? `<button disabled title="ロック中は捨てられません">捨てる</button>`
@@ -500,6 +500,8 @@ function renderAccessoryItems() {
   accessoryItems.forEach(({ item, index, isAccessory, isEquipped }) => {
     const isLocked = !!item.isLocked;
     const lockMark = isLocked ? "🔒" : "";
+    const isGlowingAccessory =
+      Array.isArray(item.specialOptions) && item.specialOptions.length >= 2;
     const specialOptions = Array.isArray(item.specialOptions)
       ? item.specialOptions
       : [];
@@ -521,7 +523,9 @@ function renderAccessoryItems() {
     div.innerHTML = `
       <div>
         ${isEquipped ? "🟢[E] " : ""}
-        ${lockMark}${item.name}
+        ${lockMark}<span class="${
+          isGlowingAccessory ? "glowing-accessory" : ""
+        }">${item.name}</span>
       </div>
 
       <div style="margin-top:4px;">
@@ -530,7 +534,7 @@ function renderAccessoryItems() {
       </div>
       <div style="margin-top:6px; display:flex; gap:10px; flex-wrap:wrap;">
         ${
-          isEquipped
+          isEquipped || isUniqueWeapon(item)
             ? ""
             : `<button onclick="toggleItemLock(${index})">${
                 isLocked ? "解除" : "ロック"
@@ -671,7 +675,10 @@ function storeDiscardThresholdInputs() {
 function discardEquipment(index) {
   const item = inventory[index];
   if (!item || item.kind === "consumable") return;
-
+  if (isUniqueWeapon(item)) {
+    log("⚠️ ユニーク武器は捨てられない。");
+    return;
+  }
   const wasWeaponEquipped = player.weapon === item;
   const wasAccessoryEquipped = player.accessory === item;
   const prevMaxHp = wasWeaponEquipped ? calcMaxHp() : null;
@@ -709,7 +716,7 @@ function discardUnprotectedItems() {
       player.accessory === item;
     const isLocked = !!item.isLocked;
     const isHerb = item.id === HERB_ITEM_TEMPLATE.id;
-    if (isEquipped || isLocked || isHerb) continue;
+    if (isEquipped || isLocked || isHerb || isUniqueWeapon(item)) continue;
 
     inventory.splice(i, 1);
   }
@@ -1020,17 +1027,22 @@ function dropItem() {
     } else {
       log(`🎁 ${item.name}を手に入れた`);
     }
-    if (
-      typeof showRareEnemyPopup === "function" &&
-      typeof item.name === "string" &&
-      item.name.startsWith("神々しい")
-    ) {
-      showRareEnemyPopup(item.name, "神々しい装飾品を手に入れた！", {
-        autoClose: false,
-        allowOverlayClose: false,
-        showCloseButton: true,
-        hintText: "閉じるボタンで閉じる",
-      });
+    if (typeof showRareEnemyPopup === "function") {
+      if (typeof item.name === "string" && item.name.startsWith("神々しい")) {
+        showRareEnemyPopup(item.name, "神々しい装飾品を手に入れた！", {
+          autoClose: false,
+          allowOverlayClose: false,
+          showCloseButton: true,
+          hintText: "閉じるボタンで閉じる",
+        });
+      } else if (optionCount === 2) {
+        showRareEnemyPopup(item.name, "光り輝く装飾品を手に入れた！", {
+          autoClose: false,
+          allowOverlayClose: false,
+          showCloseButton: true,
+          hintText: "閉じるボタンで閉じる",
+        });
+      }
     }
     return;
   }

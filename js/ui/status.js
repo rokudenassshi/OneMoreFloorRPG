@@ -217,7 +217,15 @@ function renderStatus() {
   const nextExp = calcNextExp() - player.exp;
   const weaponName = player.weapon ? `${player.weapon.name}` : "なし";
   const weapon2Name = player.weapon2 ? `${player.weapon2.name}` : "なし";
-  const accessoryName = player.accessory ? `${player.accessory.name}` : "なし";
+  const isGlowingAccessory =
+    player.accessory &&
+    Array.isArray(player.accessory.specialOptions) &&
+    player.accessory.specialOptions.length >= 2;
+  const accessoryName = player.accessory
+    ? isGlowingAccessory
+      ? `<span class="glowing-accessory">${player.accessory.name}</span>`
+      : `${player.accessory.name}`
+    : "なし";
   statusContentEl.innerHTML = `
     <div>記録：${player.maxReachedFloor}階</div>
     <div>Lv：${player.level}</div>

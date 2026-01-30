@@ -101,6 +101,10 @@ body.screen-scrollable {
   font-size: 14px;
 }
 
+.glowing-accessory {
+  color: #ffd966;
+  text-shadow: 0 0 6px rgba(255, 217, 102, 0.45);
+}
 .rare-popup {
   position: absolute;
   inset: 0;
