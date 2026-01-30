@@ -1,4 +1,39 @@
+const PENDING_IMPORT_KEY = "omf_pending_import_v1";
+
+function applyPendingImportIfAny() {
+  const payload = localStorage.getItem(PENDING_IMPORT_KEY);
+  if (!payload) return;
+
+  try {
+    const parsed = JSON.parse(payload);
+    const storage = parsed?.storage;
+
+    if (!storage || typeof storage !== "object") {
+      localStorage.removeItem(PENDING_IMPORT_KEY);
+      return;
+    }
+
+    // ここで確実に上書き
+    localStorage.clear();
+    for (const [k, v] of Object.entries(storage)) {
+      if (typeof k !== "string") continue;
+      localStorage.setItem(k, v == null ? "" : String(v));
+    }
+  } catch (e) {
+    // 壊れてたら無視
+  } finally {
+    // clearで消えてる可能性があるので最後にremove
+    try {
+      localStorage.removeItem(PENDING_IMPORT_KEY);
+    } catch (e) {}
+  }
+}
+
+applyPendingImportIfAny();
+
+// ★この行は「applyPendingImportIfAny() の後」にする
 const hasAutoSave = loadAutoSave();
+
 const URL_ITEM_GIFT_PARAM = "gift";
 const URL_ITEM_GIFT_CODE = "rokudemonai";
 const URL_ITEM_GIFT_STORAGE_KEY = "11";
