@@ -249,7 +249,7 @@ const SKILLS = [
     name: "二刀流",
     maxLevel: 1,
     requiredPoints: 300,
-    description: "アイテムを2つ装備できる",
+    description: "アイテムを2つ装備できる※装備2のステータスは半分になる",
     exclusiveWith: [
       "agility_attack",
       "vitality_attack",

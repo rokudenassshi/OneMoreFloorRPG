@@ -311,9 +311,14 @@ function getEquipmentBonus() {
   };
 
   const primaryBonus = getWeaponBonus(player.weapon);
-  const secondaryBonus = canUseDualWield
+  const secondaryRawBonus = canUseDualWield
     ? getWeaponBonus(player.weapon2)
     : { power: 0, vitality: 0, agility: 0 };
+  const secondaryBonus = {
+    power: Math.floor(secondaryRawBonus.power / 2),
+    vitality: Math.floor(secondaryRawBonus.vitality / 2),
+    agility: Math.floor(secondaryRawBonus.agility / 2),
+  };
 
   return {
     power: primaryBonus.power + secondaryBonus.power,
