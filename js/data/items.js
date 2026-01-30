@@ -502,7 +502,12 @@
   //　効果二つアクセサリー
   function pickAccessoryOptionsWithDuplicates(
     count,
-    { floor = 0, excludedIds = [], requireMinFloor = false } = {},
+    {
+      floor = 0,
+      excludedIds = [],
+      requireMinFloor = false,
+      applyMinFloorBias = false,
+    } = {},
   ) {
     if (count <= 0) return [];
     const pool = (window.SpecialOptionPool || []).filter((option) => {
@@ -519,6 +524,7 @@
       const value = rollSpecialOptionValue(option, {
         floor,
         forAccessory: true,
+        applyMinFloorBias,
       });
       result.push({
         id: option.id,
@@ -553,7 +559,7 @@
 
   function rollSpecialOptionValue(
     option,
-    { floor = 0, forAccessory = false } = {},
+    { floor = 0, forAccessory = false, applyMinFloorBias = true } = {},
   ) {
     let value;
     if (Number.isFinite(option.fixed)) {
@@ -582,6 +588,16 @@
         }
       } else {
         value = Math.floor(Math.random() * (max - min + 1)) + min;
+      }
+      if (forAccessory && applyMinFloorBias) {
+        const minFloor = Number(option.minFloor);
+        if (Number.isFinite(minFloor) && Number.isFinite(max) && max > min) {
+          const highThreshold = Math.max(min, Math.ceil(max * 0.5));
+          if (value >= highThreshold && Math.random() < 0.6) {
+            const downgradeMax = Math.max(min, highThreshold - 1);
+            value = Math.floor(Math.random() * (downgradeMax - min + 1)) + min;
+          }
+        }
       }
       if (forAccessory) {
         const cap = getAccessoryValueCap(option, floor);
