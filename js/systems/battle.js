@@ -373,7 +373,9 @@ function endBattle({ grantHerbReward = true } = {}) {
 function handleEnemyDefeat() {
   log(` ${enemy.name} を倒した！`);
   if (typeof handleWeatheredWeaponProgress === "function") {
-    handleWeatheredWeaponProgress();
+    handleWeatheredWeaponProgress({
+      defeatedRareEnemy: enemy?.isRare || enemy?.isBroken,
+    });
   }
   gainExp(enemy.exp);
   dropItem();

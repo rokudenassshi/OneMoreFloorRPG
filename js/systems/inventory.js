@@ -120,7 +120,7 @@ function incrementCursedItemStat(item) {
   log(`🔮 ${item.name}の${getCursedStatLabel(targetStat)}が1上がった。`);
 }
 
-function handleWeatheredWeaponProgress() {
+function handleWeatheredWeaponProgress({ defeatedRareEnemy = false } = {}) {
   const equippedItems = [player.weapon, player.weapon2];
   let didUpdate = false;
   equippedItems.forEach((item) => {
@@ -142,6 +142,10 @@ function handleWeatheredWeaponProgress() {
         Math.floor(previousCount / CURSED_KILL_STEP) <
         Math.floor(item.cursedKillCount / CURSED_KILL_STEP)
       ) {
+        incrementCursedItemStat(item);
+        didUpdate = true;
+      }
+      if (defeatedRareEnemy) {
         incrementCursedItemStat(item);
         didUpdate = true;
       }

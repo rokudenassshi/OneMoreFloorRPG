@@ -656,23 +656,6 @@
       .join("と");
 
     const prefix = isAllShiny ? "神々しい" : "";
-    console.log(
-      "[DBG accessory name]",
-      optionList.map((o) => {
-        const max = Number(o.max);
-        const value = Number(o.value);
-        const threshold = Math.ceil(max * 0.8);
-        return {
-          id: o.id,
-          alias: o.alias,
-          value,
-          max,
-          threshold,
-          shiny: value >= threshold,
-        };
-      }),
-      { shinyCount, isAllShiny },
-    );
     return `${prefix}${optionNames}の${pick(Math.random, suffixes)}`;
   }
 
