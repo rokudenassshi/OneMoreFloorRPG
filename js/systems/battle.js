@@ -391,16 +391,20 @@ function applyVictoryRecovery() {
 }
 
 function gameOver() {
-  log("☠ 力尽きた。下層へと叩き落とされた。");
+  if (player.stayOnCurrentFloor) {
+    log("☠ 力尽きた。だが現在の階層に留まった。");
+  } else {
+    log("☠ 力尽きた。下層へと叩き落とされた。");
+  }
   const wasBossBattle = isBossFloor(floor);
   endBattle();
-
-  const penaltyFloor = Math.max(0, floor - 20);
-  const checkpointFloor = Math.max(0, Math.floor(floor / 50) * 50);
-
-  floor = wasBossBattle
-    ? penaltyFloor // ボス戦は純粋に-20
-    : Math.max(penaltyFloor, checkpointFloor);
+  if (!player.stayOnCurrentFloor) {
+    const penaltyFloor = Math.max(0, floor - 20);
+    const checkpointFloor = Math.max(0, Math.floor(floor / 50) * 50);
+    floor = wasBossBattle
+      ? penaltyFloor // ボス戦は純粋に-20
+      : Math.max(penaltyFloor, checkpointFloor);
+  }
 
   player.hp = calcMaxHp();
   setHerbCount(getHerbMaxCount(), false);

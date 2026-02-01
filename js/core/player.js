@@ -24,6 +24,7 @@ const player = {
   autoAssignStatTarget: null,
   weatheredWeaponUnlocked: false,
   stayBattleUnlocked: false,
+  stayOnCurrentFloor: false,
   weatheredWeaponReceived: false,
   weatheredWeaponHintShown: false,
 };
