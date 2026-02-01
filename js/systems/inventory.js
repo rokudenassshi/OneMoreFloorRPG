@@ -152,6 +152,20 @@ function handleWeatheredWeaponProgress({ defeatedRareEnemy = false } = {}) {
     markInventoryDirty();
   }
 }
+function handleCursedAccessoryProgress({ defeatedRareEnemy = false } = {}) {
+  if (!defeatedRareEnemy) return;
+  const equippedItems = [player.weapon, player.weapon2];
+  let didUpdate = false;
+  equippedItems.forEach((item) => {
+    if (!item) return;
+    if (!isCursedItem(item)) return;
+    incrementCursedItemStat(item);
+    didUpdate = true;
+  });
+  if (didUpdate && typeof markInventoryDirty === "function") {
+    markInventoryDirty();
+  }
+}
 function toggleInventorySort() {
   inventorySortEnabled = !inventorySortEnabled;
   log(inventorySortEnabled ? "📊 能力値でソート" : "📊 入手順でソート");

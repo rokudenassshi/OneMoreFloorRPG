@@ -669,10 +669,16 @@
         requireMinFloor: true,
       });
       const first = primary[0];
-      const excludedIds =
-        first?.id === "evade_boost" || first?.id === "evade_boost_plus"
-          ? ["evade_boost", "evade_boost_plus"]
-          : [];
+      const excludedIds = [];
+      if (first?.id === "evade_boost" || first?.id === "evade_boost_plus") {
+        excludedIds.push("evade_boost", "evade_boost_plus");
+      }
+      if (first?.id === "exp_boost" || first?.id === "exp_boost_plus") {
+        excludedIds.push("cursed_accessory");
+      }
+      if (first?.id === "cursed_accessory") {
+        excludedIds.push("exp_boost", "exp_boost_plus");
+      }
       const secondary = pickAccessoryOptionsWithDuplicates(1, {
         floor,
         excludedIds,

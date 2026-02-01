@@ -246,6 +246,18 @@
       minFloor: WEATHERED_EVENT_FLOOR,
       describe: (value) => `攻撃を${value}%でもう一度行う。`,
     },
+    {
+      id: "cursed_accessory",
+      sortKey: 13,
+      name: "呪われた",
+      alias: "呪い",
+      accessoryTypes: ACCESSORY_TYPES,
+      min: 1,
+      max: 1,
+      minFloor: WEATHERED_EVENT_FLOOR,
+      describe: () =>
+        "経験値が0になる代わりにレアモンスターを倒したときに呪われた武器のステータスが1上がる",
+    },
   ];
 
   // id → sortKey のMapを公開

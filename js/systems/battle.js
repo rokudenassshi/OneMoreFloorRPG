@@ -377,6 +377,16 @@ function handleEnemyDefeat() {
       defeatedRareEnemy: enemy?.isRare || enemy?.isBroken,
     });
   }
+  const specialEffects = getSpecialEffects();
+  if (
+    specialEffects.cursedAccessory &&
+    (enemy?.isRare || enemy?.isBroken) &&
+    typeof handleCursedAccessoryProgress === "function"
+  ) {
+    handleCursedAccessoryProgress({
+      defeatedRareEnemy: true,
+    });
+  }
   gainExp(enemy.exp);
   dropItem();
   applyVictoryRecovery();

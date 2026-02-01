@@ -143,6 +143,10 @@ function calcNextExp() {
 
 function gainExp(exp) {
   const specialEffects = getSpecialEffects();
+  if (specialEffects.expZero) {
+    log("装飾品効果で経験値0");
+    return;
+  }
   const boostRate = (specialEffects.expBoost || 0) / 100;
   const boostedExp = Math.floor(exp * (1 + boostRate));
 
@@ -361,12 +365,14 @@ function getEquipmentSpecialEffects() {
     expBoost: 0,
     expFinalMultiplier: 1,
     rareEncounterBoost: 0,
+    expZero: false,
     minHits: 0,
     powerRate: 0,
     vitalityRate: 0,
     agilityRate: 0,
     selfDamageBoost: 0,
     attackAgainChance: 0,
+    cursedAccessory: false,
   };
 
   getEquipmentSpecialOptions().forEach((option) => {
@@ -396,6 +402,10 @@ function getEquipmentSpecialEffects() {
         break;
       case "exp_final_ex":
         effects.expFinalMultiplier *= value || 1;
+        break;
+      case "cursed_accessory":
+        effects.expZero = true;
+        effects.cursedAccessory = true;
         break;
       case "rare_encounter":
       case "rare_encounter_plus":
@@ -440,6 +450,8 @@ function getSpecialEffects() {
     ...equipmentEffects,
     expFinalMultiplier: equipmentEffects.expFinalMultiplier || 1,
     lifeSteal: equipmentEffects.lifeSteal + (skillEffects.lifeSteal || 0),
+    expZero: equipmentEffects.expZero || false,
+    cursedAccessory: equipmentEffects.cursedAccessory || false,
     lifeStealDamage: skillEffects.lifeStealDamage || 0,
     lifeStealOverHealRate: skillEffects.lifeStealOverHealRate || 0,
     reflect:
