@@ -123,10 +123,11 @@ function incrementCursedItemStat(item) {
 function handleWeatheredWeaponProgress({ defeatedRareEnemy = false } = {}) {
   const equippedItems = [player.weapon, player.weapon2];
   let didUpdate = false;
+  const progressIncrement = defeatedRareEnemy ? 2 : 1;
   equippedItems.forEach((item) => {
     if (!item) return;
     if (isWeatheredItem(item)) {
-      item.killCount = (item.killCount || 0) + 1;
+      item.killCount = (item.killCount || 0) + progressIncrement;
       didUpdate = true;
       if (item.killCount >= WEATHERED_KILL_THRESHOLD) {
         transformToCursedItem(item);
@@ -142,10 +143,6 @@ function handleWeatheredWeaponProgress({ defeatedRareEnemy = false } = {}) {
         Math.floor(previousCount / CURSED_KILL_STEP) <
         Math.floor(item.cursedKillCount / CURSED_KILL_STEP)
       ) {
-        incrementCursedItemStat(item);
-        didUpdate = true;
-      }
-      if (defeatedRareEnemy) {
         incrementCursedItemStat(item);
         didUpdate = true;
       }

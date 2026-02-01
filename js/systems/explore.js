@@ -139,13 +139,21 @@ function openTeleportModal() {
   const modal = document.getElementById("teleportModal");
   if (!modal) return;
   modal.classList.remove("hidden");
+  modal.removeAttribute("inert");
   modal.setAttribute("aria-hidden", "false");
 }
 
 function closeTeleportModal() {
   const modal = document.getElementById("teleportModal");
   if (!modal) return;
+
+  // ★ フォーカスが中に残らないようにする
+  if (modal.contains(document.activeElement)) {
+    document.activeElement.blur();
+  }
+
   modal.classList.add("hidden");
+  modal.setAttribute("inert", "");
   modal.setAttribute("aria-hidden", "true");
 }
 function teleportToFloor() {
