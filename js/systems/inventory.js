@@ -478,11 +478,21 @@ function renderAccessoryItems() {
     return 0;
   }
 
+  function isDoubleEffectAccessory(item) {
+    return (
+      Array.isArray(item?.specialOptions) && item.specialOptions.length >= 2
+    );
+  }
   accessoryItems.sort((a, b) => {
     if (a.isEquipped !== b.isEquipped) {
       return a.isEquipped ? -1 : 1;
     }
     if (inventorySortEnabled) {
+      // 0) 効果が二つのアクセサリーを最優先
+      const doubleA = isDoubleEffectAccessory(a.item);
+      const doubleB = isDoubleEffectAccessory(b.item);
+      if (doubleA !== doubleB) return doubleA ? -1 : 1;
+
       // 1) sortKey 昇順
       const skA = getAccessorySortKey(a.item);
       const skB = getAccessorySortKey(b.item);
