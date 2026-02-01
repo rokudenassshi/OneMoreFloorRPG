@@ -8,6 +8,7 @@ const SCRIPT_PATHS = [
   "js/core/state.js",
   "js/core/player.js",
   "js/systems/explore.js",
+  "js/data/serial-codes.js",
   "js/systems/battle.js",
   "js/systems/inventory.js",
   "js/systems/skills.js",

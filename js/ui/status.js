@@ -5,6 +5,7 @@ const statAutoAssignOptions = [
   { id: "vitality", label: "たいりょく" },
   { id: "agility", label: "すばやさ" },
 ];
+let serialCodePending = false;
 // =====================
 // Save Data Import / Export
 // =====================
@@ -197,6 +198,17 @@ function renderStatus() {
   const bonus = getEquipmentBonus();
   const unlockFloor = UNLOCK_FLOOR;
   const isStatPointUnlocked = player.maxReachedFloor >= unlockFloor;
+  const serialActions =
+    serialCodeActions && typeof serialCodeActions === "object"
+      ? Object.values(serialCodeActions)
+      : [];
+  const unlockedSerialCount = serialActions.filter(
+    (action) => typeof action?.isUnlocked === "function" && action.isUnlocked(),
+  ).length;
+  const totalSerialCodes = serialActions.length;
+  const remainingSerialCodes = totalSerialCodes - unlockedSerialCount;
+  const isSerialInputDisabled =
+    totalSerialCodes > 0 && remainingSerialCodes <= 0;
   const statPointLabel = isStatPointUnlocked
     ? `ステータスポイント：${player.statPoints}`
     : "";
@@ -340,8 +352,84 @@ function renderStatus() {
     onchange="handleSaveDataImport(event)"
   >
   <div class="status-save-note">※インポートは現在のデータを上書きします</div>
+  <div class="status-serial">
+  <div class="status-serial-label">シリアルコード</div>
+    <div class="status-serial-actions">
+      <input
+        id="serialCodeInput"
+        class="status-serial-input"
+        type="text"
+        autocomplete="off"
+        placeholder="シリアルコードを入力"
+        onkeydown="handleSerialCodeKeydown(event)"
+        ${isSerialInputDisabled || serialCodePending ? "disabled" : ""}
+      >
+      <button
+        type="button"
+        class="status-serial-button"
+        onclick="handleSerialCodeSubmit()"
+        ${isSerialInputDisabled || serialCodePending ? "disabled" : ""}
+      >
+        確認
+      </button>
+    </div>
 </div>
 `;
+}
+
+function handleSerialCodeKeydown(event) {
+  if (event?.key !== "Enter") return;
+  handleSerialCodeSubmit();
+}
+
+async function handleSerialCodeSubmit() {
+  if (serialCodePending) return;
+  const inputEl = document.getElementById("serialCodeInput");
+  const value = String(inputEl?.value || "").trim();
+  if (!value) return;
+  const serialActions =
+    serialCodeActions && typeof serialCodeActions === "object"
+      ? serialCodeActions
+      : {};
+  const functionsInstance = window.firebaseFunctions;
+  const httpsCallableFactory = window.firebaseHttpsCallable;
+  if (!functionsInstance || typeof httpsCallableFactory !== "function") {
+    if (typeof log === "function") {
+      log("⚠️ シリアルコードの確認に失敗しました。");
+    }
+    return;
+  }
+  serialCodePending = true;
+  renderStatus();
+  try {
+    const verifySerialCode = httpsCallableFactory(
+      functionsInstance,
+      "verifySerialCode",
+    );
+    const response = await verifySerialCode({ code: value });
+    const payload = response?.data || {};
+    const unlockKey = String(payload.unlock || "");
+    const matchedAction = serialActions[unlockKey];
+    if (!payload.ok || !matchedAction || matchedAction.isUnlocked()) {
+      if (typeof log === "function") {
+        log("⚠️ シリアルコードが無効です。");
+      }
+      return;
+    }
+    matchedAction.unlock();
+    if (inputEl) inputEl.value = "";
+    if (typeof log === "function") {
+      log(matchedAction.logMessage || "✨ シリアルコードを確認しました。");
+    }
+    autoSave();
+  } catch (error) {
+    if (typeof log === "function") {
+      log("⚠️ シリアルコードの確認に失敗しました。");
+    }
+  } finally {
+    serialCodePending = false;
+    renderStatus();
+  }
 }
 
 function addStat(stat) {

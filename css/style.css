@@ -751,7 +751,9 @@ status-actions {
   margin-top: 16px;
   padding: 6px 16px;
   font-size: 16px;
-}.teleport-modal-content select {
+}
+
+.teleport-modal-content select {
   width: 100%;
   margin-top: 12px;
   padding: 8px;
@@ -760,6 +762,19 @@ status-actions {
   background: #1a1a1a;
   color: #fff;
   border: 1px solid #444;
+}
+
+.teleport-stay-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  font-size: 14px;
+}
+
+.teleport-stay-option input {
+  width: 18px;
+  height: 18px;
 }
 @media (max-width: 480px) {
   .teleport-modal-content select {
@@ -776,7 +791,9 @@ status-actions {
 
 .teleport-modal-actions button {
   margin-top: 16px;
-}/* --- Save Data (Import / Export) --- */
+}
+
+/* --- Save Data (Import / Export) --- */
 .status-save {
   margin-top: 6px;
 }
@@ -803,4 +820,45 @@ status-actions {
   margin-top: 6px;
   font-size: 12px;
   opacity: 0.8;
+}
+
+
+.status-serial {
+  margin-top: 12px;
+}
+
+.status-serial-label {
+  font-size: 12px;
+  color: #cfcfcf;
+  margin-bottom: 6px;
+}
+
+.status-serial-input {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid #444;
+  background: #1a1a1a;
+  color: #fff;
+  font-size: 14px;
+}
+
+.status-serial-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.status-serial-actions .status-serial-input {
+  flex: 1;
+}
+
+.status-serial-button {
+  min-height: 44px;
+  padding: 6px 12px;
+  font-size: 14px;
+}
+
+.status-serial-input:disabled {
+  opacity: 0.6;
 }

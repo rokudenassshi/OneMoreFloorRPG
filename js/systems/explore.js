@@ -113,6 +113,15 @@ function openTeleportModal() {
     : availableFloors[availableFloors.length - 1];
   selectEl.value = String(defaultFloor);
 
+  const stayOptionEl = document.getElementById("teleportStayOption");
+  const stayCheckboxEl = document.getElementById("teleportStayCheckbox");
+  if (stayOptionEl) {
+    stayOptionEl.style.display = player.stayBattleUnlocked ? "flex" : "none";
+  }
+  if (stayCheckboxEl) {
+    stayCheckboxEl.checked = false;
+  }
+
   const modal = document.getElementById("teleportModal");
   if (!modal) return;
   modal.classList.remove("hidden");
@@ -128,6 +137,14 @@ function closeTeleportModal() {
 function teleportToFloor() {
   const selectEl = document.getElementById("teleportFloorSelect");
   if (!selectEl) return;
+  const stayCheckboxEl = document.getElementById("teleportStayCheckbox");
+  if (player.stayBattleUnlocked && stayCheckboxEl?.checked) {
+    stayCheckboxEl.checked = false;
+    closeTeleportModal();
+    startBattle();
+    autoSave();
+    return;
+  }
   const target = Number(selectEl.value);
   if (!Number.isInteger(target)) {
     log("転移する階層を選択してください。");

@@ -23,6 +23,7 @@ const player = {
   autoAssignExpSkillPoints: false,
   autoAssignStatTarget: null,
   weatheredWeaponUnlocked: false,
+  stayBattleUnlocked: false,
   weatheredWeaponReceived: false,
   weatheredWeaponHintShown: false,
 };

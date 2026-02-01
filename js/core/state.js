@@ -89,6 +89,7 @@ function performAutoSave(options = {}) {
       unassignedPoints: player.unassignedPoints,
       skills: { ...player.skills },
       autoAssignExpSkillPoints: player.autoAssignExpSkillPoints,
+      stayBattleUnlocked: player.stayBattleUnlocked,
       weatheredWeaponUnlocked: player.weatheredWeaponUnlocked,
       weatheredWeaponReceived: player.weatheredWeaponReceived,
       weatheredWeaponHintShown: player.weatheredWeaponHintShown,
@@ -170,6 +171,7 @@ function loadAutoSave() {
   player.autoAssignExpSkillPoints = Boolean(
     savedPlayer.autoAssignExpSkillPoints,
   );
+  player.stayBattleUnlocked = Boolean(savedPlayer.stayBattleUnlocked);
   const savedWeatheredUnlocked =
     typeof savedPlayer.weatheredWeaponUnlocked === "boolean"
       ? savedPlayer.weatheredWeaponUnlocked

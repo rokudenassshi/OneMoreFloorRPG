@@ -1,0 +1,10 @@
+{
+  "name": "one-more-floor-rpg-functions",
+  "private": true,
+  "engines": {
+    "node": "18"
+  },
+  "dependencies": {
+    "firebase-functions": "^4.5.0"
+  }
+}

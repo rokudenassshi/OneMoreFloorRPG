@@ -153,6 +153,10 @@
     <p>転移する階層を選択してください。</p>
     <select id="teleportFloorSelect" aria-label="転移する階層"></select>
     <div class="teleport-modal-actions">
+    <label id="teleportStayOption" class="teleport-stay-option" for="teleportStayCheckbox">
+      <input id="teleportStayCheckbox" type="checkbox">
+      現在の階層に留まる
+    </label>
       <button type="button" onclick="closeTeleportModal()">キャンセル</button>
       <button type="button" onclick="teleportToFloor()">転移</button>
     </div>
@@ -169,6 +173,7 @@
   // Import the functions you need from the SDKs you need
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
   import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-analytics.js";
+  import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-functions.js";
   // TODO: Add SDKs for Firebase products that you want to use
   // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -187,6 +192,8 @@
   // Initialize Firebase
   const app = initializeApp(firebaseConfig);
   const analytics = getAnalytics(app);
+  window.firebaseFunctions = getFunctions(app);
+  window.firebaseHttpsCallable = httpsCallable;
 </script>
 </body>
 </html>
