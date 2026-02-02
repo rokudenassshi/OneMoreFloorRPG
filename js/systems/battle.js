@@ -19,7 +19,7 @@ function startBattle() {
     !isBrokenBlocked &&
     Math.random() < brokenEnemyRate + bonusRareRate;
   // レアモンスター
-  const baseRareRate = 0.02;
+  const baseRareRate = 1.02;
   const isRare =
     !isBroken && !isRareBlocked && Math.random() < baseRareRate + bonusRareRate;
   const rate = isBroken ? 2.5 : isRare ? 1.8 : 1;

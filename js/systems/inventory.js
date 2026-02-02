@@ -85,6 +85,27 @@ function getAccessoryOptionLabel(option) {
   return option?.description || option?.name || "";
 }
 
+function getAccessoryOptionDescribe(option, value) {
+  if (!option) return "";
+  if (typeof option.describe === "function") {
+    return option.describe(value);
+  }
+  const optionId = option.id;
+  if (optionId && Array.isArray(window.SpecialOptionPool)) {
+    const source = window.SpecialOptionPool.find((opt) => opt.id === optionId);
+    if (typeof source?.describe === "function") {
+      return source.describe(value);
+    }
+  }
+  if (typeof option.description === "string") {
+    return option.description.replace(/-?\d+(?:\.\d+)?/, String(value));
+  }
+  if (option.name) {
+    return `${option.name}+${value}`;
+  }
+  return String(value);
+}
+
 function getAccessoryOptionMax(option) {
   const maxValue = Number(option?.max);
   if (Number.isFinite(maxValue)) return maxValue;
@@ -804,14 +825,7 @@ function confirmAccessorySynthesis() {
     if (currentValue >= maxValue) return;
     const nextValue = Math.min(maxValue, currentValue + 1);
     option.value = nextValue;
-    if (typeof option.describe === "function") {
-      option.description = option.describe(nextValue);
-    } else if (typeof option.description === "string") {
-      option.description = option.description.replace(
-        /-?\d+(?:\.\d+)?/,
-        String(nextValue),
-      );
-    }
+    option.description = getAccessoryOptionDescribe(option, nextValue);
     upgradedCount += 1;
   });
 
@@ -1291,11 +1305,11 @@ function dropItem() {
   }
 
   if (enemy.isRare) {
-    const rareAccessoryDropRate = floor >= WEATHERED_EVENT_FLOOR ? 0.5 : 1;
+    const rareAccessoryDropRate = floor >= WEATHERED_EVENT_FLOOR ? 1.5 : 1;
     if (Math.random() >= rareAccessoryDropRate) {
       return;
     }
-    const doubleEffectChance = floor >= WEATHERED_EVENT_FLOOR ? 0.0001 : 0;
+    const doubleEffectChance = floor >= WEATHERED_EVENT_FLOOR ? 1.0001 : 0;
     const optionCount = Math.random() < doubleEffectChance ? 2 : 1;
     const item = window.ItemGen.createAccessoryForDrop(floor, { optionCount });
     item.isRareDrop = true;

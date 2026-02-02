@@ -150,7 +150,6 @@ function gainExp(exp) {
   }
   const boostRate = (specialEffects.expBoost || 0) / 100;
   const boostedExp = Math.floor(exp * (1 + boostRate));
-
   const finalMultiplier = specialEffects.expFinalMultiplier || 1;
   const finalExp = Math.floor(boostedExp * finalMultiplier);
   player.exp += finalExp;
@@ -364,7 +363,7 @@ function getEquipmentSpecialEffects() {
     victoryRecover: 0,
     evadeBoost: 0,
     expBoost: 0,
-    expFinalMultiplier: 1,
+    expFinalMultiplier: 0,
     rareEncounterBoost: 0,
     expZero: false,
     minHits: 0,
@@ -399,7 +398,7 @@ function getEquipmentSpecialEffects() {
         effects.expBoost += value;
         break;
       case "exp_boost_plus":
-        effects.expFinalMultiplier *= value || 1;
+        effects.expFinalMultiplier += value || 0;
         break;
       case "exp_final_ex":
         effects.expFinalMultiplier *= value || 1;
