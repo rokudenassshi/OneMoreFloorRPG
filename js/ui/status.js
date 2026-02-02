@@ -6,6 +6,10 @@ const statAutoAssignOptions = [
   { id: "agility", label: "すばやさ" },
 ];
 let serialCodePending = false;
+const SAVE_EXPORT_SCHEMA_V1 = "one-more-floor-rpg-save-v1";
+const SAVE_EXPORT_SCHEMA_V2 = "one-more-floor-rpg-save-v2";
+const SAVE_EXPORT_SECRET = "one-more-floor-rpg-save-secret-v1";
+const SAVE_EXPORT_SALT = "omf-save-key-salt-v1";
 // =====================
 // Save Data Import / Export
 // =====================
@@ -28,15 +32,96 @@ function buildSaveDataSnapshot() {
   }
 
   return {
-    schema: "one-more-floor-rpg-save-v1",
+    schema: SAVE_EXPORT_SCHEMA_V1,
     gameVersion: typeof GAME_VERSION === "string" ? GAME_VERSION : null,
     exportedAt: now.toISOString(),
     storage,
   };
 }
 
+function base64ToUint8(base64) {
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return bytes;
+}
+
+function uint8ToBase64(bytes) {
+  let binary = "";
+  const chunkSize = 0x8000;
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
+  }
+  return btoa(binary);
+}
+
+async function getSaveExportKey() {
+  const encoder = new TextEncoder();
+  const baseKey = await crypto.subtle.importKey(
+    "raw",
+    encoder.encode(SAVE_EXPORT_SECRET),
+    { name: "PBKDF2" },
+    false,
+    ["deriveKey"],
+  );
+  return crypto.subtle.deriveKey(
+    {
+      name: "PBKDF2",
+      salt: encoder.encode(SAVE_EXPORT_SALT),
+      iterations: 100000,
+      hash: "SHA-256",
+    },
+    baseKey,
+    { name: "AES-GCM", length: 256 },
+    false,
+    ["encrypt", "decrypt"],
+  );
+}
+
+async function encryptSaveSnapshot(snapshot) {
+  const encoder = new TextEncoder();
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const key = await getSaveExportKey();
+  const encoded = encoder.encode(JSON.stringify(snapshot));
+  const encrypted = await crypto.subtle.encrypt(
+    { name: "AES-GCM", iv },
+    key,
+    encoded,
+  );
+  return {
+    schema: SAVE_EXPORT_SCHEMA_V2,
+    gameVersion: snapshot.gameVersion || null,
+    exportedAt: snapshot.exportedAt,
+    alg: "AES-GCM",
+    kdf: "PBKDF2",
+    iv: uint8ToBase64(iv),
+    data: uint8ToBase64(new Uint8Array(encrypted)),
+  };
+}
+
+async function decryptSavePayload(payload) {
+  if (!payload || typeof payload !== "object") {
+    throw new Error("invalid payload");
+  }
+  if (payload.schema !== SAVE_EXPORT_SCHEMA_V2) {
+    return payload;
+  }
+  const iv = base64ToUint8(String(payload.iv || ""));
+  const data = base64ToUint8(String(payload.data || ""));
+  const key = await getSaveExportKey();
+  const decrypted = await crypto.subtle.decrypt(
+    { name: "AES-GCM", iv },
+    key,
+    data,
+  );
+  const decoder = new TextDecoder();
+  return JSON.parse(decoder.decode(decrypted));
+}
+
 function downloadTextFile(filename, text, mime = "application/json") {
-  const blob = new Blob([text], { type: mime });
+  const blob = new Blob([text], { type: `${mime};charset=utf-8` });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
@@ -48,18 +133,19 @@ function downloadTextFile(filename, text, mime = "application/json") {
   setTimeout(() => URL.revokeObjectURL(url), 1500);
 }
 
-function exportSaveData() {
+async function exportSaveData() {
   try {
     const snapshot = buildSaveDataSnapshot();
+    const encrypted = await encryptSaveSnapshot(snapshot);
     const safeVersion = snapshot.gameVersion || "unknown";
     const dateLabel = new Date()
       .toISOString()
       .replace(/[:.]/g, "-")
       .slice(0, 19);
     const filename = `OneMoreFloorRPG_save_${safeVersion}_${dateLabel}.json`;
-    downloadTextFile(filename, JSON.stringify(snapshot, null, 2));
+    downloadTextFile(filename, JSON.stringify(encrypted));
     if (typeof log === "function") {
-      log("💾 セーブデータを書き出しました（ファイルに保存）");
+      log("🔐 セーブデータを保存しました");
     }
   } catch (e) {
     if (typeof log === "function") {
@@ -137,12 +223,15 @@ function handleSaveDataImport(event) {
   if (!ok) return;
 
   const reader = new FileReader();
-  reader.onload = () => {
+  reader.onload = async () => {
     try {
       const text = String(reader.result || "");
-      const parsed = JSON.parse(text);
+      const normalized = text.replace(/^\uFEFF/, "").trim();
+      const parsed = JSON.parse(normalized);
+      const decrypted = await decryptSavePayload(parsed);
 
-      if (parsed?.schema !== "one-more-floor-rpg-save-v1") {
+      const isKnownEncrypted = parsed?.schema === SAVE_EXPORT_SCHEMA_V2;
+      if (!isKnownEncrypted && decrypted?.schema !== SAVE_EXPORT_SCHEMA_V1) {
         const proceed = window.confirm(
           "このファイルは想定形式と異なる可能性があります。続行しますか？",
         );
@@ -150,7 +239,7 @@ function handleSaveDataImport(event) {
       }
 
       // ★直接上書きせず「保留インポート」として保存
-      localStorage.setItem("omf_pending_import_v1", JSON.stringify(parsed));
+      localStorage.setItem("omf_pending_import_v1", JSON.stringify(decrypted));
 
       if (typeof log === "function") {
         log("📥 セーブデータを読み込みました。再起動して反映します…");
@@ -167,7 +256,7 @@ function handleSaveDataImport(event) {
       log("⚠️ ファイル読み込みに失敗しました");
     }
   };
-  reader.readAsText(file);
+  reader.readAsText(file, "utf-8");
 }
 
 function openStatus() {
@@ -347,7 +436,7 @@ function renderStatus() {
   <input
     id="saveDataFileInput"
     type="file"
-    accept="application/json"
+    accept=".json,.omfsave,application/json"
     style="display:none"
     onchange="handleSaveDataImport(event)"
   >

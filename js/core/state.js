@@ -94,6 +94,7 @@ function performAutoSave(options = {}) {
       stayOnCurrentFloor: player.stayOnCurrentFloor,
       weatheredWeaponReceived: player.weatheredWeaponReceived,
       weatheredWeaponHintShown: player.weatheredWeaponHintShown,
+      accessorySynthesisUnlocked: player.accessorySynthesisUnlocked,
       weaponIndex,
       weapon2Index,
       accessoryIndex,
@@ -183,7 +184,9 @@ function loadAutoSave() {
   player.weatheredWeaponHintShown = Boolean(
     savedPlayer.weatheredWeaponHintShown,
   );
-
+  player.accessorySynthesisUnlocked = Boolean(
+    savedPlayer.accessorySynthesisUnlocked,
+  );
   player.skills =
     savedPlayer.skills && typeof savedPlayer.skills === "object"
       ? { ...savedPlayer.skills }

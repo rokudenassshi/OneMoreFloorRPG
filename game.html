@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no">
   <title>OneMoreFloorRPG</title>
-  <link rel="stylesheet" href="css/style.css?v=2.1.4">
+  <link rel="stylesheet" href="css/style.css?v=2.1.6">
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1047750481134162"
      crossorigin="anonymous"></script>
 </head>
@@ -110,7 +110,41 @@
       </div>
     </div>
   </div>
-
+  <!-- 装飾品合成モーダル -->
+  <div
+    id="accessorySynthesisModal"
+    class="modal hidden"
+    aria-hidden="true"
+    inert
+  >
+    <div class="modal-content accessory-synthesis-modal-content">
+      <h3>装飾品合成</h3>
+      <div class="accessory-synthesis-section">
+        <div class="accessory-synthesis-label">合成元</div>
+        <div id="accessorySynthesisBaseName" class="accessory-synthesis-name"></div>
+        <ul
+          id="accessorySynthesisBaseEffects"
+          class="accessory-synthesis-list"
+        ></ul>
+      </div>
+      <div class="accessory-synthesis-section">
+        <div class="accessory-synthesis-label">合成素材</div>
+        <select id="accessorySynthesisTargetSelect"></select>
+        <ul
+          id="accessorySynthesisTargetEffects"
+          class="accessory-synthesis-list"
+        ></ul>
+        <div
+          id="accessorySynthesisMatchHint"
+          class="accessory-synthesis-hint"
+        ></div>
+      </div>
+      <div class="accessory-synthesis-actions">
+        <button id="accessorySynthesisConfirm" onclick="confirmAccessorySynthesis()">合成</button>
+        <button onclick="closeAccessorySynthesisModal()">閉じる</button>
+      </div>
+    </div>
+  </div>
   <!-- ステータス画面 -->
   <div id="statusScreen" style="display:none;">
     <div class="screen-header">
@@ -167,8 +201,8 @@
        JavaScript 読み込み
   ===================== -->
   <!-- エントリーポイント -->
-  <script src="js/core/version.js?v=2.1.4"></script>
-  <script src="js/core/loader.js?v=2.1.4"></script>
+  <script src="js/core/version.js?v=2.1.6"></script>
+  <script src="js/core/loader.js?v=2.1.6"></script>
   <script type="module">
   // Import the functions you need from the SDKs you need
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";

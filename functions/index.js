@@ -3,6 +3,7 @@ const functions = require("firebase-functions");
 // ✅ ここに “シリアルコード → 解放キー” を置く（クライアントには公開しない）
 const serialCodeLookup = {
   unlockrokudemonaistay: "stayBattle",
+  unlockaccsynx9k2p8mrokudemonai7q4r6t1: "accessorySynthesis",
   // 追加するならここに
 };
 

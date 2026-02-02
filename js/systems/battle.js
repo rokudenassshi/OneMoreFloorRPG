@@ -379,12 +379,13 @@ function handleEnemyDefeat() {
   }
   const specialEffects = getSpecialEffects();
   if (
-    specialEffects.cursedAccessory &&
+    specialEffects.cursedAccessory > 0 &&
     (enemy?.isRare || enemy?.isBroken) &&
     typeof handleCursedAccessoryProgress === "function"
   ) {
     handleCursedAccessoryProgress({
       defeatedRareEnemy: true,
+      increment: specialEffects.cursedAccessory,
     });
   }
   gainExp(enemy.exp);

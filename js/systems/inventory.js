@@ -43,6 +43,9 @@ const discardThresholdDefaults = {
 let discardThresholds = { ...discardThresholdDefaults };
 let currentInventoryTab = "equipment";
 let inventorySortEnabled = false;
+let accessorySynthesisBaseItem = null;
+let accessorySynthesisCandidates = [];
+let accessorySynthesisLockedMatches = 0;
 
 // ユニーク武器
 const WEATHERED_KILL_THRESHOLD = 100;
@@ -60,6 +63,48 @@ function isUniqueWeapon(item) {
 }
 function isDualWieldRestrictedItem(item) {
   return isUniqueWeapon(item) || isWeatheredItem(item) || isCursedItem(item);
+}
+
+function isItemEquipped(item) {
+  return (
+    player.weapon === item ||
+    player.weapon2 === item ||
+    player.accessory === item
+  );
+}
+
+function isAccessorySynthesisUnlocked() {
+  return Boolean(player?.accessorySynthesisUnlocked);
+}
+
+function isDoubleEffectAccessory(item) {
+  return Array.isArray(item?.specialOptions) && item.specialOptions.length >= 2;
+}
+
+function getAccessoryOptionLabel(option) {
+  return option?.description || option?.name || "";
+}
+
+function getAccessoryOptionMax(option) {
+  const maxValue = Number(option?.max);
+  if (Number.isFinite(maxValue)) return maxValue;
+  return Number(option?.value) || 0;
+}
+
+function renderAccessoryOptionList(listEl, options) {
+  if (!listEl) return;
+  listEl.innerHTML = "";
+  if (!Array.isArray(options) || options.length === 0) {
+    const li = document.createElement("li");
+    li.textContent = "なし";
+    listEl.appendChild(li);
+    return;
+  }
+  options.forEach((option) => {
+    const li = document.createElement("li");
+    li.textContent = getAccessoryOptionLabel(option);
+    listEl.appendChild(li);
+  });
 }
 
 function enforceRestrictedSingleWeapon() {
@@ -493,11 +538,6 @@ function renderAccessoryItems() {
     return 0;
   }
 
-  function isDoubleEffectAccessory(item) {
-    return (
-      Array.isArray(item?.specialOptions) && item.specialOptions.length >= 2
-    );
-  }
   accessoryItems.sort((a, b) => {
     if (a.isEquipped !== b.isEquipped) {
       return a.isEquipped ? -1 : 1;
@@ -527,6 +567,8 @@ function renderAccessoryItems() {
     const lockMark = isLocked ? "🔒" : "";
     const isGlowingAccessory =
       Array.isArray(item.specialOptions) && item.specialOptions.length >= 2;
+    const isSynthesisAvailable =
+      isAccessorySynthesisUnlocked() && isDoubleEffectAccessory(item);
     const specialOptions = Array.isArray(item.specialOptions)
       ? item.specialOptions
       : [];
@@ -566,6 +608,11 @@ function renderAccessoryItems() {
               }</button>`
         }
 ${isEquipped ? "" : `<button onclick="equip(${index})">装備</button>`}
+        ${
+          isSynthesisAvailable
+            ? `<button onclick="openAccessorySynthesis(${index})">合成</button>`
+            : ""
+        }
                     ${
                       isEquipped
                         ? ""
@@ -578,6 +625,216 @@ ${isEquipped ? "" : `<button onclick="equip(${index})">装備</button>`}
     `;
 
     itemListEl.appendChild(div);
+  });
+}
+
+function getAccessoryMatchingCandidates(baseItem) {
+  const baseOptions = Array.isArray(baseItem?.specialOptions)
+    ? baseItem.specialOptions
+    : [];
+  const baseIds = new Set(
+    baseOptions.map((option) => option?.id).filter(Boolean),
+  );
+  const candidates = [];
+  let lockedMatches = 0;
+
+  inventory.forEach((item, index) => {
+    if (!item || item === baseItem) return;
+    if (item.kind !== "accessory") return;
+    if (!isDoubleEffectAccessory(item)) return;
+    if (isItemEquipped(item)) return;
+    const itemOptions = Array.isArray(item.specialOptions)
+      ? item.specialOptions
+      : [];
+    const matchIds = itemOptions
+      .map((option) => option?.id)
+      .filter((id) => id && baseIds.has(id));
+    if (matchIds.length === 0) return;
+    if (item.isLocked) {
+      lockedMatches += 1;
+      return;
+    }
+    candidates.push({ item, index, matchIds });
+  });
+
+  return { candidates, lockedMatches };
+}
+
+function updateAccessorySynthesisTarget(candidateIndex) {
+  if (!accessorySynthesisTargetSelectEl) return;
+  const target = accessorySynthesisCandidates[candidateIndex];
+  const targetItem = target?.item || null;
+  const matchHint = accessorySynthesisMatchHintEl;
+  const baseItem = accessorySynthesisBaseItem;
+  const matchNames = [];
+  if (baseItem && targetItem) {
+    const targetIds = new Set(
+      targetItem.specialOptions?.map((option) => option?.id).filter(Boolean),
+    );
+    baseItem.specialOptions?.forEach((option) => {
+      if (option?.id && targetIds.has(option.id)) {
+        matchNames.push(option.alias || option.name || option.id);
+      }
+    });
+  }
+
+  renderAccessoryOptionList(
+    accessorySynthesisTargetEffectsEl,
+    targetItem?.specialOptions || [],
+  );
+
+  if (matchHint) {
+    if (matchNames.length > 0) {
+      matchHint.textContent = `一致効果：${matchNames.join(" / ")}`;
+    } else {
+      matchHint.textContent = "一致効果がありません。";
+    }
+  }
+}
+
+function openAccessorySynthesis(index) {
+  if (!isAccessorySynthesisUnlocked()) {
+    log("⚠️ まだ装飾品合成は解放されていない。");
+    return;
+  }
+  const baseItem = inventory[index];
+  if (!baseItem || baseItem.kind !== "accessory") return;
+  if (!isDoubleEffectAccessory(baseItem)) {
+    log("⚠️ 効果が2つの装飾品のみ合成できる。");
+    return;
+  }
+  accessorySynthesisBaseItem = baseItem;
+
+  const { candidates, lockedMatches } =
+    getAccessoryMatchingCandidates(baseItem);
+  accessorySynthesisCandidates = candidates;
+  accessorySynthesisLockedMatches = lockedMatches;
+
+  if (accessorySynthesisBaseNameEl) {
+    accessorySynthesisBaseNameEl.textContent = baseItem.name || "";
+  }
+  renderAccessoryOptionList(
+    accessorySynthesisBaseEffectsEl,
+    baseItem.specialOptions || [],
+  );
+
+  if (accessorySynthesisTargetSelectEl) {
+    accessorySynthesisTargetSelectEl.innerHTML = "";
+  }
+
+  if (accessorySynthesisCandidates.length === 0) {
+    if (accessorySynthesisTargetSelectEl) {
+      const option = document.createElement("option");
+      option.textContent = "合成素材がありません";
+      option.value = "";
+      accessorySynthesisTargetSelectEl.appendChild(option);
+      accessorySynthesisTargetSelectEl.disabled = true;
+    }
+    renderAccessoryOptionList(accessorySynthesisTargetEffectsEl, []);
+    if (accessorySynthesisMatchHintEl) {
+      accessorySynthesisMatchHintEl.textContent =
+        accessorySynthesisLockedMatches > 0
+          ? "ロック解除した装飾品が合成素材になります。"
+          : "合成素材がありません。";
+    }
+    if (accessorySynthesisConfirmEl) {
+      accessorySynthesisConfirmEl.disabled = true;
+    }
+  } else {
+    if (accessorySynthesisTargetSelectEl) {
+      accessorySynthesisTargetSelectEl.disabled = false;
+      accessorySynthesisCandidates.forEach((candidate, candidateIndex) => {
+        const option = document.createElement("option");
+        option.value = String(candidateIndex);
+        option.textContent = candidate.item?.name || "装飾品";
+        accessorySynthesisTargetSelectEl.appendChild(option);
+      });
+      accessorySynthesisTargetSelectEl.value = "0";
+    }
+    if (accessorySynthesisConfirmEl) {
+      accessorySynthesisConfirmEl.disabled = false;
+    }
+    updateAccessorySynthesisTarget(0);
+  }
+
+  if (accessorySynthesisModalEl) {
+    accessorySynthesisModalEl.classList.remove("hidden");
+    accessorySynthesisModalEl.removeAttribute("inert");
+    accessorySynthesisModalEl.setAttribute("aria-hidden", "false");
+  }
+}
+
+function closeAccessorySynthesisModal() {
+  if (!accessorySynthesisModalEl) return;
+  if (accessorySynthesisModalEl.contains(document.activeElement)) {
+    document.activeElement.blur();
+  }
+  accessorySynthesisModalEl.classList.add("hidden");
+  accessorySynthesisModalEl.setAttribute("inert", "");
+  accessorySynthesisModalEl.setAttribute("aria-hidden", "true");
+  accessorySynthesisBaseItem = null;
+  accessorySynthesisCandidates = [];
+  accessorySynthesisLockedMatches = 0;
+}
+
+function confirmAccessorySynthesis() {
+  const baseItem = accessorySynthesisBaseItem;
+  if (!baseItem) return;
+  if (!accessorySynthesisTargetSelectEl) return;
+  const candidateIndex = Number(accessorySynthesisTargetSelectEl.value);
+  const target = accessorySynthesisCandidates[candidateIndex];
+  const targetItem = target?.item;
+  if (!targetItem) {
+    log("合成素材を選択してください。");
+    return;
+  }
+  const baseOptions = Array.isArray(baseItem.specialOptions)
+    ? baseItem.specialOptions
+    : [];
+  const targetOptions = Array.isArray(targetItem.specialOptions)
+    ? targetItem.specialOptions
+    : [];
+  let upgradedCount = 0;
+
+  baseOptions.forEach((option) => {
+    const match = targetOptions.find((other) => other?.id === option?.id);
+    if (!match) return;
+    const currentValue = Number(option?.value) || 0;
+    const maxValue = getAccessoryOptionMax(option);
+    if (currentValue >= maxValue) return;
+    const nextValue = Math.min(maxValue, currentValue + 1);
+    option.value = nextValue;
+    if (typeof option.describe === "function") {
+      option.description = option.describe(nextValue);
+    } else if (typeof option.description === "string") {
+      option.description = option.description.replace(
+        /-?\d+(?:\.\d+)?/,
+        String(nextValue),
+      );
+    }
+    upgradedCount += 1;
+  });
+
+  if (upgradedCount === 0) {
+    log("⚠️ 効果が上限に達しているため合成できない。");
+    return;
+  }
+
+  inventory.splice(target.index, 1);
+  if (typeof markInventoryDirty === "function") {
+    markInventoryDirty();
+  }
+  log(`✨ ${baseItem.name}の効果が${upgradedCount}つ強化された。`);
+  renderInventory();
+  refresh();
+  closeAccessorySynthesisModal();
+}
+
+if (accessorySynthesisTargetSelectEl) {
+  accessorySynthesisTargetSelectEl.addEventListener("change", (event) => {
+    const value = Number(event.target.value);
+    if (!Number.isFinite(value)) return;
+    updateAccessorySynthesisTarget(value);
   });
 }
 // アイテムのトータル加算値を計算

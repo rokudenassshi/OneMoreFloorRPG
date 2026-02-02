@@ -27,6 +27,7 @@ const player = {
   stayOnCurrentFloor: false,
   weatheredWeaponReceived: false,
   weatheredWeaponHintShown: false,
+  accessorySynthesisUnlocked: false,
 };
 
 function calcMaxHp() {
@@ -372,7 +373,7 @@ function getEquipmentSpecialEffects() {
     agilityRate: 0,
     selfDamageBoost: 0,
     attackAgainChance: 0,
-    cursedAccessory: false,
+    cursedAccessory: 0,
   };
 
   getEquipmentSpecialOptions().forEach((option) => {
@@ -405,7 +406,7 @@ function getEquipmentSpecialEffects() {
         break;
       case "cursed_accessory":
         effects.expZero = true;
-        effects.cursedAccessory = true;
+        effects.cursedAccessory += value > 0 ? value : 1;
         break;
       case "rare_encounter":
       case "rare_encounter_plus":
@@ -451,7 +452,7 @@ function getSpecialEffects() {
     expFinalMultiplier: equipmentEffects.expFinalMultiplier || 1,
     lifeSteal: equipmentEffects.lifeSteal + (skillEffects.lifeSteal || 0),
     expZero: equipmentEffects.expZero || false,
-    cursedAccessory: equipmentEffects.cursedAccessory || false,
+    cursedAccessory: equipmentEffects.cursedAccessory || 0,
     lifeStealDamage: skillEffects.lifeStealDamage || 0,
     lifeStealOverHealRate: skillEffects.lifeStealOverHealRate || 0,
     reflect:
