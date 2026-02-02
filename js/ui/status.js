@@ -1,4 +1,4 @@
-const statPointUnits = [1, 10, 100, 1000];
+const statPointUnits = [1, 100, 1000, 10000];
 let statPointUnit = 1;
 const statAutoAssignOptions = [
   { id: "power", label: "ちから" },
@@ -307,6 +307,11 @@ function renderStatus() {
   const powerBase = player.status.power;
   const vitalityBase = player.status.vitality;
   const agilityBase = player.status.agility;
+  const assignedStatPoints = ["power", "vitality", "agility"].reduce(
+    (sum, stat) =>
+      sum + Math.max(0, Math.floor((player.status[stat] - 10) / 5)),
+    0,
+  );
   const powerBonusText = bonus.power ? `（+${bonus.power}）` : "";
   const vitalityBonusText = bonus.vitality ? `（+${bonus.vitality}）` : "";
   const agilityBonusText = bonus.agility ? `（+${bonus.agility}）` : "";
@@ -370,6 +375,11 @@ function renderStatus() {
                     }>${unit}</button>`,
                 )
                 .join("")}
+            </div>
+            <div class="status-point-buttons">
+              <button class="skill-reset-button" onclick="resetAllStats()" ${
+                assignedStatPoints > 0 ? "" : "disabled"
+              }>一括リセット</button>
             </div>
           </div>`
         : ""
@@ -545,7 +555,27 @@ function subStat(stat) {
   refresh();
   renderStatus();
 }
+function resetAllStats() {
+  if (player.maxReachedFloor < UNLOCK_FLOOR) return;
+  const assignedPoints = ["power", "vitality", "agility"].reduce(
+    (sum, stat) =>
+      sum + Math.max(0, Math.floor((player.status[stat] - 10) / 5)),
+    0,
+  );
+  if (assignedPoints <= 0) return;
+  const shouldReset = confirm(
+    "割り振ったステータスポイントをすべてリセットします。よろしいですか？",
+  );
+  if (!shouldReset) return;
 
+  player.status.power = 10;
+  player.status.vitality = 10;
+  player.status.agility = 10;
+  player.statPoints += assignedPoints;
+
+  refresh();
+  renderStatus();
+}
 function setStatPointUnit(unit) {
   if (!statPointUnits.includes(unit)) return;
   statPointUnit = unit;
