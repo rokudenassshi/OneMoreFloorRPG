@@ -88,6 +88,11 @@ function performAutoSave(options = {}) {
       statPointUnlockGranted: player.statPointUnlockGranted,
       unassignedPoints: player.unassignedPoints,
       skills: { ...player.skills },
+      skillPresets: Array.isArray(player.skillPresets)
+        ? player.skillPresets.map((preset) =>
+            preset?.skills ? { skills: { ...preset.skills } } : null,
+          )
+        : [null, null, null],
       autoAssignExpSkillPoints: player.autoAssignExpSkillPoints,
       autoAssignStatTarget: player.autoAssignStatTarget,
       stayBattleUnlocked: player.stayBattleUnlocked,
@@ -196,6 +201,15 @@ function loadAutoSave() {
     savedPlayer.skills && typeof savedPlayer.skills === "object"
       ? { ...savedPlayer.skills }
       : {};
+  if (Array.isArray(savedPlayer.skillPresets)) {
+    player.skillPresets = savedPlayer.skillPresets.map((preset) =>
+      preset?.skills && typeof preset.skills === "object"
+        ? { skills: { ...preset.skills } }
+        : null,
+    );
+  } else {
+    player.skillPresets = [null, null, null];
+  }
 
   inventory.length = 0;
   isLoadingSave = true;

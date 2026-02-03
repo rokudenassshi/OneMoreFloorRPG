@@ -681,7 +681,48 @@ status-actions {
   gap: 12px;
   flex-wrap: wrap;
 }
-
+.skill-preset-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.skill-preset-button.is-empty {
+  opacity: 0.6;
+}
+.skill-preset-button.is-filled {
+  border-color: #7a7a7a;
+}
+.skill-preset-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+.skill-preset-dialog {
+  background: #1f1f1f;
+  border: 1px solid #444;
+  border-radius: 12px;
+  padding: 16px;
+  width: min(90vw, 360px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+}
+.skill-preset-dialog-title {
+  font-weight: bold;
+  margin-bottom: 6px;
+}
+.skill-preset-dialog-body {
+  font-size: 13px;
+  opacity: 0.9;
+  margin-bottom: 12px;
+}
+.skill-preset-dialog-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
 .skill-reset-button {
   min-height: 36px;
   padding: 6px 12px;

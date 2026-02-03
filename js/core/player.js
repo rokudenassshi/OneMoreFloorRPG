@@ -17,6 +17,7 @@ const player = {
   statPoints: 0,
   statPointUnlockGranted: false,
   skills: {},
+  skillPresets: [null, null, null],
   weapon: null,
   weapon2: null,
   accessory: null,
