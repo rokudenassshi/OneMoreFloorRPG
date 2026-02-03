@@ -1305,11 +1305,11 @@ function dropItem() {
   }
 
   if (enemy.isRare) {
-    const rareAccessoryDropRate = floor >= WEATHERED_EVENT_FLOOR ? 1.5 : 1;
+    const rareAccessoryDropRate = floor >= WEATHERED_EVENT_FLOOR ? 0.5 : 1;
     if (Math.random() >= rareAccessoryDropRate) {
       return;
     }
-    const doubleEffectChance = floor >= WEATHERED_EVENT_FLOOR ? 1.0001 : 0;
+    const doubleEffectChance = floor >= WEATHERED_EVENT_FLOOR ? 0.0001 : 0;
     const optionCount = Math.random() < doubleEffectChance ? 2 : 1;
     const item = window.ItemGen.createAccessoryForDrop(floor, { optionCount });
     item.isRareDrop = true;
