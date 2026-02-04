@@ -50,6 +50,14 @@ let accessorySynthesisLockedMatches = 0;
 // ユニーク武器
 const WEATHERED_KILL_THRESHOLD = 100;
 const CURSED_KILL_STEP = 10;
+const doubleEffectUnlockStorageKey =
+  window.DOUBLE_EFFECT_UNLOCK_STORAGE_KEY || "omf_double_effect_bonus_v1";
+const DOUBLE_EFFECT_CHANCE_STEP = 0.00001;
+let doubleEffectChanceBonus = 0;
+
+function isDoubleEffectBonusUnlocked() {
+  return localStorage.getItem(doubleEffectUnlockStorageKey) === "enabled";
+}
 
 function isWeatheredItem(item) {
   return Boolean(item?.isWeathered);
@@ -1305,11 +1313,17 @@ function dropItem() {
   }
 
   if (enemy.isRare) {
+    if (isDoubleEffectBonusUnlocked()) {
+      doubleEffectChanceBonus += DOUBLE_EFFECT_CHANCE_STEP;
+    }
     const rareAccessoryDropRate = floor >= WEATHERED_EVENT_FLOOR ? 0.5 : 1;
     if (Math.random() >= rareAccessoryDropRate) {
       return;
     }
-    const doubleEffectChance = floor >= WEATHERED_EVENT_FLOOR ? 0.0001 : 0;
+    const baseDoubleEffectChance = floor >= WEATHERED_EVENT_FLOOR ? 0.0001 : 0;
+    const doubleEffectChance =
+      baseDoubleEffectChance +
+      (isDoubleEffectBonusUnlocked() ? doubleEffectChanceBonus : 0);
     const optionCount = Math.random() < doubleEffectChance ? 2 : 1;
     const item = window.ItemGen.createAccessoryForDrop(floor, { optionCount });
     item.isRareDrop = true;
@@ -1319,6 +1333,7 @@ function dropItem() {
     }
     inventory.push(item);
     if (optionCount === 2) {
+      doubleEffectChanceBonus = 0;
       log(`🎁✨光り輝く装飾品 ${item.name}を手に入れた！`);
     } else {
       log(`🎁 ${item.name}を手に入れた`);
