@@ -101,6 +101,10 @@ function performAutoSave(options = {}) {
       weatheredWeaponReceived: player.weatheredWeaponReceived,
       weatheredWeaponHintShown: player.weatheredWeaponHintShown,
       accessorySynthesisUnlocked: player.accessorySynthesisUnlocked,
+      doubleEffectChanceBonus:
+        typeof doubleEffectChanceBonus === "number"
+          ? doubleEffectChanceBonus
+          : 0,
       weaponIndex,
       weapon2Index,
       accessoryIndex,
@@ -197,6 +201,12 @@ function loadAutoSave() {
   player.accessorySynthesisUnlocked = Boolean(
     savedPlayer.accessorySynthesisUnlocked,
   );
+  if (typeof doubleEffectChanceBonus !== "undefined") {
+    const savedDoubleEffectBonus = Number(savedPlayer.doubleEffectChanceBonus);
+    doubleEffectChanceBonus = Number.isFinite(savedDoubleEffectBonus)
+      ? Math.max(0, savedDoubleEffectBonus)
+      : 0;
+  }
   player.skills =
     savedPlayer.skills && typeof savedPlayer.skills === "object"
       ? { ...savedPlayer.skills }
