@@ -4,6 +4,7 @@ const functions = require("firebase-functions");
 const serialCodeLookup = {
   unlockrokudemonaistay: "stayBattle",
   unlockaccsynx9k2p8mrokudemonai7q4r6t1: "accessorySynthesis",
+  unlockdoubleeffectbonus8r2k9m1x: "doubleEffectBonus",
   // 追加するならここに
 };
 

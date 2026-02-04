@@ -52,7 +52,7 @@ const WEATHERED_KILL_THRESHOLD = 100;
 const CURSED_KILL_STEP = 10;
 const doubleEffectUnlockStorageKey =
   window.DOUBLE_EFFECT_UNLOCK_STORAGE_KEY || "omf_double_effect_bonus_v1";
-const DOUBLE_EFFECT_CHANCE_STEP = 0.00001;
+const DOUBLE_EFFECT_CHANCE_STEP = 0.0000001;
 let doubleEffectChanceBonus = 0;
 
 function isDoubleEffectBonusUnlocked() {
@@ -190,8 +190,11 @@ function incrementCursedItemStat(item) {
     vitality: Number(item.baseBonus?.vitality) || 0,
     agility: Number(item.baseBonus?.agility) || 0,
   };
-  item.baseBonus[targetStat] += 1;
-  log(`🔮 ${item.name}の${getCursedStatLabel(targetStat)}が1上がった。`);
+  const specialEffects = getSpecialEffects();
+  item.baseBonus[targetStat] += specialEffects.cursedAccessory;
+  log(
+    `🔮 ${item.name}の${getCursedStatLabel(targetStat)}が${specialEffects.cursedAccessory}上がった。`,
+  );
 }
 
 function handleWeatheredWeaponProgress({ defeatedRareEnemy = false } = {}) {
@@ -1315,6 +1318,7 @@ function dropItem() {
   if (enemy.isRare) {
     if (isDoubleEffectBonusUnlocked()) {
       doubleEffectChanceBonus += DOUBLE_EFFECT_CHANCE_STEP;
+      log(`次こそは光り輝く装飾品を…`);
     }
     const rareAccessoryDropRate = floor >= WEATHERED_EVENT_FLOOR ? 0.5 : 1;
     if (Math.random() >= rareAccessoryDropRate) {
@@ -1335,8 +1339,9 @@ function dropItem() {
     if (optionCount === 2) {
       doubleEffectChanceBonus = 0;
       log(`🎁✨光り輝く装飾品 ${item.name}を手に入れた！`);
-    } else {
+    } else if (isDoubleEffectBonusUnlocked()) {
       log(`🎁 ${item.name}を手に入れた`);
+      log(`次こそは光り輝く装飾品を…`);
     }
     if (typeof showRareEnemyPopup === "function") {
       if (typeof item.name === "string" && item.name.startsWith("神々しい")) {

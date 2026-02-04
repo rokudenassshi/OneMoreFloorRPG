@@ -15,4 +15,13 @@ const serialCodeActions = {
     logMessage:
       "✨ シリアルコードを確認しました。装飾品に合成機能が追加されました。",
   },
+  doubleEffectBonus: {
+    isUnlocked: () =>
+      localStorage.getItem("omf_double_effect_bonus_v1") === "enabled",
+    unlock: () => {
+      localStorage.setItem("omf_double_effect_bonus_v1", "enabled");
+    },
+    logMessage:
+      "✨ シリアルコードを確認しました。光り輝く装飾品の抽選強化が有効になった！",
+  },
 };

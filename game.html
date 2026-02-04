@@ -3,231 +3,224 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no">
   <title>OneMoreFloorRPG</title>
-  <link rel="stylesheet" href="css/style.css?v=2.1.11">
+  <link rel="stylesheet" href="css/style.css?v=2.1.13">
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1047750481134162"
-     crossorigin="anonymous"></script>
+    crossorigin="anonymous"></script>
 </head>
+
 <body>
   <div class="game">
     <div class="status">
       <div class="header-row">
         <div>Lv：<span id="playerLevel"></span></div>
-         <div class="floor-info">
+        <div class="floor-info">
           階層：<span id="floor"></span>
           <button class="teleport-button" type="button" onclick="openTeleportModal()">転移</button>
         </div>
-      </div><div class="exp-bar">
-  <div class="exp-bar-fill" id="expBarFill"></div>
-</div>
+      </div>
+      <div class="exp-bar">
+        <div class="exp-bar-fill" id="expBarFill"></div>
+      </div>
 
-<div class="battle-status">
+      <div class="battle-status">
         <div class="player-hp">HP：<span id="playerHp"></span></div>
         <div class="enemy-info">
           <div class="enemy-name"><span id="enemyName"></span></div>
           <div class="enemy-hp"><span id="enemyHp">---</span></div>
         </div>
 
-    <div class="log" id="log"></div>
+        <div class="log" id="log"></div>
 
-  <div id="rareEnemyPopup" class="rare-popup" aria-live="assertive" aria-hidden="true">
-      <div class="rare-popup-content" role="alert">
-        <div class="rare-popup-title" id="rareEnemyPopupTitle">レアモンスター出現！</div>
-        <div class="rare-popup-name" id="rareEnemyPopupName"></div>
-        <div class="rare-popup-hint" id="rareEnemyPopupHint">タップで閉じる</div>
-        <button class="rare-popup-close" id="rareEnemyPopupClose" type="button" hidden>閉じる</button>
-      </div>
-    </div>
+        <div id="rareEnemyPopup" class="rare-popup" aria-live="assertive" aria-hidden="true">
+          <div class="rare-popup-content" role="alert">
+            <div class="rare-popup-title" id="rareEnemyPopupTitle">レアモンスター出現！</div>
+            <div class="rare-popup-name" id="rareEnemyPopupName"></div>
+            <div class="rare-popup-hint" id="rareEnemyPopupHint">タップで閉じる</div>
+            <button class="rare-popup-close" id="rareEnemyPopupClose" type="button" hidden>閉じる</button>
+          </div>
+        </div>
 
-    <!-- 探索 -->
-    <div id="exploreButtons">
-      <div class="row">
-        <button onclick="move(1)">すすむ</button>
-        <button onclick="openInventory()">アイテム</button>
-      </div>
-      <div class="row">
-        <button onclick="move(-1)">もどる</button>
-        <button onclick="openStatus()">ステータス</button>
-      </div>
-    </div>
+        <!-- 探索 -->
+        <div id="exploreButtons">
+          <div class="row">
+            <button onclick="move(1)">すすむ</button>
+            <button onclick="openInventory()">アイテム</button>
+          </div>
+          <div class="row">
+            <button onclick="move(-1)">もどる</button>
+            <button onclick="openStatus()">ステータス</button>
+          </div>
+        </div>
 
-    <!-- 戦闘 -->
-    <div id="battleButtons" style="display:none;">
-      <div class="row">
-        <button onclick="attack()">たたかう</button>
-        <button onclick="useHerbInBattle()">やくそう</button>
-      </div>
-      <div class="row">
-        <button class="escape-btn" onclick="escape()">にげる</button>
-        <button onclick="openStatus()">ステータス</button>
-      </div>
-  </div>
+        <!-- 戦闘 -->
+        <div id="battleButtons" style="display:none;">
+          <div class="row">
+            <button onclick="attack()">たたかう</button>
+            <button onclick="useHerbInBattle()">やくそう</button>
+          </div>
+          <div class="row">
+            <button class="escape-btn" onclick="escape()">にげる</button>
+            <button onclick="openStatus()">ステータス</button>
+          </div>
+        </div>
 
-  <!-- アイテム画面 -->
-  <div id="inventory" style="display:none;">
-    <div class="screen-header">
-              <div class="screen-header-actions">
-                <button class="discard-button" onclick="openDiscardWeakScreen()">フィルター</button>
-                <button class="discard-button" onclick="discardUnprotectedItems()">一括破棄</button>
-                <button class="discard-button" onclick="toggleInventorySort()">ソート</button>
-                <button class="back-button" onclick="closeInventory()">戻る</button>
-      </div></div>
-       <div class="inventory-tabs" role="tablist" aria-label="アイテム分類">
-      <button class="inventory-tab is-active" data-tab="equipment" role="tab" aria-selected="true" onclick="setInventoryTab('equipment')">装備</button>
-      <button class="inventory-tab" data-tab="accessory" role="tab" aria-selected="false" onclick="setInventoryTab('accessory')">装飾品</button>
-    </div>
-    <div id="itemList"></div>
-    <div class="inventory-footer">
-      <button class="scroll-top-button" onclick="closeInventory()">戻る</button>
-    </div>
-  </div>
+        <!-- アイテム画面 -->
+        <div id="inventory" style="display:none;">
+          <div class="screen-header">
+            <div class="screen-header-actions">
+              <button class="discard-button" onclick="openDiscardWeakScreen()">フィルター</button>
+              <button class="discard-button" onclick="discardUnprotectedItems()">一括破棄</button>
+              <button class="discard-button" onclick="toggleInventorySort()">ソート</button>
+              <button class="back-button" onclick="closeInventory()">戻る</button>
+            </div>
+          </div>
+          <div class="inventory-tabs" role="tablist" aria-label="アイテム分類">
+            <button class="inventory-tab is-active" data-tab="equipment" role="tab" aria-selected="true"
+              onclick="setInventoryTab('equipment')">装備</button>
+            <button class="inventory-tab" data-tab="accessory" role="tab" aria-selected="false"
+              onclick="setInventoryTab('accessory')">装飾品</button>
+          </div>
+          <div id="itemList"></div>
+          <div class="inventory-footer">
+            <button class="scroll-top-button" onclick="closeInventory()">戻る</button>
+          </div>
+        </div>
 
- <!-- アイテムフィルター設定画面 -->
-  <div id="discardWeakScreen" style="display:none;">
-    <div class="screen-header">
-      <h3>アイテムフィルター設定</h3>
-      <button class="back-button" onclick="closeDiscardWeakScreen()">戻る</button>
-    </div>
-    <div class="discard-weak-form">
-      <p class="discard-weak-note">入力した数値以下の装備は拾いません</p>
-      <div class="discard-weak-row">
-        <label for="discardCommonInput">ちから・たいりょく・すばやさ共通</label>
-      </div>
-      <div class="discard-weak-row">
-        <input id="discardCommonInput" type="number" min="0" step="1">
-      </div>
-      <div class="discard-weak-row">
-        <label for="discardAccessoryShinyOnly">装飾品：輝く以外は拾わない</label>
-        <input id="discardAccessoryShinyOnly" type="checkbox">
-      </div>
-      <div class="discard-weak-row">
-        <label for="discardAccessoryNone">装飾品：すべて拾わない</label>
-        <input id="discardAccessoryNone" type="checkbox">
-      </div>
-      <div class="row">
-                <button class="discard-button" onclick="discardWeakerEquipment()">設定を保存</button>
-      </div>
-    </div>
-  </div>
-  <!-- 装飾品合成モーダル -->
-  <div
-    id="accessorySynthesisModal"
-    class="modal hidden"
-    aria-hidden="true"
-    inert
-  >
-    <div class="modal-content accessory-synthesis-modal-content">
-      <h3>装飾品合成</h3>
-      <div class="accessory-synthesis-section">
-        <div class="accessory-synthesis-label">合成元</div>
-        <div id="accessorySynthesisBaseName" class="accessory-synthesis-name"></div>
-        <ul
-          id="accessorySynthesisBaseEffects"
-          class="accessory-synthesis-list"
-        ></ul>
-      </div>
-      <div class="accessory-synthesis-section">
-        <div class="accessory-synthesis-label">合成素材</div>
-        <select id="accessorySynthesisTargetSelect"></select>
-        <ul
-          id="accessorySynthesisTargetEffects"
-          class="accessory-synthesis-list"
-        ></ul>
-        <div
-          id="accessorySynthesisMatchHint"
-          class="accessory-synthesis-hint"
-        ></div>
-      </div>
-      <div class="accessory-synthesis-actions">
-        <button id="accessorySynthesisConfirm" onclick="confirmAccessorySynthesis()">合成</button>
-        <button onclick="closeAccessorySynthesisModal()">閉じる</button>
-      </div>
-    </div>
-  </div>
-  <!-- ステータス画面 -->
-  <div id="statusScreen" style="display:none;">
-    <div class="screen-header">
-      <h3>ステータス <span id="statusVersion" class="status-version"></span></h3>
-      <button class="back-button" onclick="closeStatus()">戻る</button>
-    </div>
-    <div id="statusContent"></div>
-  </div>
+        <!-- アイテムフィルター設定画面 -->
+        <div id="discardWeakScreen" style="display:none;">
+          <div class="screen-header">
+            <h3>アイテムフィルター設定</h3>
+            <button class="back-button" onclick="closeDiscardWeakScreen()">戻る</button>
+          </div>
+          <div class="discard-weak-form">
+            <p class="discard-weak-note">入力した数値以下の装備は拾いません</p>
+            <div class="discard-weak-row">
+              <label for="discardCommonInput">ちから・たいりょく・すばやさ共通</label>
+            </div>
+            <div class="discard-weak-row">
+              <input id="discardCommonInput" type="number" min="0" step="1">
+            </div>
+            <div class="discard-weak-row">
+              <label for="discardAccessoryShinyOnly">装飾品：輝く以外は拾わない</label>
+              <input id="discardAccessoryShinyOnly" type="checkbox">
+            </div>
+            <div class="discard-weak-row">
+              <label for="discardAccessoryNone">装飾品：すべて拾わない</label>
+              <input id="discardAccessoryNone" type="checkbox">
+            </div>
+            <div class="row">
+              <button class="discard-button" onclick="discardWeakerEquipment()">設定を保存</button>
+            </div>
+          </div>
+        </div>
+        <!-- 装飾品合成モーダル -->
+        <div id="accessorySynthesisModal" class="modal hidden" aria-hidden="true" inert>
+          <div class="modal-content accessory-synthesis-modal-content">
+            <h3>装飾品合成</h3>
+            <div class="accessory-synthesis-section">
+              <div class="accessory-synthesis-label">合成元</div>
+              <div id="accessorySynthesisBaseName" class="accessory-synthesis-name"></div>
+              <ul id="accessorySynthesisBaseEffects" class="accessory-synthesis-list"></ul>
+            </div>
+            <div class="accessory-synthesis-section">
+              <div class="accessory-synthesis-label">合成素材</div>
+              <select id="accessorySynthesisTargetSelect"></select>
+              <ul id="accessorySynthesisTargetEffects" class="accessory-synthesis-list"></ul>
+              <div id="accessorySynthesisMatchHint" class="accessory-synthesis-hint"></div>
+            </div>
+            <div class="accessory-synthesis-actions">
+              <button id="accessorySynthesisConfirm" onclick="confirmAccessorySynthesis()">合成</button>
+              <button onclick="closeAccessorySynthesisModal()">閉じる</button>
+            </div>
+          </div>
+        </div>
+        <!-- ステータス画面 -->
+        <div id="statusScreen" style="display:none;">
+          <div class="screen-header">
+            <h3>ステータス <span id="statusVersion" class="status-version"></span></h3>
+            <button class="back-button" onclick="closeStatus()">戻る</button>
+          </div>
+          <div id="statusContent"></div>
+        </div>
 
-<!-- スキル割り振り画面 -->
-  <div id="skillScreen" style="display:none;">
-    <div class="screen-header">
-      <h3>スキル割り振り</h3>
-      <button class="back-button" onclick="closeSkillAllocation()">戻る</button>
-    </div>
-    <div id="skillScreenContent"></div>
-  </div>
+        <!-- スキル割り振り画面 -->
+        <div id="skillScreen" style="display:none;">
+          <div class="screen-header">
+            <h3>スキル割り振り</h3>
+            <button class="back-button" onclick="closeSkillAllocation()">戻る</button>
+          </div>
+          <div id="skillScreenContent"></div>
+        </div>
 
-  <footer class="site-footer">
-    <a href="index.html">トップへ戻る</a>
-    <a href="privacy.html">プライバシーポリシー</a>
-  </footer>
+        <footer class="site-footer">
+          <a href="index.html">トップへ戻る</a>
+          <a href="privacy.html">プライバシーポリシー</a>
+        </footer>
 
-<div id="statUnlockModal" class="modal hidden">
-  <div class="modal-content">
-    <h2>🎉ステータスポイント解放</h2>
-    <p>
-      ステータスポイントが解放されました！<br>
-      <strong>+<span id="unlockPointAmount"></span></strong> ポイント獲得！<br>
-      遊んでいただきありがとうございます。<br>
-      これ以降の敵は強いです。<br>
-      まだ見ぬ装備を求めて上ってください…
-    </p>
-    <button onclick="closeStatUnlockModal()">OK</button>
-  </div>
-</div>
-<div id="teleportModal" class="modal hidden" inert aria-hidden="true">
-  <div class="modal-content teleport-modal-content">
-    <h2>転移</h2>
-    <p>転移する階層を選択してください。</p>
-    <select id="teleportFloorSelect" aria-label="転移する階層"></select>
-    <div class="teleport-modal-actions">
-    <label id="teleportStayOption" class="teleport-stay-option" for="teleportStayCheckbox">
-      <input id="teleportStayCheckbox" type="checkbox" onchange="toggleStayOnCurrentFloor(this.checked)">
-      現在の階層に留まる
-    </label>
-      <button type="button" onclick="closeTeleportModal()">戻る</button>
-      <button type="button" onclick="teleportToFloor()">転移</button>
-    </div>
-  </div>
-</div>
+        <div id="statUnlockModal" class="modal hidden">
+          <div class="modal-content">
+            <h2>🎉ステータスポイント解放</h2>
+            <p>
+              ステータスポイントが解放されました！<br>
+              <strong>+<span id="unlockPointAmount"></span></strong> ポイント獲得！<br>
+              遊んでいただきありがとうございます。<br>
+              これ以降の敵は強いです。<br>
+              まだ見ぬ装備を求めて上ってください…
+            </p>
+            <button onclick="closeStatUnlockModal()">OK</button>
+          </div>
+        </div>
+        <div id="teleportModal" class="modal hidden" inert aria-hidden="true">
+          <div class="modal-content teleport-modal-content">
+            <h2>転移</h2>
+            <p>転移する階層を選択してください。</p>
+            <select id="teleportFloorSelect" aria-label="転移する階層"></select>
+            <div class="teleport-modal-actions">
+              <label id="teleportStayOption" class="teleport-stay-option" for="teleportStayCheckbox">
+                <input id="teleportStayCheckbox" type="checkbox" onchange="toggleStayOnCurrentFloor(this.checked)">
+                現在の階層に留まる
+              </label>
+              <button type="button" onclick="closeTeleportModal()">戻る</button>
+              <button type="button" onclick="teleportToFloor()">転移</button>
+            </div>
+          </div>
+        </div>
 
-  <!-- =====================
+        <!-- =====================
        JavaScript 読み込み
   ===================== -->
-  <!-- エントリーポイント -->
-  <script src="js/core/version.js?v=2.1.11"></script>
-  <script src="js/core/loader.js?v=2.1.11"></script>
-  <script type="module">
-  // Import the functions you need from the SDKs you need
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-analytics.js";
-  import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-functions.js";
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
+        <!-- エントリーポイント -->
+        <script src="js/core/version.js?v=2.1.13"></script>
+        <script src="js/core/loader.js?v=2.1.13"></script>
+        <script type="module">
+          // Import the functions you need from the SDKs you need
+          import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
+          import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-analytics.js";
+          import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-functions.js";
+          // TODO: Add SDKs for Firebase products that you want to use
+          // https://firebase.google.com/docs/web/setup#available-libraries
 
-  // Your web app's Firebase configuration
-  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-  const firebaseConfig = {
-    apiKey: "AIzaSyDVqb1zHONQouQMmUZR6K0LuqeMiPD2dCA",
-    authDomain: "one-more-floor-rpg-6.firebaseapp.com",
-    projectId: "one-more-floor-rpg-6",
-    storageBucket: "one-more-floor-rpg-6.firebasestorage.app",
-    messagingSenderId: "334316999025",
-    appId: "1:334316999025:web:d63e9e0a9d85562a7766d0",
-    measurementId: "G-8HVBF5YPWG"
-  };
+          // Your web app's Firebase configuration
+          // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+          const firebaseConfig = {
+            apiKey: "AIzaSyDVqb1zHONQouQMmUZR6K0LuqeMiPD2dCA",
+            authDomain: "one-more-floor-rpg-6.firebaseapp.com",
+            projectId: "one-more-floor-rpg-6",
+            storageBucket: "one-more-floor-rpg-6.firebasestorage.app",
+            messagingSenderId: "334316999025",
+            appId: "1:334316999025:web:d63e9e0a9d85562a7766d0",
+            measurementId: "G-8HVBF5YPWG"
+          };
 
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
-  window.firebaseFunctions = getFunctions(app);
-  window.firebaseHttpsCallable = httpsCallable;
-</script>
+          // Initialize Firebase
+          const app = initializeApp(firebaseConfig);
+          const analytics = getAnalytics(app);
+          window.firebaseFunctions = getFunctions(app);
+          window.firebaseHttpsCallable = httpsCallable;
+        </script>
 </body>
+
 </html>
