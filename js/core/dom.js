@@ -21,8 +21,33 @@ const inventoryTabButtons = Array.from(
 );
 const discardCommonInputEl = document.getElementById("discardCommonInput");
 const statusScreenEl = document.getElementById("statusScreen");
+const discardAccessoryShinyOnlyEl = document.getElementById(
+  "discardAccessoryShinyOnly",
+);
+const discardAccessoryNoneEl = document.getElementById("discardAccessoryNone");
 const statusContentEl = document.getElementById("statusContent");
 const statusVersionEl = document.getElementById("statusVersion");
 const skillScreenEl = document.getElementById("skillScreen");
 const skillScreenContentEl = document.getElementById("skillScreenContent");
 const playerLevelEl = document.getElementById("playerLevel");
+const accessorySynthesisModalEl = document.getElementById(
+  "accessorySynthesisModal",
+);
+const accessorySynthesisBaseNameEl = document.getElementById(
+  "accessorySynthesisBaseName",
+);
+const accessorySynthesisBaseEffectsEl = document.getElementById(
+  "accessorySynthesisBaseEffects",
+);
+const accessorySynthesisTargetSelectEl = document.getElementById(
+  "accessorySynthesisTargetSelect",
+);
+const accessorySynthesisTargetEffectsEl = document.getElementById(
+  "accessorySynthesisTargetEffects",
+);
+const accessorySynthesisMatchHintEl = document.getElementById(
+  "accessorySynthesisMatchHint",
+);
+const accessorySynthesisConfirmEl = document.getElementById(
+  "accessorySynthesisConfirm",
+);

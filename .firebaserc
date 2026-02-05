@@ -3,7 +3,8 @@
     "default": "one-more-floor-rpg",
     "test": "one-more-floor-rpg-test",
     "w": "one-more-floor-rpg",
-    "r": "one-more-floor-rpg-6"
+    "r": "one-more-floor-rpg-6",
+    "temp": "rokudemonai-test"
   },
   "targets": {
     "one-more-floor-rpg": {

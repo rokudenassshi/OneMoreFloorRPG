@@ -35,14 +35,29 @@ const HERB_ITEM_TEMPLATE = {
 const HERB_BASE_MAX = 10;
 
 const discardThresholdsKey = "roguelike_discard_thresholds";
-const discardThresholdDefaults = { value: 0 };
+const discardThresholdDefaults = {
+  value: 0,
+  accessoryShinyOnly: false,
+  accessoryNone: false,
+};
 let discardThresholds = { ...discardThresholdDefaults };
 let currentInventoryTab = "equipment";
 let inventorySortEnabled = false;
+let accessorySynthesisBaseItem = null;
+let accessorySynthesisCandidates = [];
+let accessorySynthesisLockedMatches = 0;
 
 // ユニーク武器
 const WEATHERED_KILL_THRESHOLD = 100;
 const CURSED_KILL_STEP = 10;
+const doubleEffectUnlockStorageKey =
+  window.DOUBLE_EFFECT_UNLOCK_STORAGE_KEY || "omf_double_effect_bonus_v1";
+const DOUBLE_EFFECT_CHANCE_STEP = 0.0000001;
+let doubleEffectChanceBonus = 0;
+
+function isDoubleEffectBonusUnlocked() {
+  return localStorage.getItem(doubleEffectUnlockStorageKey) === "enabled";
+}
 
 function isWeatheredItem(item) {
   return Boolean(item?.isWeathered);
@@ -51,11 +66,74 @@ function isWeatheredItem(item) {
 function isCursedItem(item) {
   return Boolean(item?.isCursed);
 }
-
+function isUniqueWeapon(item) {
+  return Boolean(item?.isUniqueWeapon);
+}
 function isDualWieldRestrictedItem(item) {
+  return isUniqueWeapon(item) || isWeatheredItem(item) || isCursedItem(item);
+}
+
+function isItemEquipped(item) {
   return (
-    Boolean(item?.isUniqueWeapon) || isWeatheredItem(item) || isCursedItem(item)
+    player.weapon === item ||
+    player.weapon2 === item ||
+    player.accessory === item
   );
+}
+
+function isAccessorySynthesisUnlocked() {
+  return Boolean(player?.accessorySynthesisUnlocked);
+}
+
+function isDoubleEffectAccessory(item) {
+  return Array.isArray(item?.specialOptions) && item.specialOptions.length >= 2;
+}
+
+function getAccessoryOptionLabel(option) {
+  return option?.description || option?.name || "";
+}
+
+function getAccessoryOptionDescribe(option, value) {
+  if (!option) return "";
+  if (typeof option.describe === "function") {
+    return option.describe(value);
+  }
+  const optionId = option.id;
+  if (optionId && Array.isArray(window.SpecialOptionPool)) {
+    const source = window.SpecialOptionPool.find((opt) => opt.id === optionId);
+    if (typeof source?.describe === "function") {
+      return source.describe(value);
+    }
+  }
+  if (typeof option.description === "string") {
+    return option.description.replace(/-?\d+(?:\.\d+)?/, String(value));
+  }
+  if (option.name) {
+    return `${option.name}+${value}`;
+  }
+  return String(value);
+}
+
+function getAccessoryOptionMax(option) {
+  const maxValue = Number(option?.max);
+  if (Number.isFinite(maxValue)) return maxValue;
+  return Number(option?.value) || 0;
+}
+
+function renderAccessoryOptionList(listEl, options) {
+  if (!listEl) return;
+  listEl.innerHTML = "";
+  if (!Array.isArray(options) || options.length === 0) {
+    const li = document.createElement("li");
+    li.textContent = "なし";
+    listEl.appendChild(li);
+    return;
+  }
+  options.forEach((option) => {
+    const li = document.createElement("li");
+    li.textContent = getAccessoryOptionLabel(option);
+    listEl.appendChild(li);
+  });
 }
 
 function enforceRestrictedSingleWeapon() {
@@ -112,17 +190,21 @@ function incrementCursedItemStat(item) {
     vitality: Number(item.baseBonus?.vitality) || 0,
     agility: Number(item.baseBonus?.agility) || 0,
   };
-  item.baseBonus[targetStat] += 1;
-  log(`🔮 ${item.name}の${getCursedStatLabel(targetStat)}が1上がった。`);
+  const specialEffects = getSpecialEffects();
+  item.baseBonus[targetStat] += specialEffects.cursedAccessory;
+  log(
+    `🔮 ${item.name}の${getCursedStatLabel(targetStat)}が${specialEffects.cursedAccessory}上がった。`,
+  );
 }
 
-function handleWeatheredWeaponProgress() {
+function handleWeatheredWeaponProgress({ defeatedRareEnemy = false } = {}) {
   const equippedItems = [player.weapon, player.weapon2];
   let didUpdate = false;
+  const progressIncrement = defeatedRareEnemy ? 2 : 1;
   equippedItems.forEach((item) => {
     if (!item) return;
     if (isWeatheredItem(item)) {
-      item.killCount = (item.killCount || 0) + 1;
+      item.killCount = (item.killCount || 0) + progressIncrement;
       didUpdate = true;
       if (item.killCount >= WEATHERED_KILL_THRESHOLD) {
         transformToCursedItem(item);
@@ -142,6 +224,20 @@ function handleWeatheredWeaponProgress() {
         didUpdate = true;
       }
     }
+  });
+  if (didUpdate && typeof markInventoryDirty === "function") {
+    markInventoryDirty();
+  }
+}
+function handleCursedAccessoryProgress({ defeatedRareEnemy = false } = {}) {
+  if (!defeatedRareEnemy) return;
+  const equippedItems = [player.weapon, player.weapon2];
+  let didUpdate = false;
+  equippedItems.forEach((item) => {
+    if (!item) return;
+    if (!isCursedItem(item)) return;
+    incrementCursedItemStat(item);
+    didUpdate = true;
   });
   if (didUpdate && typeof markInventoryDirty === "function") {
     markInventoryDirty();
@@ -271,7 +367,7 @@ function renderInventory() {
 
   renderEquipmentItems();
 }
-function renderConsumableItems() {
+function collectConsumableGroups() {
   const consumableGroups = [];
   const consumableMap = new Map();
 
@@ -290,6 +386,10 @@ function renderConsumableItems() {
     consumableMap.get(key).indices.push(index);
   });
 
+  return consumableGroups;
+}
+
+function appendConsumableGroups(consumableGroups) {
   consumableGroups.forEach((group) => {
     const { item, indices } = group;
     const div = document.createElement("div");
@@ -306,16 +406,16 @@ function renderConsumableItems() {
     `;
     itemListEl.appendChild(div);
   });
-  return consumableGroups.length;
 }
 
 function renderEquipmentItems() {
-  let hasContent = false;
-
-  if (renderConsumableItems() > 0) {
-    hasContent = true;
-  }
-
+  const consumableGroups = collectConsumableGroups();
+  const herbGroups = consumableGroups.filter(
+    (group) => group.item?.id === HERB_ITEM_TEMPLATE.id,
+  );
+  const otherConsumableGroups = consumableGroups.filter(
+    (group) => group.item?.id !== HERB_ITEM_TEMPLATE.id,
+  );
   const equipmentItems = [];
   inventory.forEach((item, index) => {
     if (item.kind === "consumable") {
@@ -325,67 +425,67 @@ function renderEquipmentItems() {
     if (isAccessory) {
       return;
     }
-    equipmentItems.push({ item, index, isAccessory });
-  });
-
-  if (equipmentItems.length === 0 && !hasContent) {
-    itemListEl.textContent = "アイテムなし";
-    return;
-  }
-  if (inventorySortEnabled) {
-    equipmentItems.sort((a, b) => {
-      return getItemScore(b.item) - getItemScore(a.item);
-    });
-  }
-
-  if (equipmentItems.length > 0) {
-    hasContent = true;
-  }
-  const hasDualWieldSkill =
-    typeof getSkillLevel === "function" && getSkillLevel("dual_wield") > 0;
-  const canUseDualWield =
-    hasDualWieldSkill && !isDualWieldRestrictedItem(player.weapon);
-  equipmentItems.forEach(({ item, index, isAccessory }) => {
     const isEquipped =
       player.weapon === item ||
       player.weapon2 === item ||
       player.accessory === item;
-    const isLocked = !!item.isLocked;
-    const lockMark = isLocked ? "🔒" : "";
-    const specialOptions = Array.isArray(item.specialOptions)
-      ? item.specialOptions
-      : [];
-    const specialLines = specialOptions
-      .map((option) => option.description || option.name)
-      .filter(Boolean);
+    equipmentItems.push({ item, index, isAccessory, isEquipped });
+  });
 
-    const totalBonus = getItemTotalBonus(item);
-    const totalParts = [];
-    if (totalBonus.power) totalParts.push(`ちから+${totalBonus.power}`);
-    if (totalBonus.vitality)
-      totalParts.push(`たいりょく+${totalBonus.vitality}`);
-    if (totalBonus.agility) totalParts.push(`すばやさ+${totalBonus.agility}`);
-    if (isAccessory && specialLines.length) {
-      totalParts.push(...specialLines);
+  if (equipmentItems.length === 0 && consumableGroups.length === 0) {
+    itemListEl.textContent = "アイテムなし";
+    return;
+  }
+  const sortEquipment = (a, b) => {
+    if (inventorySortEnabled) {
+      const scoreDiff = getItemScore(b.item) - getItemScore(a.item);
+      if (scoreDiff !== 0) return scoreDiff;
     }
+    return a.index - b.index;
+  };
+  equipmentItems.sort(sortEquipment);
+  const hasDualWieldSkill =
+    typeof getSkillLevel === "function" && getSkillLevel("dual_wield") > 0;
+  const canUseDualWield =
+    hasDualWieldSkill && !isDualWieldRestrictedItem(player.weapon);
+  const renderEquipmentEntries = (entries) => {
+    entries.forEach(({ item, index, isAccessory, isEquipped }) => {
+      const isLocked = !!item.isLocked;
+      const lockMark = isLocked ? "🔒" : "";
+      const specialOptions = Array.isArray(item.specialOptions)
+        ? item.specialOptions
+        : [];
+      const specialLines = specialOptions
+        .map((option) => option.description || option.name)
+        .filter(Boolean);
 
-    const equippedLabel =
-      player.weapon2 === item
-        ? "🟢[E2] "
-        : player.weapon === item
-          ? "🟢[E1] "
-          : player.accessory === item
-            ? "🟢[E] "
-            : "";
-    const div = document.createElement("div");
+      const totalBonus = getItemTotalBonus(item);
+      const totalParts = [];
+      if (totalBonus.power) totalParts.push(`ちから+${totalBonus.power}`);
+      if (totalBonus.vitality)
+        totalParts.push(`たいりょく+${totalBonus.vitality}`);
+      if (totalBonus.agility) totalParts.push(`すばやさ+${totalBonus.agility}`);
+      if (isAccessory && specialLines.length) {
+        totalParts.push(...specialLines);
+      }
 
-    const equipButtons = isEquipped
-      ? ""
-      : canUseDualWield && !isDualWieldRestrictedItem(item)
-        ? `<button onclick="equip(${index}, 'primary')">装備1</button>
+      const equippedLabel =
+        player.weapon2 === item
+          ? "🟢[E2] "
+          : player.weapon === item
+            ? "🟢[E1] "
+            : player.accessory === item
+              ? "🟢[E] "
+              : "";
+      const div = document.createElement("div");
+
+      const equipButtons = isEquipped
+        ? ""
+        : canUseDualWield && !isDualWieldRestrictedItem(item)
+          ? `<button onclick="equip(${index}, 'primary')">装備1</button>
            <button onclick="equip(${index}, 'secondary')">装備2</button>`
-        : `<button onclick="equip(${index})">装備</button>`;
-    div.innerHTML = `
+          : `<button onclick="equip(${index})">装備</button>`;
+      div.innerHTML = `
       <div>
         ${equippedLabel}
         ${lockMark}${item.name}
@@ -397,7 +497,7 @@ function renderEquipmentItems() {
       </div>
       <div style="margin-top:6px; display:flex; gap:10px; flex-wrap:wrap;">     
             ${
-              isEquipped
+              isEquipped || isUniqueWeapon(item)
                 ? ""
                 : `<button onclick="toggleItemLock(${index})">${
                     isLocked ? "解除" : "ロック"
@@ -405,7 +505,7 @@ function renderEquipmentItems() {
             }
 ${equipButtons}
                     ${
-                      isEquipped
+                      isEquipped || isUniqueWeapon(item)
                         ? ""
                         : isLocked
                           ? `<button disabled title="ロック中は捨てられません">捨てる</button>`
@@ -415,8 +515,19 @@ ${equipButtons}
       <hr>
     `;
 
-    itemListEl.appendChild(div);
-  });
+      itemListEl.appendChild(div);
+    });
+  };
+
+  if (herbGroups.length > 0) {
+    appendConsumableGroups(herbGroups);
+  }
+  renderEquipmentEntries(equipmentItems.filter((entry) => entry.isEquipped));
+  if (otherConsumableGroups.length > 0) {
+    appendConsumableGroups(otherConsumableGroups);
+  }
+
+  renderEquipmentEntries(equipmentItems.filter((entry) => !entry.isEquipped));
 }
 
 function renderAccessoryItems() {
@@ -426,7 +537,11 @@ function renderAccessoryItems() {
     if (item.kind !== "accessory") {
       return;
     }
-    accessoryItems.push({ item, index, isAccessory: true });
+    const isEquipped =
+      player.weapon === item ||
+      player.weapon2 === item ||
+      player.accessory === item;
+    accessoryItems.push({ item, index, isAccessory: true, isEquipped });
   });
 
   if (accessoryItems.length === 0) {
@@ -455,8 +570,16 @@ function renderAccessoryItems() {
     return 0;
   }
 
-  if (inventorySortEnabled) {
-    accessoryItems.sort((a, b) => {
+  accessoryItems.sort((a, b) => {
+    if (a.isEquipped !== b.isEquipped) {
+      return a.isEquipped ? -1 : 1;
+    }
+    if (inventorySortEnabled) {
+      // 0) 効果が二つのアクセサリーを最優先
+      const doubleA = isDoubleEffectAccessory(a.item);
+      const doubleB = isDoubleEffectAccessory(b.item);
+      if (doubleA !== doubleB) return doubleA ? -1 : 1;
+
       // 1) sortKey 昇順
       const skA = getAccessorySortKey(a.item);
       const skB = getAccessorySortKey(b.item);
@@ -466,19 +589,18 @@ function renderAccessoryItems() {
       const vA = getAccessoryAbilityValue(a.item);
       const vB = getAccessoryAbilityValue(b.item);
       if (vA !== vB) return vB - vA;
+    }
+    // 3) 最後に安定化（元の並び）
+    return a.index - b.index;
+  });
 
-      // 3) 最後に安定化（元の並び）
-      return a.index - b.index;
-    });
-  }
-
-  accessoryItems.forEach(({ item, index, isAccessory }) => {
-    const isEquipped =
-      player.weapon === item ||
-      player.weapon2 === item ||
-      player.accessory === item;
+  accessoryItems.forEach(({ item, index, isAccessory, isEquipped }) => {
     const isLocked = !!item.isLocked;
     const lockMark = isLocked ? "🔒" : "";
+    const isGlowingAccessory =
+      Array.isArray(item.specialOptions) && item.specialOptions.length >= 2;
+    const isSynthesisAvailable =
+      isAccessorySynthesisUnlocked() && isDoubleEffectAccessory(item);
     const specialOptions = Array.isArray(item.specialOptions)
       ? item.specialOptions
       : [];
@@ -500,7 +622,9 @@ function renderAccessoryItems() {
     div.innerHTML = `
       <div>
         ${isEquipped ? "🟢[E] " : ""}
-        ${lockMark}${item.name}
+        ${lockMark}<span class="${
+          isGlowingAccessory ? "glowing-accessory" : ""
+        }">${item.name}</span>
       </div>
 
       <div style="margin-top:4px;">
@@ -509,13 +633,18 @@ function renderAccessoryItems() {
       </div>
       <div style="margin-top:6px; display:flex; gap:10px; flex-wrap:wrap;">
         ${
-          isEquipped
+          isEquipped || isUniqueWeapon(item)
             ? ""
             : `<button onclick="toggleItemLock(${index})">${
                 isLocked ? "解除" : "ロック"
               }</button>`
         }
 ${isEquipped ? "" : `<button onclick="equip(${index})">装備</button>`}
+        ${
+          isSynthesisAvailable
+            ? `<button onclick="openAccessorySynthesis(${index})">合成</button>`
+            : ""
+        }
                     ${
                       isEquipped
                         ? ""
@@ -528,6 +657,209 @@ ${isEquipped ? "" : `<button onclick="equip(${index})">装備</button>`}
     `;
 
     itemListEl.appendChild(div);
+  });
+}
+
+function getAccessoryMatchingCandidates(baseItem) {
+  const baseOptions = Array.isArray(baseItem?.specialOptions)
+    ? baseItem.specialOptions
+    : [];
+  const baseIds = new Set(
+    baseOptions.map((option) => option?.id).filter(Boolean),
+  );
+  const candidates = [];
+  let lockedMatches = 0;
+
+  inventory.forEach((item, index) => {
+    if (!item || item === baseItem) return;
+    if (item.kind !== "accessory") return;
+    if (!isDoubleEffectAccessory(item)) return;
+    if (isItemEquipped(item)) return;
+    const itemOptions = Array.isArray(item.specialOptions)
+      ? item.specialOptions
+      : [];
+    const matchIds = itemOptions
+      .map((option) => option?.id)
+      .filter((id) => id && baseIds.has(id));
+    if (matchIds.length === 0) return;
+    if (item.isLocked) {
+      lockedMatches += 1;
+      return;
+    }
+    candidates.push({ item, index, matchIds });
+  });
+
+  return { candidates, lockedMatches };
+}
+
+function updateAccessorySynthesisTarget(candidateIndex) {
+  if (!accessorySynthesisTargetSelectEl) return;
+  const target = accessorySynthesisCandidates[candidateIndex];
+  const targetItem = target?.item || null;
+  const matchHint = accessorySynthesisMatchHintEl;
+  const baseItem = accessorySynthesisBaseItem;
+  const matchNames = [];
+  if (baseItem && targetItem) {
+    const targetIds = new Set(
+      targetItem.specialOptions?.map((option) => option?.id).filter(Boolean),
+    );
+    baseItem.specialOptions?.forEach((option) => {
+      if (option?.id && targetIds.has(option.id)) {
+        matchNames.push(option.alias || option.name || option.id);
+      }
+    });
+  }
+
+  renderAccessoryOptionList(
+    accessorySynthesisTargetEffectsEl,
+    targetItem?.specialOptions || [],
+  );
+
+  if (matchHint) {
+    if (matchNames.length > 0) {
+      matchHint.textContent = `一致効果：${matchNames.join(" / ")}`;
+    } else {
+      matchHint.textContent = "一致効果がありません。";
+    }
+  }
+}
+
+function openAccessorySynthesis(index) {
+  if (!isAccessorySynthesisUnlocked()) {
+    log("⚠️ まだ装飾品合成は解放されていない。");
+    return;
+  }
+  const baseItem = inventory[index];
+  if (!baseItem || baseItem.kind !== "accessory") return;
+  if (!isDoubleEffectAccessory(baseItem)) {
+    log("⚠️ 効果が2つの装飾品のみ合成できる。");
+    return;
+  }
+  accessorySynthesisBaseItem = baseItem;
+
+  const { candidates, lockedMatches } =
+    getAccessoryMatchingCandidates(baseItem);
+  accessorySynthesisCandidates = candidates;
+  accessorySynthesisLockedMatches = lockedMatches;
+
+  if (accessorySynthesisBaseNameEl) {
+    accessorySynthesisBaseNameEl.textContent = baseItem.name || "";
+  }
+  renderAccessoryOptionList(
+    accessorySynthesisBaseEffectsEl,
+    baseItem.specialOptions || [],
+  );
+
+  if (accessorySynthesisTargetSelectEl) {
+    accessorySynthesisTargetSelectEl.innerHTML = "";
+  }
+
+  if (accessorySynthesisCandidates.length === 0) {
+    if (accessorySynthesisTargetSelectEl) {
+      const option = document.createElement("option");
+      option.textContent = "合成素材がありません";
+      option.value = "";
+      accessorySynthesisTargetSelectEl.appendChild(option);
+      accessorySynthesisTargetSelectEl.disabled = true;
+    }
+    renderAccessoryOptionList(accessorySynthesisTargetEffectsEl, []);
+    if (accessorySynthesisMatchHintEl) {
+      accessorySynthesisMatchHintEl.textContent =
+        accessorySynthesisLockedMatches > 0
+          ? "ロック解除した装飾品が合成素材になります。"
+          : "合成素材がありません。";
+    }
+    if (accessorySynthesisConfirmEl) {
+      accessorySynthesisConfirmEl.disabled = true;
+    }
+  } else {
+    if (accessorySynthesisTargetSelectEl) {
+      accessorySynthesisTargetSelectEl.disabled = false;
+      accessorySynthesisCandidates.forEach((candidate, candidateIndex) => {
+        const option = document.createElement("option");
+        option.value = String(candidateIndex);
+        option.textContent = candidate.item?.name || "装飾品";
+        accessorySynthesisTargetSelectEl.appendChild(option);
+      });
+      accessorySynthesisTargetSelectEl.value = "0";
+    }
+    if (accessorySynthesisConfirmEl) {
+      accessorySynthesisConfirmEl.disabled = false;
+    }
+    updateAccessorySynthesisTarget(0);
+  }
+
+  if (accessorySynthesisModalEl) {
+    accessorySynthesisModalEl.classList.remove("hidden");
+    accessorySynthesisModalEl.removeAttribute("inert");
+    accessorySynthesisModalEl.setAttribute("aria-hidden", "false");
+  }
+}
+
+function closeAccessorySynthesisModal() {
+  if (!accessorySynthesisModalEl) return;
+  if (accessorySynthesisModalEl.contains(document.activeElement)) {
+    document.activeElement.blur();
+  }
+  accessorySynthesisModalEl.classList.add("hidden");
+  accessorySynthesisModalEl.setAttribute("inert", "");
+  accessorySynthesisModalEl.setAttribute("aria-hidden", "true");
+  accessorySynthesisBaseItem = null;
+  accessorySynthesisCandidates = [];
+  accessorySynthesisLockedMatches = 0;
+}
+
+function confirmAccessorySynthesis() {
+  const baseItem = accessorySynthesisBaseItem;
+  if (!baseItem) return;
+  if (!accessorySynthesisTargetSelectEl) return;
+  const candidateIndex = Number(accessorySynthesisTargetSelectEl.value);
+  const target = accessorySynthesisCandidates[candidateIndex];
+  const targetItem = target?.item;
+  if (!targetItem) {
+    log("合成素材を選択してください。");
+    return;
+  }
+  const baseOptions = Array.isArray(baseItem.specialOptions)
+    ? baseItem.specialOptions
+    : [];
+  const targetOptions = Array.isArray(targetItem.specialOptions)
+    ? targetItem.specialOptions
+    : [];
+  let upgradedCount = 0;
+
+  baseOptions.forEach((option) => {
+    const match = targetOptions.find((other) => other?.id === option?.id);
+    if (!match) return;
+    const currentValue = Number(option?.value) || 0;
+    const maxValue = getAccessoryOptionMax(option);
+    if (currentValue >= maxValue) return;
+    const nextValue = Math.min(maxValue, currentValue + 1);
+    option.value = nextValue;
+    option.description = getAccessoryOptionDescribe(option, nextValue);
+    upgradedCount += 1;
+  });
+
+  if (upgradedCount === 0) {
+    log("⚠️ 効果が上限に達しているため合成できない。");
+    return;
+  }
+
+  inventory.splice(target.index, 1);
+  if (typeof markInventoryDirty === "function") {
+    markInventoryDirty();
+  }
+  log(`✨ ${baseItem.name}の効果が${upgradedCount}つ強化された。`);
+  renderInventory();
+  refresh();
+  closeAccessorySynthesisModal();
+}
+
+if (accessorySynthesisTargetSelectEl) {
+  accessorySynthesisTargetSelectEl.addEventListener("change", (event) => {
+    const value = Number(event.target.value);
+    if (!Number.isFinite(value)) return;
+    updateAccessorySynthesisTarget(value);
   });
 }
 // アイテムのトータル加算値を計算
@@ -593,10 +925,14 @@ function loadDiscardThresholds() {
     if (typeof data === "number") {
       discardThresholds = {
         value: normalizeDiscardThreshold(data),
+        accessoryShinyOnly: false,
+        accessoryNone: false,
       };
     } else if (typeof data?.value !== "undefined") {
       discardThresholds = {
         value: normalizeDiscardThreshold(data.value),
+        accessoryShinyOnly: Boolean(data?.accessoryShinyOnly),
+        accessoryNone: Boolean(data?.accessoryNone),
       };
     } else {
       const legacyValues = [
@@ -606,6 +942,8 @@ function loadDiscardThresholds() {
       ];
       discardThresholds = {
         value: Math.max(...legacyValues),
+        accessoryShinyOnly: false,
+        accessoryNone: false,
       };
     }
   } catch (error) {
@@ -620,11 +958,19 @@ function saveDiscardThresholds() {
 }
 function syncDiscardThresholdInputs() {
   discardCommonInputEl.value = discardThresholds.value;
+  if (discardAccessoryShinyOnlyEl) {
+    discardAccessoryShinyOnlyEl.checked = discardThresholds.accessoryShinyOnly;
+  }
+  if (discardAccessoryNoneEl) {
+    discardAccessoryNoneEl.checked = discardThresholds.accessoryNone;
+  }
 }
 
 function storeDiscardThresholdInputs() {
   discardThresholds = {
     value: normalizeDiscardThreshold(discardCommonInputEl.value),
+    accessoryShinyOnly: Boolean(discardAccessoryShinyOnlyEl?.checked),
+    accessoryNone: Boolean(discardAccessoryNoneEl?.checked),
   };
   syncDiscardThresholdInputs();
   saveDiscardThresholds();
@@ -636,7 +982,10 @@ function storeDiscardThresholdInputs() {
 function discardEquipment(index) {
   const item = inventory[index];
   if (!item || item.kind === "consumable") return;
-
+  if (isUniqueWeapon(item)) {
+    log("⚠️ ユニーク武器は捨てられない。");
+    return;
+  }
   const wasWeaponEquipped = player.weapon === item;
   const wasAccessoryEquipped = player.accessory === item;
   const prevMaxHp = wasWeaponEquipped ? calcMaxHp() : null;
@@ -674,7 +1023,7 @@ function discardUnprotectedItems() {
       player.accessory === item;
     const isLocked = !!item.isLocked;
     const isHerb = item.id === HERB_ITEM_TEMPLATE.id;
-    if (isEquipped || isLocked || isHerb) continue;
+    if (isEquipped || isLocked || isHerb || isUniqueWeapon(item)) continue;
 
     inventory.splice(i, 1);
   }
@@ -879,6 +1228,24 @@ function shouldPickupItem(item) {
     itemBonus.agility <= thresholds.value
   );
 }
+function isAccessoryOptionShiny(option, ratio = 0.8) {
+  const maxValue = Number(option?.max);
+  const value = Number(option?.value);
+  if (!Number.isFinite(maxValue) || !Number.isFinite(value)) return false;
+  return value >= Math.ceil(maxValue * ratio);
+}
+
+function shouldPickupAccessory(item) {
+  const thresholds = loadDiscardThresholds();
+  const optionList = Array.isArray(item?.specialOptions)
+    ? item.specialOptions
+    : [];
+  if (optionList.length >= 2) return true;
+  if (thresholds.accessoryNone) return false;
+  if (!thresholds.accessoryShinyOnly) return true;
+  if (optionList.length === 0) return false;
+  return isAccessoryOptionShiny(optionList[0]);
+}
 /* =====================
    ドロップ（敵ごとの drops から抽選）
    
@@ -949,12 +1316,50 @@ function dropItem() {
   }
 
   if (enemy.isRare) {
-    const doubleEffectChance = floor >= WEATHERED_EVENT_FLOOR ? 0.0001 : 0;
+    if (isDoubleEffectBonusUnlocked()) {
+      doubleEffectChanceBonus += DOUBLE_EFFECT_CHANCE_STEP;
+      log(`次こそは光り輝く装飾品を…`);
+    }
+    const rareAccessoryDropRate = floor >= WEATHERED_EVENT_FLOOR ? 0.5 : 1;
+    if (Math.random() >= rareAccessoryDropRate) {
+      return;
+    }
+    const baseDoubleEffectChance = floor >= WEATHERED_EVENT_FLOOR ? 0.0001 : 0;
+    const doubleEffectChance =
+      baseDoubleEffectChance +
+      (isDoubleEffectBonusUnlocked() ? doubleEffectChanceBonus : 0);
     const optionCount = Math.random() < doubleEffectChance ? 2 : 1;
     const item = window.ItemGen.createAccessoryForDrop(floor, { optionCount });
     item.isRareDrop = true;
+    if (!shouldPickupAccessory(item)) {
+      log(`⏭ ${item.name} は拾わなかった`);
+      return;
+    }
     inventory.push(item);
-    log(`🎁 ${item.name}を手に入れた`);
+    if (optionCount === 2) {
+      doubleEffectChanceBonus = 0;
+      log(`🎁✨光り輝く装飾品 ${item.name}を手に入れた！`);
+    } else if (isDoubleEffectBonusUnlocked()) {
+      log(`🎁 ${item.name}を手に入れた`);
+      log(`次こそは光り輝く装飾品を…`);
+    }
+    if (typeof showRareEnemyPopup === "function") {
+      if (typeof item.name === "string" && item.name.startsWith("神々しい")) {
+        showRareEnemyPopup(item.name, "神々しい装飾品を手に入れた！", {
+          autoClose: false,
+          allowOverlayClose: false,
+          showCloseButton: true,
+          hintText: "閉じるボタンで閉じる",
+        });
+      } else if (optionCount === 2) {
+        showRareEnemyPopup(item.name, "光り輝く装飾品を手に入れた！", {
+          autoClose: false,
+          allowOverlayClose: false,
+          showCloseButton: true,
+          hintText: "閉じるボタンで閉じる",
+        });
+      }
+    }
     return;
   }
   // 敵tierに合わせてアイテムtierを決める（±1くらい揺らす）

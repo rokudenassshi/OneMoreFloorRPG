@@ -1,64 +1,40 @@
-const hasAutoSave = loadAutoSave();
-const URL_ITEM_GIFT_PARAM = "gift";
-const URL_ITEM_GIFT_CODE = "rokudemonai";
-const URL_ITEM_GIFT_STORAGE_KEY = "11";
-const SKILL_RESET_ONCE_KEY = "skill_reset_once_v1";
+const PENDING_IMPORT_KEY = "omf_pending_import_v1";
 
-const URL_ITEM_GIFT_PARAM2 = "gift";
-const URL_ITEM_GIFT_CODE2 = "owabi";
-const URL_ITEM_GIFT_STORAGE_KEY2 = "11";
+function applyPendingImportIfAny() {
+  const payload = localStorage.getItem(PENDING_IMPORT_KEY);
+  if (!payload) return;
 
-function createUrlGiftItem() {
-  return {
-    id: "url_gift_omf80",
-    name: "ろくでもない贈り物",
-    type: "sword",
-    tier: 10,
-    minFloor: 0,
-    atk: 0,
-    baseBonus: { power: 80, vitality: 80, agility: 80 },
-    optionBonus: { power: 0, vitality: 0, agility: 0 },
-    specialOptions: [],
-    isLocked: true,
-  };
-}
-function createUrlGiftItem2() {
-  return {
-    id: "url_gift_omf",
-    name: "ろくでもないお詫び",
-    type: "sword",
-    tier: 10,
-    minFloor: 0,
-    atk: 0,
-    baseBonus: { power: 50, vitality: 50, agility: 50 },
-    optionBonus: { power: 0, vitality: 0, agility: 0 },
-    specialOptions: [],
-    isLocked: true,
-  };
-}
-function removeGiftParamFromUrl() {
-  const url = new URL(window.location.href);
-  if (!url.searchParams.has(URL_ITEM_GIFT_PARAM)) return;
-  url.searchParams.delete(URL_ITEM_GIFT_PARAM);
-  window.history.replaceState({}, document.title, url.toString());
-}
+  try {
+    const parsed = JSON.parse(payload);
+    const storage = parsed?.storage;
 
-function claimUrlGiftItem() {
-  const params = new URLSearchParams(window.location.search);
-  const giftCode = params.get(URL_ITEM_GIFT_PARAM);
-  if (giftCode !== URL_ITEM_GIFT_CODE) return;
-  if (localStorage.getItem(URL_ITEM_GIFT_STORAGE_KEY)) {
-    removeGiftParamFromUrl();
-    return;
+    if (!storage || typeof storage !== "object") {
+      localStorage.removeItem(PENDING_IMPORT_KEY);
+      return;
+    }
+
+    // ここで確実に上書き
+    localStorage.clear();
+    for (const [k, v] of Object.entries(storage)) {
+      if (typeof k !== "string") continue;
+      localStorage.setItem(k, v == null ? "" : String(v));
+    }
+  } catch (e) {
+    // 壊れてたら無視
+  } finally {
+    // clearで消えてる可能性があるので最後にremove
+    try {
+      localStorage.removeItem(PENDING_IMPORT_KEY);
+    } catch (e) {}
   }
-
-  const giftItem = createUrlGiftItem();
-  inventory.push(giftItem);
-  localStorage.setItem(URL_ITEM_GIFT_STORAGE_KEY, "claimed");
-  log("🎁 URL特典で神器を手に入れた！");
-  autoSave();
-  removeGiftParamFromUrl();
 }
+
+applyPendingImportIfAny();
+
+// ★この行は「applyPendingImportIfAny() の後」にする
+const hasAutoSave = loadAutoSave();
+
+const SKILL_RESET_ONCE_KEY = "skill_reset_once_v1";
 let skillResetRefundedPoints = 0;
 if (!localStorage.getItem(SKILL_RESET_ONCE_KEY)) {
   skillResetRefundedPoints = resetAllSkillsSilently();
@@ -74,31 +50,7 @@ if (!hasAutoSave) {
 if (skillResetRefundedPoints > 0) {
   log("🔁 起動時スキルリセットを実行しました");
 }
-function removeGiftParamFromUrl2() {
-  const url = new URL(window.location.href);
-  if (!url.searchParams.has(URL_ITEM_GIFT_PARAM2)) return;
-  url.searchParams.delete(URL_ITEM_GIFT_PARAM2);
-  window.history.replaceState({}, document.title, url.toString());
-}
 
-function claimUrlGiftItem2() {
-  const params = new URLSearchParams(window.location.search);
-  const giftCode = params.get(URL_ITEM_GIFT_PARAM2);
-  if (giftCode !== URL_ITEM_GIFT_CODE2) return;
-  if (localStorage.getItem(URL_ITEM_GIFT_STORAGE_KEY2)) {
-    removeGiftParamFromUrl2();
-    return;
-  }
-
-  const giftItem = createUrlGiftItem2();
-  inventory.push(giftItem);
-  localStorage.setItem(URL_ITEM_GIFT_STORAGE_KEY2, "claimed");
-  log("🎁 URL特典で神器を手に入れた！");
-  autoSave();
-  removeGiftParamFromUrl2();
-}
-claimUrlGiftItem();
-claimUrlGiftItem2();
 awardStatPointUnlock();
 refresh();
 setGameReady(true);

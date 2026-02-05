@@ -15,26 +15,40 @@ function goToBase() {
 
 function move(dir) {
   if (gameState !== "EXPLORE") return;
+  if (player.stayOnCurrentFloor) {
+    if (floor === 0) return;
+    handleExploreEvents({ enteredNewFloor: false });
+    return;
+  }
   floor = Math.max(0, Math.min(MAX_FLOOR, floor + dir));
   player.maxReachedFloor = Math.max(
     player.maxReachedFloor,
     Math.min(MAX_FLOOR, floor),
   );
-  awardStatPointUnlock();
-  handleBaseArrival();
-  // 拠点（0階層）
-  if (floor === 0) {
-    goToBase();
-    autoSave();
-    return;
-  }
+  handleExploreEvents({ enteredNewFloor: true });
+}
 
-  if (floor == WEATHERED_EVENT_FLOOR) {
-    // if (floor == 1) {
-    handleFloorArrival();
-    refresh();
-    return;
-  } // 50階層ごとの節目：必ずHP全回復（ボス階層は勝利時に表示）
+function handleExploreEvents({ enteredNewFloor }) {
+  if (enteredNewFloor) {
+    awardStatPointUnlock();
+    handleBaseArrival();
+    // 拠点（0階層）
+    if (floor === 0) {
+      goToBase();
+      autoSave();
+      return;
+    }
+
+    if (floor == WEATHERED_EVENT_FLOOR) {
+      // if (floor == 1) {
+      handleFloorArrival();
+      refresh();
+      return;
+    }
+  }
+  if (floor === 0) return;
+
+  // 50階層ごとの節目：必ずHP全回復（ボス階層は勝利時に表示）
   if (floor % 50 === 0 && !isBossFloor(floor)) {
     log("🔥静かに炎が燈っている。ここでは休めそうだ。");
     autoSave();
@@ -113,21 +127,45 @@ function openTeleportModal() {
     : availableFloors[availableFloors.length - 1];
   selectEl.value = String(defaultFloor);
 
+  const stayOptionEl = document.getElementById("teleportStayOption");
+  const stayCheckboxEl = document.getElementById("teleportStayCheckbox");
+  if (stayOptionEl) {
+    stayOptionEl.style.display = player.stayBattleUnlocked ? "flex" : "none";
+  }
+  if (stayCheckboxEl) {
+    stayCheckboxEl.checked = Boolean(player.stayOnCurrentFloor);
+  }
+
   const modal = document.getElementById("teleportModal");
   if (!modal) return;
   modal.classList.remove("hidden");
+  modal.removeAttribute("inert");
   modal.setAttribute("aria-hidden", "false");
 }
 
 function closeTeleportModal() {
   const modal = document.getElementById("teleportModal");
   if (!modal) return;
+
+  // ★ フォーカスが中に残らないようにする
+  if (modal.contains(document.activeElement)) {
+    document.activeElement.blur();
+  }
+
   modal.classList.add("hidden");
+  modal.setAttribute("inert", "");
   modal.setAttribute("aria-hidden", "true");
 }
 function teleportToFloor() {
   const selectEl = document.getElementById("teleportFloorSelect");
   if (!selectEl) return;
+  const stayCheckboxEl = document.getElementById("teleportStayCheckbox");
+  if (player.stayBattleUnlocked && stayCheckboxEl?.checked) {
+    player.stayOnCurrentFloor = true;
+    closeTeleportModal();
+    autoSave();
+    return;
+  }
   const target = Number(selectEl.value);
   if (!Number.isInteger(target)) {
     log("転移する階層を選択してください。");
@@ -148,7 +186,15 @@ function teleportToFloor() {
   autoSave();
   closeTeleportModal();
 }
-
+function toggleStayOnCurrentFloor(checked) {
+  if (!player.stayBattleUnlocked) return;
+  player.stayOnCurrentFloor = Boolean(checked);
+  if (player.stayOnCurrentFloor) {
+    log("🛑 現在の階層に留まる設定にした。");
+    closeTeleportModal();
+  }
+  autoSave();
+}
 function handleFloorArrival() {
   if (floor >= WEATHERED_EVENT_FLOOR && !player.weatheredWeaponUnlocked) {
     player.weatheredWeaponUnlocked = true;

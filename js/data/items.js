@@ -32,7 +32,7 @@
     bonus: { power: 0, vitality: 0, agility: 0 },
     specialOptions: [
       {
-        id: "exp_final_double",
+        id: "exp_final_ex",
         name: "経験値15倍",
         value: 15,
         describe: () => "獲得経験値が15倍",
@@ -457,16 +457,30 @@
 
   function pickSpecialOptions(count, { floor = 0, forAccessory = false } = {}) {
     if (count <= 0) return [];
+
     const pool = (window.SpecialOptionPool || [])
       .filter((option) => {
         if (!forAccessory) return true;
+
         const minFloor = Number(option.minFloor);
-        return !Number.isFinite(minFloor) || floor >= minFloor;
+        const hasMinFloor = Number.isFinite(minFloor);
+
+        // ★WEATHERED_EVENT_FLOOR 未満：通常のみ（minFloor無しのみ）
+        if (floor < WEATHERED_EVENT_FLOOR) {
+          return !hasMinFloor;
+        }
+
+        // ★WEATHERED_EVENT_FLOOR 以降：改のみ（minFloor有り & floor >= minFloor）
+        return hasMinFloor && floor >= minFloor;
       })
       .slice();
+
+    if (pool.length === 0) return [];
+
     const shuffled = pool.sort(() => Math.random() - 0.5);
     const result = [];
     const pickCount = Math.min(count, shuffled.length);
+
     for (let i = 0; i < pickCount; i += 1) {
       const option = shuffled[i];
       const value = rollSpecialOptionValue(option, { floor, forAccessory });
@@ -481,17 +495,26 @@
         description: option.describe(value),
       });
     }
+
     return result;
   }
+
   //　効果二つアクセサリー
   function pickAccessoryOptionsWithDuplicates(
     count,
-    { floor = 0, excludedIds = [] } = {},
+    {
+      floor = 0,
+      excludedIds = [],
+      requireMinFloor = false,
+      applyMinFloorBias = false,
+    } = {},
   ) {
     if (count <= 0) return [];
     const pool = (window.SpecialOptionPool || []).filter((option) => {
       if (excludedIds.includes(option.id)) return false;
       const minFloor = Number(option.minFloor);
+      // ★2効果用：minFloorが設定されているものだけに絞る
+      if (requireMinFloor && !Number.isFinite(minFloor)) return false;
       return !Number.isFinite(minFloor) || floor >= minFloor;
     });
     if (pool.length === 0) return [];
@@ -501,10 +524,12 @@
       const value = rollSpecialOptionValue(option, {
         floor,
         forAccessory: true,
+        applyMinFloorBias,
       });
       result.push({
         id: option.id,
         name: option.name,
+        alias: option.alias,
         accessoryTypes: option.accessoryTypes,
         max: option.max,
         min: option.min,
@@ -515,6 +540,7 @@
     }
     return result;
   }
+
   function getAccessoryValueCap(option, floor = 0) {
     const max = Number(option.max);
     if (!Number.isFinite(max)) return null;
@@ -533,7 +559,7 @@
 
   function rollSpecialOptionValue(
     option,
-    { floor = 0, forAccessory = false } = {},
+    { floor = 0, forAccessory = false, applyMinFloorBias = true } = {},
   ) {
     let value;
     if (Number.isFinite(option.fixed)) {
@@ -550,7 +576,7 @@
         }
       } else if (max > min) {
         const highRollChance = 0.1;
-        const highThreshold = Math.max(min, Math.ceil(max * 0.9));
+        const highThreshold = Math.max(min, Math.ceil(max * 0.75));
         if (Math.random() < highRollChance && highThreshold <= max) {
           value =
             Math.floor(Math.random() * (max - highThreshold + 1)) +
@@ -562,6 +588,16 @@
         }
       } else {
         value = Math.floor(Math.random() * (max - min + 1)) + min;
+      }
+      if (forAccessory && applyMinFloorBias) {
+        const minFloor = Number(option.minFloor);
+        if (Number.isFinite(minFloor) && Number.isFinite(max) && max > min) {
+          const highThreshold = Math.max(min, Math.ceil(max * 0.5));
+          if (value >= highThreshold && Math.random() < 0.7) {
+            const downgradeMax = Math.max(min, highThreshold - 1);
+            value = Math.floor(Math.random() * (downgradeMax - min + 1)) + min;
+          }
+        }
       }
       if (forAccessory) {
         const cap = getAccessoryValueCap(option, floor);
@@ -590,28 +626,63 @@
     const optionList = Array.isArray(options) ? options : [];
     const first = optionList[0];
     if (!first) return "装飾品";
+
     const suffixes = first.accessoryTypes;
-    const optionNames = optionList.map((option) => option.name).join("と");
-    const baseName = `${optionNames}の${pick(Math.random, suffixes)}`;
-    if (optionList.some((option) => hasAccessoryHighValue(option))) {
-      return `輝く${baseName}`;
-    }
-    return baseName;
+
+    const isAccessoryOptionShiny = (option, ratio = 0.8) => {
+      const maxValue = Number(option?.max);
+      const value = Number(option?.value);
+      if (!Number.isFinite(maxValue) || !Number.isFinite(value)) return false;
+      return value >= Math.ceil(maxValue * ratio);
+    };
+
+    const isMultiEffect = optionList.length >= 2;
+    const shinyCount = optionList.filter((o) =>
+      isAccessoryOptionShiny(o),
+    ).length;
+    const isAllShiny = isMultiEffect && shinyCount === optionList.length;
+
+    // ★ 表示名をここで分岐
+    const optionNames = optionList
+      .map((o) => {
+        const label = o.alias || o.name;
+        if (isAllShiny) {
+          // 神々しい場合は「輝く」を付けない
+          return label;
+        }
+        // 通常時のみ個別に「輝く」
+        return isAccessoryOptionShiny(o) ? `輝く${label}` : label;
+      })
+      .join("と");
+
+    const prefix = isAllShiny ? "神々しい" : "";
+    return `${prefix}${optionNames}の${pick(Math.random, suffixes)}`;
   }
+
   function createAccessoryForDrop(floor = 0, { optionCount = 1 } = {}) {
     let specialOptions = [];
     if (optionCount <= 1) {
       specialOptions = pickSpecialOptions(1, { floor, forAccessory: true });
     } else {
-      const primary = pickAccessoryOptionsWithDuplicates(1, { floor });
+      const primary = pickAccessoryOptionsWithDuplicates(1, {
+        floor,
+        requireMinFloor: true,
+      });
       const first = primary[0];
-      const excludedIds =
-        first?.id === "evade_boost" || first?.id === "evade_boost_plus"
-          ? ["evade_boost", "evade_boost_plus"]
-          : [];
+      const excludedIds = [];
+      if (first?.id === "evade_boost" || first?.id === "evade_boost_plus") {
+        excludedIds.push("evade_boost", "evade_boost_plus");
+      }
+      if (first?.id === "exp_boost" || first?.id === "exp_boost_plus") {
+        excludedIds.push("cursed_accessory");
+      }
+      if (first?.id === "cursed_accessory") {
+        excludedIds.push("exp_boost", "exp_boost_plus");
+      }
       const secondary = pickAccessoryOptionsWithDuplicates(1, {
         floor,
         excludedIds,
+        requireMinFloor: true,
       });
       specialOptions = [...primary, ...secondary].slice(0, optionCount);
     }
@@ -632,6 +703,7 @@
       kind: "accessory",
       name: getAccessoryName(specialOptions),
       specialOptions,
+      isLocked: specialOptions.length >= 2,
       bonus: { power: 0, vitality: 0, agility: 0 },
     };
   }

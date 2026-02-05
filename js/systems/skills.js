@@ -1,4 +1,5 @@
 let skillReturnState = "EXPLORE";
+let skillPresetDialogIndex = null;
 
 function getSkillLevel(skillId) {
   return Number(player.skills?.[skillId]) || 0;
@@ -40,6 +41,17 @@ function hasExclusiveSkillConflict(skill) {
     : [];
   return exclusives.some((exclusiveId) => getSkillLevel(exclusiveId) > 0);
 }
+function getSkillPointsSpent(skills = player.skills) {
+  if (!skills || typeof skills !== "object") return 0;
+  let total = 0;
+  Object.entries(skills).forEach(([skillId, level]) => {
+    const skill = SKILLS.find((entry) => entry.id === skillId);
+    if (!skill) return;
+    const requiredPoints = Number(skill.requiredPoints) || 1;
+    total += requiredPoints * Number(level || 0);
+  });
+  return total;
+}
 function getSkillEffects() {
   const total = {
     herbHealBoost: 0,
@@ -60,6 +72,8 @@ function getSkillEffects() {
     rareEncounterBoost: 0,
     rareEncounterBlock: 0,
     brokenEncounterBlock: 0,
+    rareEncounterPopupCut: 0,
+    brokenEncounterPopupCut: 0,
     powerRate: 0,
     vitalityRate: 0,
     agilityRate: 0,
@@ -140,6 +154,9 @@ function renderSkillScreen() {
   const pointsLabel = `スキルポイント：${player.unassignedPoints}`;
   const hasAssignedSkills =
     player.skills && Object.keys(player.skills).length > 0;
+  const presets = Array.isArray(player.skillPresets)
+    ? player.skillPresets
+    : [null, null, null];
   // （任意）合計効果を上に出す：すでに getSkillEffects() があるので活用
   const total = getSkillEffects();
   const hasSacrificialAttack = getSkillLevel("sacrificial_attack") > 0;
@@ -158,6 +175,12 @@ function renderSkillScreen() {
   }
   if (total.brokenEncounterBlock > 0) {
     summaryItems.push("<div>忍び足2</div>");
+  }
+  if (total.rareEncounterPopupCut > 0) {
+    summaryItems.push("<div>静寂の予兆</div>");
+  }
+  if (total.brokenEncounterPopupCut > 0) {
+    summaryItems.push("<div>静寂の予兆2</div>");
   }
   if (total.herbHealBoost > 0) {
     summaryItems.push(
@@ -347,6 +370,40 @@ function renderSkillScreen() {
     })
     .join("");
 
+  const presetButtonsHtml = [0, 1, 2]
+    .map((index) => {
+      const label = `セット${index + 1}`;
+      const isFilled = Boolean(presets[index]?.skills);
+      return `<button class="skill-reset-button skill-preset-button ${
+        isFilled ? "is-filled" : "is-empty"
+      }" onclick="handleSkillPreset(${index})">${label}</button>`;
+    })
+    .join("");
+
+  const presetDialogHtml =
+    skillPresetDialogIndex === null
+      ? ""
+      : `
+        <div class="skill-preset-dialog-backdrop" onclick="closeSkillPresetDialog()">
+          <div class="skill-preset-dialog" onclick="event.stopPropagation()">
+            <div class="skill-preset-dialog-title">
+              スキルプリセット${skillPresetDialogIndex + 1}
+            </div>
+            <div class="skill-preset-dialog-body">
+              どちらの操作を行いますか？
+            </div>
+            <div class="skill-preset-dialog-actions">
+              <button class="skill-reset-button" onclick="confirmOverwriteSkillPreset()">
+                上書き
+              </button>
+              <button class="skill-reset-button" onclick="confirmApplySkillPreset()">
+                呼び出し
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+
   skillScreenContentEl.innerHTML = `
     <div class="skill-top">
       <div class="skill-top-row">
@@ -361,6 +418,12 @@ function renderSkillScreen() {
           player.autoAssignExpSkillPoints ? "is-active" : ""
         }" onclick="toggleAutoAssignExpSkillPoints()">${autoAssignLabel}</button>
       </div>
+      <div class="skill-top-row">
+        <div>スキルプリセット</div>
+        <div class="skill-preset-actions">
+          ${presetButtonsHtml}
+        </div>
+      </div>
       ${summaryHtml}
     </div>
     <div class="skill-list">${skillListHtml}</div>
@@ -369,7 +432,88 @@ function renderSkillScreen() {
         戻る
       </button>
     </div>
+    ${presetDialogHtml}
   `;
+}
+
+function handleSkillPreset(index) {
+  if (!Array.isArray(player.skillPresets)) {
+    player.skillPresets = [null, null, null];
+  }
+  const preset = player.skillPresets[index];
+  if (preset?.skills) {
+    skillPresetDialogIndex = index;
+    renderSkillScreen();
+    return;
+  }
+
+  const shouldSave = confirm(
+    "このスロットは空です。現在のスキル割り振りを保存しますか？",
+  );
+  if (shouldSave) {
+    saveSkillPreset(index);
+  }
+}
+
+function closeSkillPresetDialog() {
+  skillPresetDialogIndex = null;
+  renderSkillScreen();
+}
+
+function confirmOverwriteSkillPreset() {
+  if (skillPresetDialogIndex === null) return;
+  const index = skillPresetDialogIndex;
+  closeSkillPresetDialog();
+  saveSkillPreset(index);
+}
+
+function confirmApplySkillPreset() {
+  if (skillPresetDialogIndex === null) return;
+  const index = skillPresetDialogIndex;
+  closeSkillPresetDialog();
+  applySkillPreset(index);
+}
+
+function saveSkillPreset(index) {
+  if (!Array.isArray(player.skillPresets)) {
+    player.skillPresets = [null, null, null];
+  }
+  player.skillPresets[index] = { skills: { ...player.skills } };
+  if (typeof log === "function") {
+    log(`📌 スキルプリセット${index + 1}を保存しました`);
+  }
+  renderSkillScreen();
+}
+
+function applySkillPreset(index) {
+  if (!Array.isArray(player.skillPresets)) return;
+  const preset = player.skillPresets[index];
+  if (!preset?.skills) return;
+
+  const totalPoints = getSkillPointsSpent() + player.unassignedPoints;
+  const presetCost = getSkillPointsSpent(preset.skills);
+  if (presetCost > totalPoints) {
+    alert(
+      "このプリセットは現在のスキルポイント合計を超えています。ポイント獲得後に再度お試しください。",
+    );
+    return;
+  }
+
+  const prevMaxHp = calcMaxHp();
+  player.skills = { ...preset.skills };
+  player.unassignedPoints = totalPoints - presetCost;
+  removeInvalidDependentSkills();
+  const nextMaxHp = calcMaxHp();
+  if (typeof adjustHpForMaxChange === "function") {
+    adjustHpForMaxChange(prevMaxHp, nextMaxHp);
+  } else if (player.hp > nextMaxHp) {
+    player.hp = nextMaxHp;
+  }
+  refresh();
+  renderSkillScreen();
+  if (typeof log === "function") {
+    log(`🧩 スキルプリセット${index + 1}を呼び出しました`);
+  }
 }
 
 function learnSkill(skillId) {

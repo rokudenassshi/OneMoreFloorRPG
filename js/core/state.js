@@ -88,10 +88,23 @@ function performAutoSave(options = {}) {
       statPointUnlockGranted: player.statPointUnlockGranted,
       unassignedPoints: player.unassignedPoints,
       skills: { ...player.skills },
+      skillPresets: Array.isArray(player.skillPresets)
+        ? player.skillPresets.map((preset) =>
+            preset?.skills ? { skills: { ...preset.skills } } : null,
+          )
+        : [null, null, null],
       autoAssignExpSkillPoints: player.autoAssignExpSkillPoints,
+      autoAssignStatTarget: player.autoAssignStatTarget,
+      stayBattleUnlocked: player.stayBattleUnlocked,
       weatheredWeaponUnlocked: player.weatheredWeaponUnlocked,
+      stayOnCurrentFloor: player.stayOnCurrentFloor,
       weatheredWeaponReceived: player.weatheredWeaponReceived,
       weatheredWeaponHintShown: player.weatheredWeaponHintShown,
+      accessorySynthesisUnlocked: player.accessorySynthesisUnlocked,
+      doubleEffectChanceBonus:
+        typeof doubleEffectChanceBonus === "number"
+          ? doubleEffectChanceBonus
+          : 0,
       weaponIndex,
       weapon2Index,
       accessoryIndex,
@@ -170,6 +183,12 @@ function loadAutoSave() {
   player.autoAssignExpSkillPoints = Boolean(
     savedPlayer.autoAssignExpSkillPoints,
   );
+  player.autoAssignStatTarget =
+    typeof savedPlayer.autoAssignStatTarget === "string"
+      ? savedPlayer.autoAssignStatTarget
+      : null;
+  player.stayBattleUnlocked = Boolean(savedPlayer.stayBattleUnlocked);
+  player.stayOnCurrentFloor = Boolean(savedPlayer.stayOnCurrentFloor);
   const savedWeatheredUnlocked =
     typeof savedPlayer.weatheredWeaponUnlocked === "boolean"
       ? savedPlayer.weatheredWeaponUnlocked
@@ -179,11 +198,28 @@ function loadAutoSave() {
   player.weatheredWeaponHintShown = Boolean(
     savedPlayer.weatheredWeaponHintShown,
   );
-
+  player.accessorySynthesisUnlocked = Boolean(
+    savedPlayer.accessorySynthesisUnlocked,
+  );
+  if (typeof doubleEffectChanceBonus !== "undefined") {
+    const savedDoubleEffectBonus = Number(savedPlayer.doubleEffectChanceBonus);
+    doubleEffectChanceBonus = Number.isFinite(savedDoubleEffectBonus)
+      ? Math.max(0, savedDoubleEffectBonus)
+      : 0;
+  }
   player.skills =
     savedPlayer.skills && typeof savedPlayer.skills === "object"
       ? { ...savedPlayer.skills }
       : {};
+  if (Array.isArray(savedPlayer.skillPresets)) {
+    player.skillPresets = savedPlayer.skillPresets.map((preset) =>
+      preset?.skills && typeof preset.skills === "object"
+        ? { skills: { ...preset.skills } }
+        : null,
+    );
+  } else {
+    player.skillPresets = [null, null, null];
+  }
 
   inventory.length = 0;
   isLoadingSave = true;

@@ -17,14 +17,18 @@ const player = {
   statPoints: 0,
   statPointUnlockGranted: false,
   skills: {},
+  skillPresets: [null, null, null],
   weapon: null,
   weapon2: null,
   accessory: null,
   autoAssignExpSkillPoints: false,
   autoAssignStatTarget: null,
   weatheredWeaponUnlocked: false,
+  stayBattleUnlocked: false,
+  stayOnCurrentFloor: false,
   weatheredWeaponReceived: false,
   weatheredWeaponHintShown: false,
+  accessorySynthesisUnlocked: false,
 };
 
 function calcMaxHp() {
@@ -141,9 +145,12 @@ function calcNextExp() {
 
 function gainExp(exp) {
   const specialEffects = getSpecialEffects();
+  if (specialEffects.expZero) {
+    log("装飾品効果で経験値0");
+    return;
+  }
   const boostRate = (specialEffects.expBoost || 0) / 100;
   const boostedExp = Math.floor(exp * (1 + boostRate));
-
   const finalMultiplier = specialEffects.expFinalMultiplier || 1;
   const finalExp = Math.floor(boostedExp * finalMultiplier);
   player.exp += finalExp;
@@ -311,9 +318,14 @@ function getEquipmentBonus() {
   };
 
   const primaryBonus = getWeaponBonus(player.weapon);
-  const secondaryBonus = canUseDualWield
+  const secondaryRawBonus = canUseDualWield
     ? getWeaponBonus(player.weapon2)
     : { power: 0, vitality: 0, agility: 0 };
+  const secondaryBonus = {
+    power: Math.floor(secondaryRawBonus.power / 2),
+    vitality: Math.floor(secondaryRawBonus.vitality / 2),
+    agility: Math.floor(secondaryRawBonus.agility / 2),
+  };
 
   return {
     power: primaryBonus.power + secondaryBonus.power,
@@ -352,13 +364,16 @@ function getEquipmentSpecialEffects() {
     victoryRecover: 0,
     evadeBoost: 0,
     expBoost: 0,
-    expFinalMultiplier: 1,
+    expFinalMultiplier: 0,
     rareEncounterBoost: 0,
+    expZero: false,
     minHits: 0,
     powerRate: 0,
     vitalityRate: 0,
     agilityRate: 0,
     selfDamageBoost: 0,
+    attackAgainChance: 0,
+    cursedAccessory: 0,
   };
 
   getEquipmentSpecialOptions().forEach((option) => {
@@ -384,10 +399,14 @@ function getEquipmentSpecialEffects() {
         effects.expBoost += value;
         break;
       case "exp_boost_plus":
+        effects.expFinalMultiplier += value || 0;
+        break;
+      case "exp_final_ex":
         effects.expFinalMultiplier *= value || 1;
         break;
-      case "exp_final_double":
-        effects.expFinalMultiplier *= value || 1;
+      case "cursed_accessory":
+        effects.expZero = true;
+        effects.cursedAccessory += value > 0 ? value : 1;
         break;
       case "rare_encounter":
       case "rare_encounter_plus":
@@ -413,6 +432,9 @@ function getEquipmentSpecialEffects() {
       case "self_damage_boost_plus":
         effects.selfDamageBoost += value;
         break;
+      case "attack_again":
+        effects.attackAgainChance += value;
+        break;
       default:
         break;
     }
@@ -429,6 +451,8 @@ function getSpecialEffects() {
     ...equipmentEffects,
     expFinalMultiplier: equipmentEffects.expFinalMultiplier || 1,
     lifeSteal: equipmentEffects.lifeSteal + (skillEffects.lifeSteal || 0),
+    expZero: equipmentEffects.expZero || false,
+    cursedAccessory: equipmentEffects.cursedAccessory || 0,
     lifeStealDamage: skillEffects.lifeStealDamage || 0,
     lifeStealOverHealRate: skillEffects.lifeStealOverHealRate || 0,
     reflect:
@@ -442,6 +466,8 @@ function getSpecialEffects() {
       (skillEffects.rareEncounterBoost || 0),
     rareEncounterBlock: skillEffects.rareEncounterBlock || 0,
     brokenEncounterBlock: skillEffects.brokenEncounterBlock || 0,
+    rareEncounterPopupCut: skillEffects.rareEncounterPopupCut || 0,
+    brokenEncounterPopupCut: skillEffects.brokenEncounterPopupCut || 0,
     agilityAttackRate: skillEffects.agilityAttackRate || 0,
     vitalityAttackRate: skillEffects.vitalityAttackRate || 0,
     singleHitBoost: skillEffects.singleHitBoost || 0,

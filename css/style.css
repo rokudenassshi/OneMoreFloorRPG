@@ -100,7 +100,63 @@ body.screen-scrollable {
 #inventory {
   font-size: 14px;
 }
+.accessory-synthesis-modal-content {
+  max-width: 420px;
+  text-align: left;
+}
 
+.accessory-synthesis-section {
+  margin-top: 12px;
+}
+
+.accessory-synthesis-label {
+  font-size: 12px;
+  color: #cfcfcf;
+  margin-bottom: 6px;
+}
+
+.accessory-synthesis-name {
+  font-size: 14px;
+  margin-bottom: 6px;
+}
+
+.accessory-synthesis-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 8px;
+  font-size: 13px;
+}
+
+.accessory-synthesis-list li {
+  margin-bottom: 4px;
+}
+
+#accessorySynthesisTargetSelect {
+  width: 100%;
+  margin: 6px 0 10px;
+  padding: 8px;
+  font-size: 14px;
+  border-radius: 6px;
+  background: #1a1a1a;
+  color: #fff;
+  border: 1px solid #444;
+}
+
+.accessory-synthesis-hint {
+  font-size: 12px;
+  color: #ddd;
+}
+
+.accessory-synthesis-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 12px;
+}
+.glowing-accessory {
+  color: #ffd966;
+  text-shadow: 0 0 6px rgba(255, 217, 102, 0.45);
+}
 .rare-popup {
   position: absolute;
   inset: 0;
@@ -446,7 +502,12 @@ status-actions {
   color: #fff;
   font-size: 14px;
 }
-
+.discard-weak-row input[type="checkbox"] {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+}
 .status {
   background: #222;
   padding: 10px;
@@ -620,7 +681,48 @@ status-actions {
   gap: 12px;
   flex-wrap: wrap;
 }
-
+.skill-preset-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.skill-preset-button.is-empty {
+  opacity: 0.6;
+}
+.skill-preset-button.is-filled {
+  border-color: #7a7a7a;
+}
+.skill-preset-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+.skill-preset-dialog {
+  background: #1f1f1f;
+  border: 1px solid #444;
+  border-radius: 12px;
+  padding: 16px;
+  width: min(90vw, 360px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+}
+.skill-preset-dialog-title {
+  font-weight: bold;
+  margin-bottom: 6px;
+}
+.skill-preset-dialog-body {
+  font-size: 13px;
+  opacity: 0.9;
+  margin-bottom: 12px;
+}
+.skill-preset-dialog-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
 .skill-reset-button {
   min-height: 36px;
   padding: 6px 12px;
@@ -742,7 +844,9 @@ status-actions {
   margin-top: 16px;
   padding: 6px 16px;
   font-size: 16px;
-}.teleport-modal-content select {
+}
+
+.teleport-modal-content select {
   width: 100%;
   margin-top: 12px;
   padding: 8px;
@@ -751,6 +855,19 @@ status-actions {
   background: #1a1a1a;
   color: #fff;
   border: 1px solid #444;
+}
+
+.teleport-stay-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  font-size: 14px;
+}
+
+.teleport-stay-option input {
+  width: 18px;
+  height: 18px;
 }
 @media (max-width: 480px) {
   .teleport-modal-content select {
@@ -767,4 +884,74 @@ status-actions {
 
 .teleport-modal-actions button {
   margin-top: 16px;
+}
+
+/* --- Save Data (Import / Export) --- */
+.status-save {
+  margin-top: 6px;
+}
+
+.status-save-label {
+  font-size: 12px;
+  color: #cfcfcf;
+  margin-bottom: 6px;
+}
+
+.status-save-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.status-save-button {
+  flex: 1;
+  min-height: 44px; /* button { min-height:80px } を潰す */
+  padding: 6px 12px;
+  font-size: 14px;
+}
+
+.status-save-note {
+  margin-top: 6px;
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+
+.status-serial {
+  margin-top: 12px;
+}
+
+.status-serial-label {
+  font-size: 12px;
+  color: #cfcfcf;
+  margin-bottom: 6px;
+}
+
+.status-serial-input {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid #444;
+  background: #1a1a1a;
+  color: #fff;
+  font-size: 14px;
+}
+
+.status-serial-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.status-serial-actions .status-serial-input {
+  flex: 1;
+}
+
+.status-serial-button {
+  min-height: 44px;
+  padding: 6px 12px;
+  font-size: 14px;
+}
+
+.status-serial-input:disabled {
+  opacity: 0.6;
 }

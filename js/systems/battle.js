@@ -10,6 +10,8 @@ function startBattle() {
   bonusRareRate = (specialEffects.rareEncounterBoost || 0) / 100;
   const isRareBlocked = (specialEffects.rareEncounterBlock || 0) > 0;
   const isBrokenBlocked = (specialEffects.brokenEncounterBlock || 0) > 0;
+  const isRarePopupCut = (specialEffects.rareEncounterPopupCut || 0) > 0;
+  const isBrokenPopupCut = (specialEffects.brokenEncounterPopupCut || 0) > 0;
   // ★壊れたエネミー（1001階層以降）
   const brokenEnemyRate = 0.01;
   const isBroken =
@@ -52,9 +54,9 @@ function startBattle() {
   battleButtons.style.display = "block";
 
   log(`⚔ ${enemy.name} があらわれた！`);
-  if (isBroken) {
+  if (isBroken && !isBrokenPopupCut) {
     showRareEnemyPopup(base.name, "★壊れたエネミーが出現した。");
-  } else if (isRare) {
+  } else if (isRare && !isRarePopupCut) {
     showRareEnemyPopup(base.name);
   }
   updateUI();
@@ -65,7 +67,7 @@ function adjustDamageForEnemy(rawDamage) {
   }
   return rawDamage;
 }
-async function attack() {
+async function attack({ isExtraAttack = false } = {}) {
   if (gameState !== "BATTLE") return;
 
   const atk = calcAttack();
@@ -175,11 +177,12 @@ async function attack() {
     if (recoverAmount > 0) {
       const overHealRate = specialEffects.lifeStealOverHealRate || 0;
       if (overHealRate > 0) {
-        const overHealAmount = Math.max(1, recoverAmount * overHealRate);
-        const maxHp = calcMaxHp();
-        const maxRecoverHp = maxHp + overHealAmount;
-        player.hp = Math.min(maxRecoverHp, player.hp + recoverAmount);
-        log(`🩸 血装衛でHPを${recoverAmount}回復`);
+        const overHealAmount = Math.max(
+          1,
+          Math.floor(recoverAmount * overHealRate),
+        );
+        player.hp = player.hp + overHealAmount;
+        log(`🩸 血装衛でHPを${overHealAmount}回復`);
       } else {
         const maxHp = calcMaxHp();
         player.hp = Math.min(maxHp, player.hp + recoverAmount);
@@ -192,12 +195,25 @@ async function attack() {
         );
         if (extraDamage > 0) {
           enemy.hp -= extraDamage;
-          log(`🩸 血装撃ダメージ ${extraDamage}`);
+          log(`🩸 血装撃${extraDamage}ダメージ `);
         }
       }
     }
   }
+  if (enemy.hp <= 0) {
+    afterPlayerAction();
+    return;
+  }
 
+  const attackAgainChance = specialEffects.attackAgainChance || 0;
+  if (!isExtraAttack && attackAgainChance > 0) {
+    const roll = Math.random() * 100;
+    if (roll < attackAgainChance) {
+      log("⚔️ 追撃！");
+      await attack({ isExtraAttack: true });
+      return;
+    }
+  }
   refresh();
   afterPlayerAction();
 }
@@ -357,7 +373,20 @@ function endBattle({ grantHerbReward = true } = {}) {
 function handleEnemyDefeat() {
   log(` ${enemy.name} を倒した！`);
   if (typeof handleWeatheredWeaponProgress === "function") {
-    handleWeatheredWeaponProgress();
+    handleWeatheredWeaponProgress({
+      defeatedRareEnemy: enemy?.isRare || enemy?.isBroken,
+    });
+  }
+  const specialEffects = getSpecialEffects();
+  if (
+    specialEffects.cursedAccessory > 0 &&
+    (enemy?.isRare || enemy?.isBroken) &&
+    typeof handleCursedAccessoryProgress === "function"
+  ) {
+    handleCursedAccessoryProgress({
+      defeatedRareEnemy: true,
+      increment: specialEffects.cursedAccessory,
+    });
   }
   gainExp(enemy.exp);
   dropItem();
@@ -375,16 +404,20 @@ function applyVictoryRecovery() {
 }
 
 function gameOver() {
-  log("☠ 力尽きた。下層へと叩き落とされた。");
+  if (player.stayOnCurrentFloor) {
+    log("☠ 力尽きた。だが現在の階層に留まった。");
+  } else {
+    log("☠ 力尽きた。下層へと叩き落とされた。");
+  }
   const wasBossBattle = isBossFloor(floor);
   endBattle();
-
-  const penaltyFloor = Math.max(0, floor - 20);
-  const checkpointFloor = Math.max(0, Math.floor(floor / 50) * 50);
-
-  floor = wasBossBattle
-    ? penaltyFloor // ボス戦は純粋に-20
-    : Math.max(penaltyFloor, checkpointFloor);
+  if (!player.stayOnCurrentFloor) {
+    const penaltyFloor = Math.max(0, floor - 20);
+    const checkpointFloor = Math.max(0, Math.floor(floor / 50) * 50);
+    floor = wasBossBattle
+      ? penaltyFloor // ボス戦は純粋に-20
+      : Math.max(penaltyFloor, checkpointFloor);
+  }
 
   player.hp = calcMaxHp();
   setHerbCount(getHerbMaxCount(), false);
