@@ -191,9 +191,10 @@ function incrementCursedItemStat(item) {
     agility: Number(item.baseBonus?.agility) || 0,
   };
   const specialEffects = getSpecialEffects();
-  item.baseBonus[targetStat] += specialEffects.cursedAccessory;
+  const upstate = Math.max(1, Number(specialEffects.cursedAccessory) || 0);
+  item.baseBonus[targetStat] += upstate;
   log(
-    `🔮 ${item.name}の${getCursedStatLabel(targetStat)}が${specialEffects.cursedAccessory}上がった。`,
+    `🔮 ${item.name}の${getCursedStatLabel(targetStat)}が${upstate}上がった。`,
   );
 }
 
@@ -1339,9 +1340,11 @@ function dropItem() {
     if (optionCount === 2) {
       doubleEffectChanceBonus = 0;
       log(`🎁✨光り輝く装飾品 ${item.name}を手に入れた！`);
-    } else if (isDoubleEffectBonusUnlocked()) {
+    } else {
       log(`🎁 ${item.name}を手に入れた`);
-      log(`次こそは光り輝く装飾品を…`);
+      if (isDoubleEffectBonusUnlocked()) {
+        log(`次こそは光り輝く装飾品を…`);
+      }
     }
     if (typeof showRareEnemyPopup === "function") {
       if (typeof item.name === "string" && item.name.startsWith("神々しい")) {
