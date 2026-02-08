@@ -109,10 +109,6 @@ function calcAttackCount() {
 
 // すばやさ：回避
 function rollEvade() {
-  // ★ ろく氏の攻撃は回避率1%固定
-  if (typeof enemy !== "undefined" && enemy?.id === "boss_rokushi") {
-    return Math.random() < 0.01;
-  }
   const baseRate = 0.05; // 固定5%
   const specialEffects = getSpecialEffects();
   const extraRate = (specialEffects.evadeBoost || 0) / 100;
@@ -120,7 +116,9 @@ function rollEvade() {
     player.hp === 1 && (specialEffects.lastStandEvadeBoost || 0) > 0
       ? (specialEffects.lastStandEvadeBoost || 0) / 100
       : 0;
-  const evadeRate = baseRate + extraRate + lastStandEvadeRate;
+  const isRokushi = typeof enemy !== "undefined" && enemy?.id === "boss_rokushi";
+  const evadePenaltyRate = isRokushi ? 0.2 : 0;
+  const evadeRate = (baseRate + extraRate + lastStandEvadeRate) * (1 - evadePenaltyRate);
   return Math.random() < evadeRate;
 }
 

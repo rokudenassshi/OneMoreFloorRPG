@@ -54,6 +54,10 @@ function startBattle() {
   battleButtons.style.display = "block";
 
   log(`⚔ ${enemy.name} があらわれた！`);
+  if (enemy?.id === "boss_rokushi") {
+    log("ろく氏は特殊なバリアに守られている");
+    log("受けるダメージを20%軽減、反射ダメージを50%軽減、回避率を20%低下。");
+  }
   if (isBroken && !isBrokenPopupCut) {
     showRareEnemyPopup(base.name, "★壊れたエネミーが出現した。");
   } else if (isRare && !isRarePopupCut) {
@@ -63,7 +67,7 @@ function startBattle() {
 }
 function adjustDamageForEnemy(rawDamage) {
   if (enemy?.id === "boss_rokushi") {
-    return Math.floor(rawDamage * 0.5);
+    return Math.floor(rawDamage * 0.8);
   }
   return rawDamage;
 }
@@ -82,7 +86,7 @@ async function attack({ isExtraAttack = false } = {}) {
 
   const selfDamageMultiplier = 1 + selfDamageBoostRate;
   const isRokushi = enemy?.id === "boss_rokushi";
-  const enemyDamageMultiplier = isRokushi ? 0.5 : 1;
+  const enemyDamageMultiplier = isRokushi ? 0.8 : 1;
 
   const singleHitMultiplier =
     hits === 1 && singleHitBoostRate > 0 ? 1 + singleHitBoostRate : 1;
@@ -286,9 +290,9 @@ function enemyAttack() {
   if (reflectRate > 0 && enemy) {
     const reflectSourceDamage = result?.rawDamage ?? result?.damage ?? 0;
     let reflectDamage = Math.floor(reflectSourceDamage * reflectRate);
-    // ★ ろく氏は反射ダメージ80%軽減
+    // ★ ろく氏は反射ダメージ50%軽減
     if (enemy.id === "boss_rokushi") {
-      reflectDamage = Math.floor(reflectDamage * 0.2);
+      reflectDamage = Math.floor(reflectDamage * 0.5);
       log("ろく氏「キカヌ」");
     }
     reflectDamage = adjustDamageForEnemy(reflectDamage);
