@@ -149,6 +149,9 @@ async function attack({ isExtraAttack = false } = {}) {
 
     enemy.hp -= damage;
     total += damage;
+    if (typeof recordMaxDamage === "function") {
+      recordMaxDamage(damage);
+    }
 
     // ---- ログは必要な部分だけ作る（配列に全ヒット分溜めない）----
     const inHead = i < SHOW_HEAD;
@@ -199,6 +202,9 @@ async function attack({ isExtraAttack = false } = {}) {
         );
         if (extraDamage > 0) {
           enemy.hp -= extraDamage;
+          if (typeof recordMaxDamage === "function") {
+            recordMaxDamage(extraDamage);
+          }
           log(`🩸 血装撃${extraDamage}ダメージ `);
         }
       }
@@ -298,6 +304,9 @@ function enemyAttack() {
     reflectDamage = adjustDamageForEnemy(reflectDamage);
     if (reflectDamage > 0) {
       enemy.hp -= reflectDamage;
+      if (typeof recordMaxDamage === "function") {
+        recordMaxDamage(reflectDamage);
+      }
       log(`🛡️ ${enemy.name} に${reflectDamage}ダメージ反射`);
       if (enemy.hp <= 0) {
         handleEnemyDefeat();
@@ -323,6 +332,9 @@ function triggerEvadeCounter() {
   const effectiveAtk = Math.max(1, Math.floor(attackPower * attackMultiplier));
   const damage = adjustDamageForEnemy(rollDamage(effectiveAtk, 0.3));
   enemy.hp -= damage;
+  if (typeof recordMaxDamage === "function") {
+    recordMaxDamage(damage);
+  }
   log(`⚡ 回避反撃！ ${enemy.name} に${damage}ダメージ`);
   if (enemy.hp <= 0) {
     handleEnemyDefeat();

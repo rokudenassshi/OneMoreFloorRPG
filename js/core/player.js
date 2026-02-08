@@ -7,6 +7,7 @@ const player = {
 
   maxReachedFloor: 0,
   lastTeleportedFloor: null,
+  maxDamage: 0,
 
   status: {
     power: 10,
@@ -30,6 +31,12 @@ const player = {
   weatheredWeaponHintShown: false,
   accessorySynthesisUnlocked: false,
 };
+
+function recordMaxDamage(amount) {
+  const value = Number(amount);
+  if (!Number.isFinite(value) || value <= 0) return;
+  player.maxDamage = Math.max(player.maxDamage || 0, Math.floor(value));
+}
 
 function calcMaxHp() {
   const totalVitality = getTotalStatus().vitality;

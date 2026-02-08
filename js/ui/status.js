@@ -334,6 +334,7 @@ function renderStatus() {
     : "なし";
   statusContentEl.innerHTML = `
     <div>記録：${player.maxReachedFloor}階</div>
+    <div>最大ダメージ：${player.maxDamage || 0}</div>
     <div>Lv：${player.level}</div>
     <div>スキルポイント：${player.unassignedPoints}</div>
     <div>${statPointLabel}</div>

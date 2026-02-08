@@ -79,6 +79,7 @@ function performAutoSave(options = {}) {
       hp: player.hp,
       maxReachedFloor: player.maxReachedFloor,
       lastTeleportedFloor: player.lastTeleportedFloor,
+      maxDamage: player.maxDamage,
       status: {
         power: player.status.power,
         vitality: player.status.vitality,
@@ -167,6 +168,7 @@ function loadAutoSave() {
     0,
     Math.min(MAX_FLOOR, Number(savedPlayer.maxReachedFloor) || 0),
   );
+  player.maxDamage = Math.max(0, Number(savedPlayer.maxDamage) || 0);
   const savedLastTeleportedFloor = Number(savedPlayer.lastTeleportedFloor);
   player.lastTeleportedFloor = Number.isFinite(savedLastTeleportedFloor)
     ? Math.max(0, Math.min(MAX_FLOOR, savedLastTeleportedFloor))
