@@ -178,7 +178,7 @@ function transformToCursedItem(item) {
   );
 }
 
-function incrementCursedItemStat(item) {
+function incrementCursedItemStat(item, increment = 1) {
   const stats = ["power", "vitality", "agility"];
   const targetStat =
     item.cursedStat === "random"
@@ -190,10 +190,11 @@ function incrementCursedItemStat(item) {
     vitality: Number(item.baseBonus?.vitality) || 0,
     agility: Number(item.baseBonus?.agility) || 0,
   };
-  const specialEffects = getSpecialEffects();
-  item.baseBonus[targetStat] += specialEffects.cursedAccessory;
+  const resolvedIncrement = Number(increment) || 0;
+  if (resolvedIncrement <= 0) return;
+  item.baseBonus[targetStat] += resolvedIncrement;
   log(
-    `🔮 ${item.name}の${getCursedStatLabel(targetStat)}が${specialEffects.cursedAccessory}上がった。`,
+    `🔮 ${item.name}の${getCursedStatLabel(targetStat)}が${resolvedIncrement}上がった。`,
   );
 }
 
@@ -220,7 +221,7 @@ function handleWeatheredWeaponProgress({ defeatedRareEnemy = false } = {}) {
         Math.floor(previousCount / CURSED_KILL_STEP) <
         Math.floor(item.cursedKillCount / CURSED_KILL_STEP)
       ) {
-        incrementCursedItemStat(item);
+        incrementCursedItemStat(item, 1);
         didUpdate = true;
       }
     }
@@ -229,14 +230,17 @@ function handleWeatheredWeaponProgress({ defeatedRareEnemy = false } = {}) {
     markInventoryDirty();
   }
 }
-function handleCursedAccessoryProgress({ defeatedRareEnemy = false } = {}) {
+function handleCursedAccessoryProgress({
+  defeatedRareEnemy = false,
+  increment = 0,
+} = {}) {
   if (!defeatedRareEnemy) return;
   const equippedItems = [player.weapon, player.weapon2];
   let didUpdate = false;
   equippedItems.forEach((item) => {
     if (!item) return;
     if (!isCursedItem(item)) return;
-    incrementCursedItemStat(item);
+    incrementCursedItemStat(item, increment);
     didUpdate = true;
   });
   if (didUpdate && typeof markInventoryDirty === "function") {
@@ -1318,7 +1322,6 @@ function dropItem() {
   if (enemy.isRare) {
     if (isDoubleEffectBonusUnlocked()) {
       doubleEffectChanceBonus += DOUBLE_EFFECT_CHANCE_STEP;
-      log(`次こそは光り輝く装飾品を…`);
     }
     const rareAccessoryDropRate = floor >= WEATHERED_EVENT_FLOOR ? 0.5 : 1;
     if (Math.random() >= rareAccessoryDropRate) {
@@ -1339,9 +1342,11 @@ function dropItem() {
     if (optionCount === 2) {
       doubleEffectChanceBonus = 0;
       log(`🎁✨光り輝く装飾品 ${item.name}を手に入れた！`);
-    } else if (isDoubleEffectBonusUnlocked()) {
+    } else {
       log(`🎁 ${item.name}を手に入れた`);
-      log(`次こそは光り輝く装飾品を…`);
+      if (isDoubleEffectBonusUnlocked()) {
+        log(`次こそは光り輝く装飾品を…`);
+      }
     }
     if (typeof showRareEnemyPopup === "function") {
       if (typeof item.name === "string" && item.name.startsWith("神々しい")) {
