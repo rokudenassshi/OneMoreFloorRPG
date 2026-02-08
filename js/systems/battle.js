@@ -27,6 +27,12 @@ function startBattle() {
   const highFloorStep =
     floor >= UNLOCK_FLOOR ? Math.floor((floor - UNLOCK_FLOOR) / 50) + 1 : 0;
   const highFloorMultiplier = highFloorStep > 0 ? 1 + highFloorStep * 0.2 : 1;
+  const reincarnationEnemyMultiplier =
+    typeof getReincarnationEnemyMultiplier === "function"
+      ? getReincarnationEnemyMultiplier()
+      : 1;
+  const enemyStatMultiplier =
+    rate * highFloorMultiplier * reincarnationEnemyMultiplier;
   enemy = {
     id: base.id,
     name: isBroken
@@ -39,11 +45,9 @@ function startBattle() {
     tier: base.tier,
     titleMul: base.titleMul,
     // 上位ほど強い：baseがtierで強い + floor補正を少し
-    maxHp: Math.floor((base.hp + floor * 2) * rate * highFloorMultiplier),
-    hp: Math.floor((base.hp + floor * 2) * rate * highFloorMultiplier),
-    atk: Math.floor(
-      (base.atk + Math.floor(floor / 3)) * rate * highFloorMultiplier,
-    ),
+    maxHp: Math.floor((base.hp + floor * 2) * enemyStatMultiplier),
+    hp: Math.floor((base.hp + floor * 2) * enemyStatMultiplier),
+    atk: Math.floor((base.atk + Math.floor(floor / 3)) * enemyStatMultiplier),
     exp: Math.floor((base.exp + Math.floor(floor / 2)) * rate),
 
     // ★ ドロップ候補を保持

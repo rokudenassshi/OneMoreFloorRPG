@@ -304,6 +304,15 @@ function renderStatus() {
   const statPointNote = isStatPointUnlocked
     ? ""
     : `<div class="status-note"></div>`;
+  const reincarnationCount =
+    typeof getReincarnationCount === "function" ? getReincarnationCount() : 0;
+  const reincarnationUnlocked =
+    typeof isReincarnationUnlocked === "function"
+      ? isReincarnationUnlocked()
+      : player.maxReachedFloor >= REINCARNATION_UNLOCK_FLOOR;
+  const reincarnationNote = reincarnationUnlocked
+    ? ""
+    : `<div class="status-note">転生は${REINCARNATION_UNLOCK_FLOOR}階到達で解放されます</div>`;
   const powerBase = player.status.power;
   const vitalityBase = player.status.vitality;
   const agilityBase = player.status.agility;
@@ -334,6 +343,7 @@ function renderStatus() {
     : "なし";
   statusContentEl.innerHTML = `
     <div>記録：${player.maxReachedFloor}階</div>
+    <div>転生回数：${reincarnationCount}回</div>
     <div>Lv：${player.level}</div>
     <div>スキルポイント：${player.unassignedPoints}</div>
     <div>${statPointLabel}</div>
@@ -473,6 +483,13 @@ function renderStatus() {
       </button>
     </div>
 </div>
+  <hr>
+  <div class="status-actions">
+    <button class="status-action-button" onclick="handleReincarnation()" ${
+      reincarnationUnlocked ? "" : "disabled"
+    }>転生</button>
+    ${reincarnationNote}
+  </div>
 `;
 }
 
@@ -529,6 +546,49 @@ async function handleSerialCodeSubmit() {
     serialCodePending = false;
     renderStatus();
   }
+}
+
+function handleReincarnation() {
+  const isUnlocked =
+    typeof isReincarnationUnlocked === "function"
+      ? isReincarnationUnlocked()
+      : player.maxReachedFloor >= REINCARNATION_UNLOCK_FLOOR;
+  if (!isUnlocked) {
+    log(`転生は${REINCARNATION_UNLOCK_FLOOR}階到達で解放されます。`);
+    return;
+  }
+  const isBattleView =
+    gameState === "BATTLE" ||
+    (gameState === "INVENTORY" && inventoryReturnState === "BATTLE") ||
+    (gameState === "SKILL" && skillReturnState === "BATTLE");
+  if (isBattleView) {
+    log("⚠️ 戦闘中は転生できない。");
+    return;
+  }
+  const shouldReincarnate = confirm(
+    `転生すると階層が${UNLOCK_FLOOR}からになります。\n敵のステータスが2倍、ドロップするアイテムのステータスが3倍になります。\n実行しますか？`,
+  );
+  if (!shouldReincarnate) return;
+
+  player.reincarnationCount =
+    (typeof getReincarnationCount === "function"
+      ? getReincarnationCount()
+      : player.reincarnationCount || 0) + 1;
+  floor = UNLOCK_FLOOR;
+  player.maxReachedFloor = UNLOCK_FLOOR;
+  player.lastTeleportedFloor = null;
+  player.stayOnCurrentFloor = false;
+  enemy = null;
+  gameState = "EXPLORE";
+
+  battleButtons.style.display = "none";
+  exploreButtons.style.display = "block";
+  inventoryEl.style.display = "none";
+
+  log(`✨ 転生した。（転生回数：${player.reincarnationCount}回）`);
+  refresh();
+  renderStatus();
+  autoSave();
 }
 
 function addStat(stat) {

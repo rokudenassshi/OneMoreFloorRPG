@@ -79,6 +79,7 @@ function performAutoSave(options = {}) {
       hp: player.hp,
       maxReachedFloor: player.maxReachedFloor,
       lastTeleportedFloor: player.lastTeleportedFloor,
+      reincarnationCount: player.reincarnationCount,
       status: {
         power: player.status.power,
         vitality: player.status.vitality,
@@ -171,6 +172,10 @@ function loadAutoSave() {
   player.lastTeleportedFloor = Number.isFinite(savedLastTeleportedFloor)
     ? Math.max(0, Math.min(MAX_FLOOR, savedLastTeleportedFloor))
     : null;
+  player.reincarnationCount = Math.max(
+    0,
+    Number(savedPlayer.reincarnationCount) || 0,
+  );
   player.status.power = Number(savedStatus.power) || 0;
   player.status.vitality = Number(savedStatus.vitality) || 0;
   player.status.agility = Number(savedStatus.agility) || 0;

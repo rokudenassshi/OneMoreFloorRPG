@@ -7,6 +7,7 @@ const player = {
 
   maxReachedFloor: 0,
   lastTeleportedFloor: null,
+  reincarnationCount: 0,
 
   status: {
     power: 10,
@@ -30,6 +31,27 @@ const player = {
   weatheredWeaponHintShown: false,
   accessorySynthesisUnlocked: false,
 };
+
+function getReincarnationCount() {
+  return Math.max(0, Number(player.reincarnationCount) || 0);
+}
+
+function isReincarnationUnlocked() {
+  return (
+    player.maxReachedFloor >= REINCARNATION_UNLOCK_FLOOR ||
+    getReincarnationCount() > 0
+  );
+}
+
+function getReincarnationEnemyMultiplier() {
+  const count = getReincarnationCount();
+  return count > 0 ? count * 2 : 1;
+}
+
+function getReincarnationDropMultiplier() {
+  const count = getReincarnationCount();
+  return count > 0 ? count * 3 : 1;
+}
 
 function calcMaxHp() {
   const totalVitality = getTotalStatus().vitality;

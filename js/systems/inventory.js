@@ -1259,9 +1259,17 @@ function dropItem() {
     typeof getSkillEffects === "function" ? getSkillEffects() : {};
   const dropItemValueBoost = Math.max(0, skillEffects.dropItemValueBoost || 0);
   const dropItemMultiplier = 1 + dropItemValueBoost / 100;
+  const reincarnationDropMultiplier =
+    typeof getReincarnationDropMultiplier === "function"
+      ? getReincarnationDropMultiplier()
+      : 1;
   const applyDropItemValueBoost = (item) => {
     if (!item || dropItemMultiplier <= 1) return;
     scaleItemBonuses(item, dropItemMultiplier);
+  };
+  const applyReincarnationDropBoost = (item) => {
+    if (!item || reincarnationDropMultiplier <= 1) return;
+    scaleItemBonuses(item, reincarnationDropMultiplier);
   };
   if (finalBossFloor && enemy.minFloor === finalBossFloor) {
     const proof = window.ItemGen?.PROOF_OF_SLAYING;
@@ -1285,6 +1293,7 @@ function dropItem() {
       );
       item.name = `★壊れた${item.name}`;
       applyBrokenItemStat(item);
+      applyReincarnationDropBoost(item);
       applyDropItemValueBoost(item);
       if (!shouldPickupItem(item)) {
         log(`⏭ ${item.name} は拾わなかった`);
@@ -1304,6 +1313,7 @@ function dropItem() {
       );
       item.name = `★六神★${item.name}`;
       scaleItemBonuses(item, 1.5);
+      applyReincarnationDropBoost(item);
       applyDropItemValueBoost(item);
       if (!shouldPickupItem(item)) {
         log(`⏭ ${item.name} は拾わなかった`);
@@ -1386,6 +1396,7 @@ function dropItem() {
     enemy.titleMul,
     desiredBaseStatCount,
   );
+  applyReincarnationDropBoost(item);
   applyDropItemValueBoost(item);
   if (!shouldPickupItem(item)) {
     log(`⏭ ${item.name} は拾わなかった`);
