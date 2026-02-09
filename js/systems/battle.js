@@ -26,7 +26,16 @@ function startBattle() {
 
   const highFloorStep =
     floor >= UNLOCK_FLOOR ? Math.floor((floor - UNLOCK_FLOOR) / 50) + 1 : 0;
-  const highFloorMultiplier = highFloorStep > 0 ? 1 + highFloorStep * 0.2 : 1;
+  const baseHighFloorMultiplier =
+    highFloorStep > 0 ? 1 + highFloorStep * 0.2 : 1;
+  const finalBossFloor = window.getFinalBossFloor?.() ?? 15000;
+  const postBossStep =
+    floor > finalBossFloor
+      ? Math.floor((floor - finalBossFloor - 1) / 50) + 1
+      : 0;
+  const postBossMultiplier =
+    postBossStep > 0 ? 1 + postBossStep * 0.15 : 1;
+  const highFloorMultiplier = baseHighFloorMultiplier * postBossMultiplier;
   enemy = {
     id: base.id,
     name: isBroken

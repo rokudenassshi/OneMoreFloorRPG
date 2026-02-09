@@ -199,6 +199,22 @@
       "絶望の門",
       "永劫の番人",
     ],
+    11: [
+      "深奥の古神",
+      "虚無の創世竜",
+      "終界の支配者",
+      "滅界の監視者",
+      "世界終焉機兵",
+      "深淵の原初獣",
+      "冥界の神王",
+      "星海喰らい",
+      "混沌の審問者",
+      "虚空の大賢者",
+      "滅星の覇竜",
+      "界境の門番",
+      "永劫の破壊者",
+      "終末の守護神",
+    ],
   };
 
   const BOSS_BASE_BY_TIER = {
@@ -211,6 +227,7 @@
     8: "ボスワイバーン",
     9: "ボスデーモン",
     10: "ボス古龍",
+    11: "ボス終界竜",
   };
 
   /* ========= 二つ名（tier別・倍率付き） ========= */
@@ -325,6 +342,18 @@
       { t: "終焉を告ぐ", mul: 15.38 },
       { t: "神域喰らいの", mul: 15.95 },
     ],
+    11: [
+      { t: "世界再編の", mul: 16.3 },
+      { t: "虚空を穿つ", mul: 16.9 },
+      { t: "終界王の", mul: 17.6 },
+      { t: "永劫を砕く", mul: 18.2 },
+      { t: "神域崩しの", mul: 18.9 },
+      { t: "万象終律の", mul: 19.6 },
+      { t: "深寂王の", mul: 20.3 },
+      { t: "創世喰らいの", mul: 21.1 },
+      { t: "超越絶望の", mul: 21.8 },
+      { t: "終末審理の", mul: 22.6 },
+    ],
   };
 
   function pickTitle(rng, tier) {
@@ -336,6 +365,10 @@
   /* ========= 出現階層 ========= */
   function tierToMinFloor(tier) {
     if (tier <= 1) return 1;
+    if (tier >= 11) {
+      const finalBossFloor = window.getFinalBossFloor?.() ?? 15000;
+      return finalBossFloor + 1;
+    }
     return BOSS_FLOORS[tier - 2] ?? 1;
   }
 
@@ -365,7 +398,10 @@
   function resolveTierForFloor(floor) {
     const normalizedFloor = Number(floor);
     if (!Number.isFinite(normalizedFloor)) return 1;
-    for (let tier = 10; tier >= 1; tier -= 1) {
+    const maxTier = Math.max(
+      ...Object.keys(BASE_BY_TIER).map((tier) => Number(tier)),
+    );
+    for (let tier = maxTier; tier >= 1; tier -= 1) {
       if (normalizedFloor >= tierToMinFloor(tier)) return tier;
     }
     return 1;
@@ -432,6 +468,7 @@
       8: { hp: [24170, 33466], atk: [4090, 6500], exp: [1350, 1500] },
       9: { hp: [42000, 58000], atk: [7000, 10000], exp: [2000, 2500] },
       10: { hp: [75264, 104832], atk: [13000, 18000], exp: [3000, 3500] },
+      11: { hp: [120000, 170000], atk: [21000, 28000], exp: [4500, 5200] },
     };
     const bossBaseTier = isBossFloor ? Math.min(tier + 1, 11) : tier;
     const baseStats =
