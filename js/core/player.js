@@ -369,7 +369,7 @@ function getEquipmentSpecialEffects() {
     victoryRecover: 0,
     evadeBoost: 0,
     expBoost: 0,
-    expFinalMultiplier: 0,
+    expFinalMultiplier: 1,
     rareEncounterBoost: 0,
     expZero: false,
     minHits: 0,
@@ -404,7 +404,7 @@ function getEquipmentSpecialEffects() {
         effects.expBoost += value;
         break;
       case "exp_boost_plus":
-        effects.expFinalMultiplier += value || 0;
+        effects.expFinalMultiplier *= value || 1;
         break;
       case "exp_final_ex":
         effects.expFinalMultiplier *= value || 1;

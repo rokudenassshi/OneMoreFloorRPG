@@ -5,59 +5,75 @@ function startBattle() {
 
   // ★ floor 以上で出現する敵だけ抽選
   const base = EnemyGen.createEnemyForFloor(floor);
-  const equipmentSpecialEffects = getEquipmentSpecialEffects();
-  const specialEffects = getSpecialEffects();
-  bonusRareRate = (specialEffects.rareEncounterBoost || 0) / 100;
-  const isRareBlocked = (specialEffects.rareEncounterBlock || 0) > 0;
-  const isBrokenBlocked = (specialEffects.brokenEncounterBlock || 0) > 0;
-  const isRarePopupCut = (specialEffects.rareEncounterPopupCut || 0) > 0;
-  const isBrokenPopupCut = (specialEffects.brokenEncounterPopupCut || 0) > 0;
-  // ★壊れたエネミー（1001階層以降）
-  const brokenEnemyRate = 0.01;
-  const isBroken =
-    floor >= UNLOCK_FLOOR &&
-    !isBrokenBlocked &&
-    Math.random() < brokenEnemyRate + bonusRareRate;
-  // レアモンスター
-  const baseRareRate = 0.02;
-  const isRare =
-    !isBroken && !isRareBlocked && Math.random() < baseRareRate + bonusRareRate;
-  const rate = isBroken ? 2.5 : isRare ? 1.8 : 1;
+  if (base.id === "boss_rokushi") {
+    enemy = {
+      ...base,
+      isRare: false,
+      isBroken: false,
+    };
+  } else {
+    const equipmentSpecialEffects = getEquipmentSpecialEffects();
+    const specialEffects = getSpecialEffects();
+    bonusRareRate = (specialEffects.rareEncounterBoost || 0) / 100;
+    const isRareBlocked = (specialEffects.rareEncounterBlock || 0) > 0;
+    const isBrokenBlocked = (specialEffects.brokenEncounterBlock || 0) > 0;
+    const isRarePopupCut = (specialEffects.rareEncounterPopupCut || 0) > 0;
+    const isBrokenPopupCut = (specialEffects.brokenEncounterPopupCut || 0) > 0;
+    // ★壊れたエネミー（1001階層以降）
+    const brokenEnemyRate = 0.01;
+    const isBroken =
+      floor >= UNLOCK_FLOOR &&
+      !isBrokenBlocked &&
+      Math.random() < brokenEnemyRate + bonusRareRate;
+    // レアモンスター
+    const baseRareRate = 0.02;
+    const isRare =
+      !isBroken &&
+      !isRareBlocked &&
+      Math.random() < baseRareRate + bonusRareRate;
+    const rate = isBroken ? 2.5 : isRare ? 1.8 : 1;
 
-  const highFloorStep =
-    floor >= UNLOCK_FLOOR ? Math.floor((floor - UNLOCK_FLOOR) / 50) + 1 : 0;
-  const baseHighFloorMultiplier =
-    highFloorStep > 0 ? 1 + highFloorStep * 0.2 : 1;
-  const finalBossFloor = window.getFinalBossFloor?.() ?? 15000;
-  const postBossStep =
-    floor > finalBossFloor
-      ? Math.floor((floor - finalBossFloor - 1) / 50) + 1
-      : 0;
-  const postBossMultiplier =
-    postBossStep > 0 ? 1 + postBossStep * 0.15 : 1;
-  const highFloorMultiplier = baseHighFloorMultiplier * postBossMultiplier;
-  enemy = {
-    id: base.id,
-    name: isBroken
-      ? `★壊れた ${base.name}`
-      : isRare
-        ? `＊レア ${base.name}`
-        : base.name,
-    isRare,
-    isBroken,
-    tier: base.tier,
-    titleMul: base.titleMul,
-    // 上位ほど強い：baseがtierで強い + floor補正を少し
-    maxHp: Math.floor((base.hp + floor * 2) * rate * highFloorMultiplier),
-    hp: Math.floor((base.hp + floor * 2) * rate * highFloorMultiplier),
-    atk: Math.floor(
-      (base.atk + Math.floor(floor / 3)) * rate * highFloorMultiplier,
-    ),
-    exp: Math.floor((base.exp + Math.floor(floor / 2)) * rate),
+    const highFloorStep =
+      floor >= UNLOCK_FLOOR ? Math.floor((floor - UNLOCK_FLOOR) / 50) + 1 : 0;
+    const baseHighFloorMultiplier =
+      highFloorStep > 0 ? 1 + highFloorStep * 0.2 : 1;
+    const finalBossFloor = window.getFinalBossFloor?.() ?? 15001;
+    const postBossStep =
+      floor > finalBossFloor
+        ? Math.floor((floor - finalBossFloor - 1) / 50) + 1
+        : 0;
+    const postBossMultiplier =
+      postBossStep > 0 ? 1 + postBossStep * 0.15 : 1;
+    const highFloorMultiplier = baseHighFloorMultiplier * postBossMultiplier;
+    enemy = {
+      id: base.id,
+      name: isBroken
+        ? `★壊れた ${base.name}`
+        : isRare
+          ? `＊レア ${base.name}`
+          : base.name,
+      isRare,
+      isBroken,
+      tier: base.tier,
+      titleMul: base.titleMul,
+      // 上位ほど強い：baseがtierで強い + floor補正を少し
+      maxHp: Math.floor((base.hp + floor * 2) * rate * highFloorMultiplier),
+      hp: Math.floor((base.hp + floor * 2) * rate * highFloorMultiplier),
+      atk: Math.floor(
+        (base.atk + Math.floor(floor / 3)) * rate * highFloorMultiplier,
+      ),
+      exp: Math.floor((base.exp + Math.floor(floor / 2)) * rate),
 
-    // ★ ドロップ候補を保持
-    drops: base.drops,
-  };
+      // ★ ドロップ候補を保持
+      drops: base.drops,
+    };
+
+    if (isBroken && !isBrokenPopupCut) {
+      showRareEnemyPopup(base.name, "★壊れたエネミーが出現した。");
+    } else if (isRare && !isRarePopupCut) {
+      showRareEnemyPopup(base.name);
+    }
+  }
 
   exploreButtons.style.display = "none";
   battleButtons.style.display = "block";
@@ -66,11 +82,6 @@ function startBattle() {
   if (enemy?.id === "boss_rokushi") {
     log("ろく氏は特殊なバリアに守られている");
     log("受けるダメージを20%軽減、反射ダメージを50%軽減、回避率を20%低下。");
-  }
-  if (isBroken && !isBrokenPopupCut) {
-    showRareEnemyPopup(base.name, "★壊れたエネミーが出現した。");
-  } else if (isRare && !isRarePopupCut) {
-    showRareEnemyPopup(base.name);
   }
   updateUI();
 }

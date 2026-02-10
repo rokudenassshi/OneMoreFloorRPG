@@ -366,7 +366,7 @@
   function tierToMinFloor(tier) {
     if (tier <= 1) return 1;
     if (tier >= 11) {
-      const finalBossFloor = window.getFinalBossFloor?.() ?? 15000;
+      const finalBossFloor = window.getFinalBossFloor?.() ?? 15001;
       return finalBossFloor + 1;
     }
     return BOSS_FLOORS[tier - 2] ?? 1;
@@ -468,7 +468,11 @@
       8: { hp: [24170, 33466], atk: [4090, 6500], exp: [1350, 1500] },
       9: { hp: [42000, 58000], atk: [7000, 10000], exp: [2000, 2500] },
       10: { hp: [75264, 104832], atk: [13000, 18000], exp: [3000, 3500] },
-      11: { hp: [120000, 170000], atk: [21000, 28000], exp: [4500, 5200] },
+      11: {
+        hp: [40483200, 90000000],
+        atk: [40000000, 90000000],
+        exp: [4500, 5200],
+      },
     };
     const bossBaseTier = isBossFloor ? Math.min(tier + 1, 11) : tier;
     const baseStats =

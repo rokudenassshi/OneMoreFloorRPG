@@ -1336,6 +1336,9 @@ function dropItem() {
     item.isRareDrop = true;
     if (!shouldPickupAccessory(item)) {
       log(`⏭ ${item.name} は拾わなかった`);
+      if (isDoubleEffectBonusUnlocked()) {
+        log(`次こそは光り輝く装飾品を…`);
+      }
       return;
     }
     inventory.push(item);
