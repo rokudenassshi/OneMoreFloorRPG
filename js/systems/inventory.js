@@ -202,6 +202,12 @@ function handleWeatheredWeaponProgress({ defeatedRareEnemy = false } = {}) {
   const equippedItems = [player.weapon, player.weapon2];
   let didUpdate = false;
   const progressIncrement = defeatedRareEnemy ? 2 : 1;
+  const skillEffects =
+    typeof getSkillEffects === "function" ? getSkillEffects() : null;
+  const cursedWeaponKillCountBoost = Math.max(
+    0,
+    Math.floor(skillEffects?.cursedWeaponKillCountBoost || 0),
+  );
   equippedItems.forEach((item) => {
     if (!item) return;
     if (isWeatheredItem(item)) {
@@ -214,8 +220,9 @@ function handleWeatheredWeaponProgress({ defeatedRareEnemy = false } = {}) {
       return;
     }
     if (isCursedItem(item) && floor >= UNLOCK_FLOOR) {
+      const progressIncrement = 1 + cursedWeaponKillCountBoost;
       const previousCount = item.cursedKillCount || 0;
-      item.cursedKillCount = previousCount + 1;
+      item.cursedKillCount = previousCount + progressIncrement;
       didUpdate = true;
       if (
         Math.floor(previousCount / CURSED_KILL_STEP) <

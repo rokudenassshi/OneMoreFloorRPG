@@ -17,6 +17,15 @@ const SKILLS = [
     effects: { dropItemValueBoost: 1 },
   },
   {
+    id: "cursed_weapon_bloodlust",
+    name: "呪武器血戦",
+    maxLevel: 10,
+    requiredPoints: 10000,
+    unlockFloor: UNLOCK_FLOOR,
+    description: "呪われた武器装備時、敵撃破時の呪われた武器カウント+1",
+    effects: { cursedWeaponKillCountBoost: 1 },
+  },
+  {
     id: "rare_encounter_boost",
     name: "レアモンスターの遭遇率up",
     maxLevel: 10,

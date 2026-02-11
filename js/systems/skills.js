@@ -84,6 +84,7 @@ function getSkillEffects() {
     lastStandEvadeBoost: 0,
     maxHpOverride: 0,
     dropItemValueBoost: 0,
+    cursedWeaponKillCountBoost: 0,
   };
 
   SKILLS.forEach((skill) => {
@@ -168,6 +169,11 @@ function renderSkillScreen() {
   if (total.rareEncounterBoost > 0) {
     summaryItems.push(
       `<div>レアモンスター遭遇率：+${Math.floor(total.rareEncounterBoost)}%</div>`,
+    );
+  }
+  if (total.cursedWeaponKillCountBoost > 0) {
+    summaryItems.push(
+      `<div>呪われた武器撃破カウント増加：+${Math.floor(total.cursedWeaponKillCountBoost)}</div>`,
     );
   }
   if (total.rareEncounterBlock > 0) {
