@@ -1,4 +1,5 @@
 const PENDING_IMPORT_KEY = "omf_pending_import_v1";
+const PERIODIC_AUTO_SAVE_INTERVAL_MS = 10 * 60 * 1000;
 
 function applyPendingImportIfAny() {
   const payload = localStorage.getItem(PENDING_IMPORT_KEY);
@@ -54,6 +55,9 @@ if (skillResetRefundedPoints > 0) {
 awardStatPointUnlock();
 refresh();
 setGameReady(true);
+setInterval(() => {
+  autoSave({ saveInventory: true });
+}, PERIODIC_AUTO_SAVE_INTERVAL_MS);
 if (skillResetRefundedPoints > 0) {
   autoSave();
 }
