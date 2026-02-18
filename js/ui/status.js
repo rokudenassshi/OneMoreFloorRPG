@@ -165,6 +165,19 @@ function openImportSaveDialog() {
   input.click();
 }
 
+function manualSave() {
+  try {
+    flushAutoSave();
+    if (typeof log === "function") {
+      log("💾 手動でセーブしました");
+    }
+  } catch (e) {
+    if (typeof log === "function") {
+      log("⚠️ 手動セーブに失敗しました");
+    }
+  }
+}
+
 function applySaveSnapshotToLocalStorage(snapshot) {
   if (!snapshot || typeof snapshot !== "object") {
     throw new Error("invalid snapshot");
@@ -441,6 +454,7 @@ function renderStatus() {
 <div class="status-save">
   <div class="status-save-label">セーブデータ</div>
   <div class="status-save-actions">
+    <button class="status-save-button" type="button" onclick="manualSave()">手動セーブ</button>
     <button class="status-save-button" type="button" onclick="openImportSaveDialog()">インポート</button>
     <button class="status-save-button" type="button" onclick="exportSaveData()">エクスポート</button>
   </div>
