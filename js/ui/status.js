@@ -311,6 +311,10 @@ function renderStatus() {
   const remainingSerialCodes = totalSerialCodes - unlockedSerialCount;
   const isSerialInputDisabled =
     totalSerialCodes > 0 && remainingSerialCodes <= 0;
+  const nextWorkSerialCodeMessage =
+    player.maxReachedFloor >= UNLOCK_FLOOR
+      ? '<div class="status-serial-next-note">次回作で入力してね「omfprg1h30n98jqmo」</div>'
+      : "";
   const statPointLabel = isStatPointUnlocked
     ? `ステータスポイント：${player.statPoints}`
     : "";
@@ -487,6 +491,7 @@ function renderStatus() {
         確認
       </button>
     </div>
+    ${nextWorkSerialCodeMessage}
 </div>
 `;
 }

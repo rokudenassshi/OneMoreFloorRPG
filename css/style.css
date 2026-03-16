@@ -955,3 +955,8 @@ status-actions {
 .status-serial-input:disabled {
   opacity: 0.6;
 }
+.status-serial-next-note {
+  margin-top: 8px;
+  font-size: 12px;
+  opacity: 0.85;
+}
